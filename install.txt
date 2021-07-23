@@ -2,13 +2,11 @@ aria2
 atool
 bc
 bdf-unifont
-bspwm
 clang
 cmake
 cronie
 dhcpcd
 diff-so-fancy
-dmenu
 dunst
 dzen2
 exa
