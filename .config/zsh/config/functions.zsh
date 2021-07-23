@@ -77,19 +77,6 @@ function v() {
 
 }
 
-#Wine
-
-wine32() {
-export WINEPREFIX="$HOME/.local/share/wineprefixes/32"
-export WINEARCH="win32"
-command wine "$@"
-}
-
-wine64() {
-export WINEPREFIX="$HOME/.local/share/wineprefixes/64"
-export WINEARCH="win64"
-command wine64 "$@"
-}
 
 # Git
 

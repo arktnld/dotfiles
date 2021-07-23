@@ -20,7 +20,7 @@ alias erase='sudo rm -r'
 alias n='nnn' # simple file manager
 alias d='wget $(xclip -selection clipboard -out)'
 alias calc='bc -l <<<' # Simple calculator, only expressions without space.
-alias tree='exa --classify --color=always --group-directories-first --sort=extension --tree'
+alias qree='exa --classify --color=always --group-directories-first --sort=extension --tree'
 alias pbcopy='xclip -selection clipboard' # Copy terminal output.
 alias pbpaste='xclip -selection clipboard -out' # Paste text on clipboard.
 
