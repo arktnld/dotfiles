@@ -1,0 +1,30 @@
+#!/bin/python
+
+import subprocess, re, sys
+from colorama import Fore, Back, Style
+
+arg = sys.argv[1:]
+
+out = subprocess.run(['sdcv', arg[0]], stdout=subprocess.PIPE)
+
+# get all definitions with examples
+definitions = re.findall(r'[0-9]+:([^0-9]*[^:]*)(?=[0-9]+:)',
+                   out.stdout.decode('utf-8')) # formated output
+
+for i in range(len(definitions)):
+
+    definition = definitions[i]
+
+    # cleaning and organizing
+    NoSyn = re.sub('\[.*\]', '', definition) # removing synonyms
+    Cleaned = re.sub(' +', ' ', NoSyn.replace('\n','')).strip() # removing extra spaces and breaklines
+    definition = re.findall(r'([^;]*)', Cleaned)[0].capitalize() # get the definition
+    examples = re.findall(r'"([^"]*)"', Cleaned) # find examples inside parentheses
+
+    # print definition
+    print(" "*3 + "{}. {}.".format(str(i + 1), definition))
+
+    # print all examples
+    for j in range(len(examples)):
+        print(Style.DIM + " "*6 + "\"{}\"".format(examples[j].capitalize())) # dim color
+    print(Style.NORMAL)

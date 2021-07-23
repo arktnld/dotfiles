@@ -1,0 +1,23 @@
+#!/usr/bin/sh
+#
+# Upload file online using transfer.sh website.
+
+if [ $# -eq 0 ]; then
+	echo -e "No arguments specified.";
+	echo -e "Usage:";
+	echo -e "echo test /tmp/test.md";
+	echo -e "cat /tmp/test.md | upload test.md";
+	exit;
+fi
+
+tmpfile=$( mktemp -t transferXXX );
+
+if tty -s; then
+	basefile=$(basename "$1" | sed -e 's/[^a-zA-Z0-9._-]/-/g');
+	curl --progress-bar --upload-file "$1" "https://transfer.sh/$basefile" >> $tmpfile;
+else
+	curl --progress-bar --upload-file "-" "https://transfer.sh/$1" >> $tmpfile ;
+fi;
+
+echo "Link --> $(cat $tmpfile)"
+rm -f $tmpfile;
