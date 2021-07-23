@@ -1,0 +1,2 @@
+
+map <leader>v :VimwikiIndex

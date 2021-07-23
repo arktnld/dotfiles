@@ -1,0 +1,18 @@
+[include]
+	path = ./conf/user.gitconfig
+	path = ./conf/settings.gitconfig
+	path = ./conf/aliases.gitconfig
+	path = ./conf/colors.gitconfig
+	path = ./conf/urls.gitconfig
+[gpg]
+	program = gpg
+[commit]
+	gpgsign = true
+[http]
+	sslVerify = false
+[user]
+	name = arktnld
+	email = arktnld@gmail.com
+	signingkey = 05913150387A2A5E
+[pgp]
+	program = pgp

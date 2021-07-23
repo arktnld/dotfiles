@@ -1,0 +1,7 @@
+[url "git@github.com:"]
+	insteadOf = "g:"
+	pushInsteadOf = "g:"
+
+[url "git@gist.github.com:"]
+	insteadOf = "gist:"
+	pushInsteadOf = "gist:"

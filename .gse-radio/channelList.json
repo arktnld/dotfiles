@@ -1,0 +1,161 @@
+{ "channels":[
+	{
+	"id": "c8fbc4ce-98a9-4a6c-8ceb-b58676adbeb8",
+	"name": "DubStep (SomaFM)",
+	"address": "http://ice3.somafm.com/dubstep-128-mp3\n",
+	"favourite": true,
+	"encoding": false
+},	{
+	"id": "a3821cca-c5b8-4c74-b68f-08bf74edb601",
+	"name": "Groove Salad (SomaFM)",
+	"address": "http://ice3.somafm.com/groovesalad-128-mp3",
+	"favourite": true,
+	"encoding": false
+},	{
+	"id": "79c2107a-c326-4aa7-8d25-bd73407e0135",
+	"name": "Folk Foward (SomaFM)",
+	"address": "http://ice3.somafm.com/folkfwd-128-mp3",
+	"favourite": true,
+	"encoding": false
+},	{
+	"id": "8e54228f-650e-4d3f-bc65-3c84b5de757e",
+	"name": "Classic FM",
+	"address": "http://media-ice.musicradio.com/ClassicFMMP3",
+	"favourite": true,
+	"encoding": false
+},	{
+	"id": "dfd743fc-2a86-456f-a48d-681357ff6c9e",
+	"name": "Nightwave Plaza",
+	"address": "https://radio.plaza.one/mp3",
+	"favourite": true,
+	"encoding": false
+},	{
+	"id": "2565290f-ab06-403b-b0be-2364b4696d46",
+	"name": "Best Video Game (RPGN)",
+	"address": "http://stream.rpgamers.net:8000/rpgn",
+	"favourite": true,
+	"encoding": false
+},	{
+	"id": "02d61c59-3c68-4962-8d5b-ddf807d0fa9d",
+	"name": "Plaza Hotel (Vaporwave)",
+	"address": "http://94.23.26.22:8060/live.mp3",
+	"favourite": true,
+	"encoding": false
+},	{
+	"id": "9da2dbae-b402-4672-ad8d-9518f291b5fe",
+	"name": "Buzz (181 FM)",
+	"address": "http://relay.181.fm:8126",
+	"favourite": true,
+	"encoding": false
+},	{
+	"id": "447f661b-3360-4162-bcf9-ab52f72ec21a",
+	"name": "Drone Zone (SomaFM)",
+	"address": "http://ice2.somafm.com/dronezone-128-mp3",
+	"favourite": true,
+	"encoding": false
+},	{
+	"id": "fdfa906e-c663-4377-83a5-a3395f07a6ea",
+	"name": "Flashback",
+	"address": "http://stm9.srvstm.com:13544/;",
+	"favourite": true,
+	"encoding": false
+},	{
+	"id": "bc9234a0-a21e-47e2-ab7b-2df6980988b3",
+	"name": "HipHop Oldschool (181.FM)",
+	"address": "http://relay.181.fm:8068",
+	"favourite": true,
+	"encoding": false
+},	{
+	"id": "08f11408-81d6-47c9-be93-e2199b7d7af8",
+	"name": "Rap Oldschool (Big FM)",
+	"address": "http://streams.bigfm.de/bigfm-oldschool-128-mp3",
+	"favourite": true,
+	"encoding": false
+},	{
+	"id": "8e24fd59-f533-4d2b-86ec-ac259126ac34",
+	"name": "Kiss FM",
+	"address": "http://cloud2.cdnseguro.com:23538/;",
+	"favourite": true,
+	"encoding": false
+},	{
+	"id": "568728d8-cf6a-4afc-827d-5ba6a953b807",
+	"name": "Classic Country",
+	"address": "http://185.33.21.112:11061",
+	"favourite": true,
+	"encoding": false
+},	{
+	"id": "d60baedc-7744-44eb-9024-050d764483c2",
+	"name": "Funky Express Radio",
+	"address": "http://185.33.21.112:11121",
+	"favourite": true,
+	"encoding": false
+},	{
+	"id": "ac6fdb74-cffd-4d6b-8101-f0d54e3d5e6c",
+	"name": "Reggae Trade Radio",
+	"address": "http://185.33.21.112:11109",
+	"favourite": true,
+	"encoding": false
+},	{
+	"id": "2a877733-a23d-4441-aecc-779fdc0e5f20",
+	"name": "Rock Classics Radio",
+	"address": "http://185.33.21.112:11205",
+	"favourite": true,
+	"encoding": false
+},	{
+	"id": "fa005b4f-49fc-4a6d-b0a6-7c2c372831c4",
+	"name": "Soul Disco Funk",
+	"address": "http://91.121.104.123:8000/stream/1/",
+	"favourite": true,
+	"encoding": false
+},	{
+	"id": "08378f97-f611-4c5e-a645-f0381e96a770",
+	"name": "HipHop Request",
+	"address": "http://149.56.175.167:5461/",
+	"favourite": true,
+	"encoding": false
+},	{
+	"id": "38422526-74ef-4b69-b1af-c2578f253055",
+	"name": "Joint Reggae Radio",
+	"address": "http://star.jointil.net/proxy/jrn_reggae?mp=/stream/",
+	"favourite": true,
+	"encoding": false
+},	{
+	"id": "a719f479-ad0d-4071-bb1b-d33e5aacf05c",
+	"name": "Rockantenne",
+	"address": "http://mp3channels.webradio.rockantenne.de/rockantenne",
+	"favourite": true,
+	"encoding": false
+},	{
+	"id": "e4e16cd5-2b09-4210-8f22-b0e485cb8edf",
+	"name": "Radi/u (Chiptune Vaporwave)",
+	"address": "http://radio.dangeru.us:8000/stream.ogg",
+	"favourite": true,
+	"encoding": false
+},	{
+	"id": "732a64eb-267c-428b-9d68-568090441ac8",
+	"name": "Radioup Pure Rock",
+	"address": "http://powerhitz.powerhitz.com:6520",
+	"favourite": true,
+	"encoding": false
+},	{
+	"id": "65f530c7-220d-46f0-b55e-2adb29b1d403",
+	"name": "Truckers FM (Varied Music)",
+	"address": "http://radio.truckers.fm",
+	"favourite": true,
+	"encoding": false
+},	{
+	"id": "27df3154-0434-40f6-9f60-be26cad0a3ce",
+	"name": "1POWER ( HipHop/Urban/RNB)",
+	"address": "http://powerhitz.powerhitz.com:5040/;?.mp3",
+	"favourite": true,
+	"encoding": false
+}
+],
+
+  "lastplayed":{
+	"id": "c8fbc4ce-98a9-4a6c-8ceb-b58676adbeb8",
+	"name": "DubStep (SomaFM)",
+	"address": "http://ice3.somafm.com/dubstep-128-mp3\n",
+	"encoding": false
+}
+}

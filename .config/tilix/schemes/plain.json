@@ -1,0 +1,36 @@
+{
+    "background-color": "#222222",
+    "badge-color": "#FFFFFF",
+    "bold-color": "#FFFFFF",
+    "comment": "",
+    "cursor-background-color": "#000000",
+    "cursor-foreground-color": "#FFFFFF",
+    "foreground-color": "#F0F0F0",
+    "highlight-background-color": "#000000",
+    "highlight-foreground-color": "#FFFFFF",
+    "name": "Plain",
+    "palette": [
+        "#424242",
+        "#e32791",
+        "#5fd7a7",
+        "#f3e430",
+        "#b6d6fd",
+        "#6855de",
+        "#4fb8cc",
+        "#999999",
+
+        "#999999",
+        "#FF1A72",
+        "#10a778",
+        "#a89c14",
+        "#008ec4",
+        "#523c79",
+        "#20a5ba",
+        "#FFFFFF"
+    ],
+    "use-badge-color": false,
+    "use-bold-color": false,
+    "use-cursor-color": false,
+    "use-highlight-color": false,
+    "use-theme-colors": false
+}
