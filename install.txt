@@ -1,0 +1,159 @@
+alsa-firmware
+alsa-utils
+arc-icon-theme
+arch-wiki-man
+aria2
+atool
+base
+bc
+bdf-unifont
+bspwm
+clang
+cmake
+cronie
+dhcpcd
+diff-so-fancy
+dmenu
+dunst
+dzen2
+exa
+expac
+ffmpeg
+fuse2
+fzf
+gimp
+git
+grub
+lib32-mesa
+lib32-sdl2
+libva-mesa-driver
+libva-mesa-driverbc
+linux
+linux-firmware
+lxappearance
+man-db
+man-pages
+mesa-demos
+mksh
+mlocate
+mpv
+neovim
+nnn
+p7zip
+pacman-contrib
+pcmanfm
+playerctl
+pulseaudio
+pulseaudio-alsa
+python
+python-pip
+python-pygments
+python-pynvim
+qutebrowser
+rofi
+scrot
+sdcv
+shellcheck
+slock
+streamlink
+sxhkd
+telegram-desktop
+the_silver_searcher
+tilix
+trash-cli
+tree
+trizen
+ttf-roboto
+unclutter
+unrar
+vi
+vim
+w3m
+weechat
+wget
+xautolock
+xclip
+xcompmgr
+xdg-user-dirs
+xf86-video-ati
+xorg-server
+xorg-xinit
+xorg-xinput
+xorg-xkbutils
+xorg-xkill
+xorg-xprop
+xwallpaper
+yay
+youtube-dl
+zathura
+zathura-cb
+zathura-pdf-mupdf
+zsh
+mesa-vdpau
+lib32-mesa-vdpau
+unzip
+mpd
+mpc
+timidity
+ncmpcpp
+transmission-cli
+sxiv
+ntfs-3g
+sdl_mixer
+menda-themes-dark-git
+reflector
+pinta
+ttf-joypixels
+pulsemixer
+aerc
+pass
+pixelvision8-1.0.0-bin
+guake
+
+
+# Grub
+/etc/default/grub
+GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet acpi=off noapic radeon.dpm=0"
+# wine game audio
+lib32-sdl_mixer
+sdl2_mixer
+lib32-sdl2_mixer
+lib32-openal
+
+# aur
+nerd-fonts-noto-sans-mono
+python-adblock
+fonts-meta-base
+fonts-meta-extended-lt
+ventoy-bin
+castero
+selectdefaultapplication
+
+
+# systemd
+sudo systemctl enable cronie, dhcpd
+systemctl --user enable pulseaudio, mpd
+
+# pacman config
+Color
+NoProgressBar
+CheckSpace
+ParallelDownloads = 5
+
+# pip
+mitype
+# gnome
+gnome-shell-extension-appindicator
+run this command to activate tray icons
+$ gnome-extensions enable $(gnome-extensions list | grep -m 1 appindicatorsupport)
+disable gnome activities corner
+gsettings set org.gnome.desktop.interface enable-hot-corners false
+
+# gnome store
+ungoogled-chromium
+telegram-desktop
+# gnome extensions
+Internet Radio
+Lock Keys
+Time++
+
