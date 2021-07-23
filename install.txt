@@ -1,10 +1,5 @@
-alsa-firmware
-alsa-utils
-arc-icon-theme
-arch-wiki-man
 aria2
 atool
-base
 bc
 bdf-unifont
 bspwm
