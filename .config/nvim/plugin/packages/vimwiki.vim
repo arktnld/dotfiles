@@ -1,2 +1,2 @@
 
-map <leader>v :VimwikiIndex
+map <leader>v :VimwikiIndex<Enter>

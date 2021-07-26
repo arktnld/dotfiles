@@ -8,31 +8,33 @@ nnn
 the_silver_searcher
 trash-cli
 zsh
-
 wget
 aria2
 xclip
 pacman-contrib
 youtube-dl
 mlocate
-
 diff-so-fancy
 sdcv
 shellcheck
 w3m
 man-db
-unrar
+
+
 
 # System
 lib32-mesa
 lib32-sdl2
 libva-mesa-driver
 libva-mesa-driverbc
-man-pages
 xf86-video-ati
-mesa-vdpau
 lib32-mesa-vdpau
+man-pages
+mesa-vdpau
 ntfs-3g
+gnome
+gnome-extra
+
 
 # Programs
 gimp
@@ -43,43 +45,18 @@ zathura-cb
 zathura-pdf-mupdf
 tilix
 sxiv
-
+ungoogled-chromium
+mednafen
 
 
 # Grub
 /etc/default/grub
 GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet acpi=off noapic radeon.dpm=0"
 
+
 # aur
 fonts-meta-base
 fonts-meta-extended-lt
 ventoy-bin
 
-# systemd
-sudo systemctl enable cronie, dhcpd
-
-# pacman config
-Color
-NoProgressBar
-CheckSpace
-ParallelDownloads = 5
-
-# gnome
-gnome-shell-extension-appindicator
-run this command to activate tray icons
-$ gnome-extensions enable $(gnome-extensions list | grep -m 1 appindicatorsupport)
-disable gnome activities corner
-gsettings set org.gnome.desktop.interface enable-hot-corners false
-
-# gnome store
-ungoogled-chromium
-telegram-desktop
-# gnome extensions
-Internet Radio
-Lock Keys
-Time++
-clear top bar
-applications menu
-places status indicator
-
-
+k

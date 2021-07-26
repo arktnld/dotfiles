@@ -24,6 +24,9 @@ image/svg+xml-compressed=org.gnome.eog.desktop;
 image/vnd.wap.wbmp=org.gnome.eog.desktop;
 image/x-icns=org.gnome.eog.desktop;
 image/x-tga=sxiv.desktop;
+video/mp4=vlc.desktop;
+application/x-mobipocket-ebook=org.pwmt.zathura-cb.desktop;
+application/epub+zip=org.gnome.Evince.desktop;
 
 [Default Applications]
 x-scheme-handler/tg=userapp-Telegram Desktop-KLMA30.desktop
@@ -104,4 +107,3 @@ video/mpeg=mpv.desktop
 video/ogg=mpv.desktop
 video/x-flv=mpv.desktop
 video/quicktime=mpv.desktop
-
