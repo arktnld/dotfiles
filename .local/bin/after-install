@@ -9,6 +9,9 @@ aurhelper="trizen"
 repobranch="master"
 name="arktnld"
 
+
+
+
 ### FUNCTIONS ###
 
 installpkg(){ pacman --noconfirm --needed -S "$1" >/dev/null 2>&1 ; }
@@ -21,8 +24,7 @@ refreshkeys() { \
 	pacman --noconfirm -S archlinux-keyring >/dev/null 2>&1
 	}
 
-# Set special sudoers settings for install (or after).
-newperms() { echo "$*" >> /etc/sudoers ; }
+newperms() { echo "$*" >> /etc/sudoers ; } # Set special sudoers settings for install (or after).
 
 manualinstall() { # Installs $1 manually if not installed. Used only for AUR helper here.
 	[ -f "/usr/bin/$1" ] || (
@@ -70,12 +72,14 @@ putgitrepo() { # Downloads a gitrepo $1 and places the files in $2 only overwrit
 
 finalize() { echo "All done! Congrats! The script completed successfully."; }
 
+
+
+
 ### THE ACTUAL SCRIPT ###
 
 welcomemsg # Welcome message
 
-# Refresh Arch keyrings.
-refreshkeys || error "Error automatically refreshing Arch keyring. Consider doing so manually."
+refreshkeys || error "Error automatically refreshing Arch keyring. Consider doing so manually." # Refresh Arch keyrings.
 
 for x in curl base-devel git ntp zsh; do
 	echo "Installing $x to configure the system."
@@ -87,27 +91,20 @@ ntpdate 0.us.pool.ntp.org >/dev/null 2>&1
 
 [ -f /etc/sudoers.pacnew ] && cp /etc/sudoers.pacnew /etc/sudoers # Just in case
 
-# Allow user to run sudo without password. Since AUR programs must be installed
-newperms "%wheel ALL=(ALL) NOPASSWD: ALL"
+newperms "%wheel ALL=(ALL) NOPASSWD: ALL" # Allow user to run sudo without password. Since AUR programs must be installed
 
-# Make pacman and paru colorful and adds eye candy on the progress bar because why not.
-grep -q "^Color" /etc/pacman.conf || sed -i "s/^#Color$/Color/" /etc/pacman.conf
+grep -q "^Color" /etc/pacman.conf || sed -i "s/^#Color$/Color/" /etc/pacman.conf # Make pacman and trizen colorful
 
-# Use all cores for compilation.
-sed -i "s/-j2/-j$(nproc)/;s/^#MAKEFLAGS/MAKEFLAGS/" /etc/makepkg.conf
+sed -i "s/-j2/-j$(nproc)/;s/^#MAKEFLAGS/MAKEFLAGS/" /etc/makepkg.conf # Use all cores for compilation.
 
 manualinstall $aurhelper || error "Failed to install AUR helper."
 
-# The command that does all the install using the progs.csv file.
-installationloop
+installationloop # The command that does all the install using the progs.csv file.
 
-# Install the dotfiles in the user's home directory
-putgitrepo "$dotfilesrepo" "/home/$name" "$repobranch"
+putgitrepo "$dotfilesrepo" "/home/$name" "$repobranch" # Install the dotfiles in the user's home directory
 
-# Make zsh the default shell for the user.
-chsh -s /bin/zsh "$name" >/dev/null 2>&1
+chsh -s /bin/zsh "$name" >/dev/null 2>&1 # Make zsh the default shell for the user.
 
-# Last message! Install complete!
-finalize
-echo "Press enter to exit."
-read -r
+finalize # Last message! Install complete!
+
+echo "Press enter to exit."; read -r

@@ -1,45 +1,42 @@
 #TAG ,NAME IN REPO ,PURPOSE
-,exa ,ls replacement
-,xorg-xinit
-,atool |
-,git
-,fzf
-,neovim
-,nnn
-,the_silver_searcher
-,trash-cli
-,zsh
-,wget
-,aria2
-,xclip
-,pacman-contrib
-,youtube-dl
-,mlocate
-,diff-so-fancy
-,sdcv
-,shellcheck
-,w3m
-,man-db
-,lib32-mesa
-,lib32-sdl2
-,libva-mesa-driver
-,libva-mesa-driverbc
-,xf86-video-ati
-,lib32-mesa-vdpau
-,man-pages
-,mesa-vdpau
-,ntfs-3g
-,gnome
-,gnome-extra
-,gimp
-,mpv
-,telegram-desktop
-,zathura
-,zathura-cb
-,zathura-pdf-mupdf
-,tilix
-,sxiv
-,mednafen
-A,ungoogled-chromium
-A,chrome-gnome-shell-git
-A,nerd-fonts-noto-sans-mono
+,exa ,ls replacement.
+,xorg-xinit, starts the graphical server.
+,atool, a script for managing file archives.
+,fzf, fuzzy finder tool.
+,neovim, atidier vim with some useful features.
+,nnn, a terminal file manager.
+,the_silver_searcher, code searching tool.
+,trash-cli, commandline reclycle bin interface.
+,zsh, advanced command interpreter shell.
+,wget, network utility to retrieve files from the Web.
+,aria2, Download utility that supports HTTP FTP and Torrent.
+,xclip, allows for coping ahd pasting from the commandline.
+,youtube-dl, can download any YouTube video when given the link.
+,mlocate, merging locate/updatedb implementation.
+,diff-so-fancy, good-looking diffs with diff-highlight and more.
+,sdcv, StarDict Console Version.
+,shellcheck, shell script analysis tool.
+,w3m, text-based Web browser as well as pager.
+,man-db, a utility for reading man pages.
+,man-pages, Linux man pages.
+,lib32-mesa, An open-source implementation of the OpenGL specification.
+,lib32-sdl2, A library for portable low-level access to a video framebuffer.
+,libva-mesa-driver, VA-API implementation for gallium.
+,xf86-video-ati, xorg ati video driver.
+,lib32-mesa-vdpau, Mesa VDPAU drivers 32bits.
+,mesa-vdpau, Mesa VDPAU drivers.
+,ntfs-3g, NTFS filesystem driver and utilities.
+,gnome, next generation desktop shell.
+,gnome-extra, extra packages for the gnome desktop.
+,gimp, GNU image manipulation program.
+,mpv,  cross-platform media player.
+,telegram-desktop, telegram desktop client.
+,zathura, minimalistic document viewer.
+,zathura-cb, adds comic book support to zathura.
+,zathura-pdf-mupdf, adds supports for PDF ePub and OpenXPS.
+,tilix, a tiling terminal emulator for Linux using GTK+3.
+,sxiv, simple X Image Viewer.
+,mednafen, commandline multi-system gaming emulator.
+A,ungoogled-chromium, a lightweight approach to removing Google service.
+A,chrome-gnome-shell-git, Native connector for integration with extensions.gnome.org.
+A,nerd-fonts-noto-sans-mono, Standard variants of Noto Sans Mono patched with Nerd Fonts.
