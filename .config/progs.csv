@@ -1,5 +1,6 @@
 #TAG ,NAME IN REPO ,PURPOSE
-,exa , ls replacement
+,exa ,ls replacement
+,xorg-xinit
 ,atool |
 ,git
 ,fzf
