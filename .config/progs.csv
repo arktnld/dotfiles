@@ -1,0 +1,44 @@
+#TAG ,NAME IN REPO ,PURPOSE
+,exa , ls replacement
+,atool |
+,git
+,fzf
+,neovim
+,nnn
+,the_silver_searcher
+,trash-cli
+,zsh
+,wget
+,aria2
+,xclip
+,pacman-contrib
+,youtube-dl
+,mlocate
+,diff-so-fancy
+,sdcv
+,shellcheck
+,w3m
+,man-db
+,lib32-mesa
+,lib32-sdl2
+,libva-mesa-driver
+,libva-mesa-driverbc
+,xf86-video-ati
+,lib32-mesa-vdpau
+,man-pages
+,mesa-vdpau
+,ntfs-3g
+,gnome
+,gnome-extra
+,gimp
+,mpv
+,telegram-desktop
+,zathura
+,zathura-cb
+,zathura-pdf-mupdf
+,tilix
+,sxiv
+,mednafen
+A,ungoogled-chromium
+A,chrome-gnome-shell-git
+A,nerd-fonts-noto-sans-mono
