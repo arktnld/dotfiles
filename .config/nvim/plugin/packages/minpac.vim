@@ -14,6 +14,8 @@ function! PackInit() abort
 	call minpac#add('mhinz/vim-signify') " Git status diff
 	call minpac#add('sheerun/vim-polyglot') " Code packs configs
 	call minpac#add('tmsvg/pear-tree') " Auto pair
+    call minpac#add('b3nj5m1n/kommentary') " Comment motion
+    call minpac#add('hrsh7th/nvim-compe') " Auto completion
 
 	" Additional plugins here.
 	call minpac#add('k-takata/minpac', {'type': 'opt'}) " Simple plugin manager

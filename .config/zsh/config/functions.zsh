@@ -141,8 +141,8 @@ gitcheck() {
 # List all installed packages, not base or base-devel groups.
 @-packages-list-user() {
 
-	all_packages=/tmp/all.list
-	base_packages=/tmp/base.list
+	local all_packages=/tmp/all.list
+	local base_packages=/tmp/base.list
 
 	pacman -Qeq | sort > "$all_packages"
 	pacman -Qgq base base-devel | sort > "$base_packages"

@@ -29,6 +29,8 @@ set shortmess=filmnrwxoOstTIc " Use abbreviations and short messages in command 
 set sidescroll=5 " Columns to scroll horizontally when cursor is moved off the screen.
 set sidescrolloff=5 " Minimum number of screen columns to keep to cursor right.
 set visualbell " Use visual bell instead of beeping on errors.
+" set timeoutlen = 500 " Time in milliseconds to wait for a mapped sequence to complete.
+" set ttimeoutlen = 0 " Time in milliseconds to wait for a key code sequence to complete.
 
 " Interface
 set cursorline " Highlight the line background of the cursor.
@@ -59,7 +61,7 @@ set path=.,** " Use recursive file search.
 set tabstop=4 " Length of a <Tab> character.
 set shiftwidth=0 " Number of spaces to use for each step of auto indent operators.
 set softtabstop=-1 " Number of spaces that a <Tab> counts.
-set noexpandtab " Disable using spaces instead of tab characters.
+set expandtab " Disable using spaces instead of tab characters.
 set nosmarttab " Tab key always inserts blanks according to 'tabstop'.
 set autoindent " Copy indent from current line when starting a new line.
 set shiftround " Round indent to multiple of 'shiftwidth'. Applies to > and < commands.
@@ -68,7 +70,6 @@ set smartindent " Automatically inserts one extra level of indentation in some c
 " Folding
 set foldlevelstart=99 " Start editing with all folds open.
 set foldmethod=indent " Use indent model for folding mechanism.
-set foldtext=settings#foldtext() " Use custom fold text function for folds.
 
 " Search
 let &grepprg = 'ag' " Program to use for the :grep command.
@@ -115,18 +116,6 @@ if has('nvim')
 	set display+=msgsep " Only scroll lines on command line pager, not the entire screen.
 	silent! set wildoptions+=pum " Display the completion matches using the popupmenu.
 endif
-
-"Mode Settings
-" let &t_SI.="\e[5 q" "SI = INSERT mode
-" let &t_SR.="\e[4 q" "SR = REPLACE mode
-" let &t_EI.="\e[4 q" "EI = NORMAL mode (ELSE)
-"Cursor settings:
-"  1 -> blinking block
-"  2 -> solid block
-"  3 -> blinking underscore
-"  4 -> solid underscore
-"  5 -> blinking vertical bar
-"  6 -> solid vertical bar
 
 " Root
 if exists('$SUDO_USER')

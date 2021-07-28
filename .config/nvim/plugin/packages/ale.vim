@@ -43,6 +43,7 @@ let g:ale_fixers = {
 	\ 'sh' : ['shellcheck'],
 	\ 'vim' : ['vint'],
 	\ 'python' : ['flake8'],
+	\ 'lua' : ['stylua'],
 \ }
 
 " Define mappings.
