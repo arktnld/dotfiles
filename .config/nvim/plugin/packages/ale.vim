@@ -40,7 +40,7 @@ let g:ale_fixers = {
 	\ 'javascript.jsx': ['eslint', 'prettier'],
 	\ 'json': ['prettier'],
 	\ 'graphql': ['prettier'],
-	\ 'sh' : ['shelcheck'],
+	\ 'sh' : ['shellcheck'],
 	\ 'vim' : ['vint'],
 	\ 'python' : ['flake8'],
 \ }

@@ -1,11 +1,6 @@
-" For a paranoia.
-" Normally `:set nocp` is not needed, because it is done automatically
-" when .vimrc is found.
-if &compatible
-	" `:set nocp` has many side effects. Therefore this should be done
-	" only when 'compatible' is set.
-	" set nocompatible
-endif
+"
+" A minimal package manager
+"
 
 function! PackInit() abort
 
@@ -16,22 +11,16 @@ function! PackInit() abort
 
 	" Core plugins on startup.
 	call minpac#add('dense-analysis/ale') " Linting
-	call minpac#add('tpope/vim-fugitive') " Control git repo
 	call minpac#add('mhinz/vim-signify') " Git status diff
 	call minpac#add('sheerun/vim-polyglot') " Code packs configs
 	call minpac#add('tmsvg/pear-tree') " Auto pair
-	call minpac#add('vimwiki/vimwiki')
 
 	" Additional plugins here.
 	call minpac#add('k-takata/minpac', {'type': 'opt'}) " Simple plugin manager
+	call minpac#add('vimwiki/vimwiki', {'type': 'opt'}) " personal wiki
 	call minpac#add('lilydjwg/colorizer', {'type': 'opt'}) " Color rgb text
-	call minpac#add('sjl/gundo.vim', {'type': 'opt'}) " Undo tree visualization
-	" call minpac#add('neoclide/coc.nvim', {'type': 'opt'}) " Language server
-	" call minpac#add('sunaku/vim-dasht', {'type': 'opt'})
-	" call minpac#add('flipcoder/vim-textbeat', {'type': 'opt'})
-
-	" call minpac#add('dart-lang/dart-vim-plugin', {'type': 'opt'})
-	" call minpac#add('thosakwe/vim-flutter', {'type': 'opt'})
+	call minpac#add('mcchrish/nnn.vim', {'type': 'opt'}) " File manager
+	"
 endfunction
 
 " Plugin settings here.

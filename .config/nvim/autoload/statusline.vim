@@ -1,17 +1,9 @@
 scriptencoding UTF-8
 
 function! statusline#fileprefix() abort
-	let l:basename = expand('%')
+	let l:basename = expand('%:p:H')
 
     return ''. l:basename
-endfunction
-
-function! statusline#filetypesymbol() abort
-	if !exists('*WebDevIconsGetFileTypeSymbol')
-		return ''
-	endif
-
-	return WebDevIconsGetFileTypeSymbol()
 endfunction
 
 function! statusline#spell() abort
@@ -23,31 +15,23 @@ function! statusline#spell() abort
 endfunction
 
 function! statusline#git() abort
-	if !exists('g:loaded_gina')
+	let l:path=expand('%:p:H')
+	let l:path=system("readlink -f " . l:path)
+	let l:path=substitute(l:path, '\n', '', 'g')
+	let l:path=substitute(l:path, '/home/arktnld/', '', 'g')
+	let l:stats=len(system("git ls-files --full-name /home/arktnld | grep -x " . l:path))
+
+	if l:stats < 1
 		return ''
 	endif
 
-	return gina#component#repo#branch() . ' '
+	let b:gitbranch=""
+	let l:dir=expand('%:p:h')
+	let l:gitrevparse = system("git -C ".l:dir." rev-parse --abbrev-ref HEAD")
+	let b:gitbranch="(".substitute(l:gitrevparse, '\n', '', 'g').") "
+
+	return b:gitbranch
 endfunction
-
-function! statusline#markdownpreview() abort
-	if !exists('b:markdownpreview')
-		return ''
-	endif
-
-	return ' ' . ' '
-endfunction
-
-function! statusline#nerdtree() abort
-	if !exists('b:NERDTree')
-		return v:false
-	endif
-
-	return substitute(b:NERDTree.root.path.str() . '/', '\C^' . $HOME, '~', '')
-endfunction
-
-
-
 
 function! statusline#warnings() abort
   let l:counts = ale#statusline#Count(bufnr(''))
