@@ -29,8 +29,8 @@ set shortmess=filmnrwxoOstTIc " Use abbreviations and short messages in command 
 set sidescroll=5 " Columns to scroll horizontally when cursor is moved off the screen.
 set sidescrolloff=5 " Minimum number of screen columns to keep to cursor right.
 set visualbell " Use visual bell instead of beeping on errors.
-" set timeoutlen = 500 " Time in milliseconds to wait for a mapped sequence to complete.
-" set ttimeoutlen = 0 " Time in milliseconds to wait for a key code sequence to complete.
+set timeoutlen=500 " Time in milliseconds to wait for a mapped sequence to complete.
+set ttimeoutlen=0 " Time in milliseconds to wait for a key code sequence to complete.
 
 " Interface
 set cursorline " Highlight the line background of the cursor.
@@ -110,7 +110,6 @@ set wildmode=full " Wildmenu options.
 " Neovim
 if has('nvim')
 	set guicursor=n-v-c-sm:underline,i-ci:ver25,r-cr-o-ve:hor20 " Configures the cursor style for each mode.
-	" set guicursor=
 	set inccommand=nosplit " Show live substitution results as you type.
 	set fillchars+=eob:\  " Hide end of buffer tilde symbols.
 	set display+=msgsep " Only scroll lines on command line pager, not the entire screen.

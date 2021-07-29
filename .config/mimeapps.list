@@ -26,7 +26,8 @@ image/x-icns=org.gnome.eog.desktop;
 image/x-tga=sxiv.desktop;
 video/mp4=vlc.desktop;
 application/x-mobipocket-ebook=org.pwmt.zathura-cb.desktop;
-application/epub+zip=org.gnome.Evince.desktop;
+application/epub+zip=calibre-ebook-viewer.desktop;org.gnome.Evince.desktop;org.pwmt.zathura-pdf-mupdf.desktop;
+text/plain=mpv.desktop;
 
 [Default Applications]
 x-scheme-handler/tg=userapp-Telegram Desktop-KLMA30.desktop
@@ -79,7 +80,7 @@ audio/x-wavpack=mpv.desktop
 audio/x-adpcm=mpv.desktop
 inode/directory=org.gnome.Nautilus.desktop
 text/tcl=nvim.desktop
-text/plain=nvim.desktop
+text/plain=mpv.desktop
 text/x-csrc=nvim.desktop
 text/x-pascal=nvim.desktop
 text/x-moc=nvim.desktop
