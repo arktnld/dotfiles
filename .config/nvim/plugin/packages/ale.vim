@@ -48,5 +48,3 @@ let g:ale_fixers = {
 
 " Define mappings.
 nmap <LocalLeader>f <Plug>(ale_fix)
-
-

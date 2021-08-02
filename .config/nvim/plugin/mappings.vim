@@ -26,13 +26,13 @@ nnoremap x "_x
 nnoremap / /\v
 nnoremap ? ?\v
 
+
 " Set highlight search when navigate on searching matchers.
 nnoremap n :silent set hlsearch <Bar> normal! n<Enter>
 nnoremap N :silent set hlsearch <Bar> normal! N<Enter>
 nnoremap <silent> <ESC> :set nohlsearch<Enter>
 
 " Command Mappings
-
 " command mode easy navigation.
 cnoremap <C-a> <Home>
 cnoremap <C-e> <End>
@@ -54,6 +54,10 @@ cnoremap <expr> <S-Tab> getcmdtype() ==# '/' \|\| getcmdtype() ==# '?' ? '<Enter
 " Shortcuts for quiting.
 nnoremap <silent> <Leader>q :quit!<Enter>
 nnoremap <silent> <Leader>Q :quitall<Enter>
+
+" Insert extra new line
+nnoremap <Leader>o o<Esc>k
+nnoremap <Leader>O O<Esc>j
 
 " Insert Mappings
 

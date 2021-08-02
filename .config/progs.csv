@@ -41,6 +41,8 @@
 ,vint,Lint tool for Vim script Language.
 ,flake8,Python source code checker.
 ,shellcheck,shell script analysis tool.
+,expac,pacman database extraction utility.
 A,ungoogled-chromium,a lightweight approach to removing Google service.
 A,chrome-gnome-shell-git,Native connector for integration with extensions.gnome.org.
 A,nerd-fonts-noto-sans-mono,Standard variants of Noto Sans Mono patched with Nerd Fonts.
+A,gnome-shell-extension-pop-shell,tiling window management for gnome shell.

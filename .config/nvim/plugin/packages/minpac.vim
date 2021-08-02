@@ -15,6 +15,7 @@ function! PackInit() abort
 	call minpac#add('sheerun/vim-polyglot') " Code packs configs
 	call minpac#add('tmsvg/pear-tree') " Auto pair
     call minpac#add('b3nj5m1n/kommentary') " Comment motion
+    call minpac#add('gyim/vim-boxdraw') " Draw diagrams
     " call minpac#add('hrsh7th/nvim-compe') " Auto completion
 
 	" Additional plugins here.
@@ -22,6 +23,7 @@ function! PackInit() abort
 	call minpac#add('vimwiki/vimwiki', {'type': 'opt'}) " personal wiki
 	call minpac#add('lilydjwg/colorizer', {'type': 'opt'}) " Color rgb text
 	call minpac#add('mcchrish/nnn.vim', {'type': 'opt'}) " File manager
+    call minpac#add('sunaku/vim-dasht', {'type': 'opt'}) " Code docs
 	"
 endfunction
 
@@ -30,6 +32,6 @@ endfunction
 " Define user commands for updating/cleaning the plugins.
 " Each of them loads minpac, reloads .vimrc to register the
 " information of plugins, then performs the task.
-command! PackUpdate call PackInit() | call minpac#update('', {'do': 'call minpac#status()'})
+command! PackUpdate call PackInit() | call minpac#update()
 command! PackClean  call PackInit() | call minpac#clean()
 command! PackStatus call PackInit() | call minpac#status()
