@@ -106,14 +106,7 @@ FZF-EOF"
 
 # List all installed packages, not base or base-devel groups.
 @-packages-list-user() {
-
-	local all_packages=/tmp/all.list
-	local base_packages=/tmp/base.list
-
-	pacman -Qeq | sort > "$all_packages"
-	pacman -Qgq base base-devel | sort > "$base_packages"
-
-	comm -23 "$all_packages" "$base_packages"
+    comm -23 <(pacman -Qeq) <(pacman -Qgq base base-devel)
 }
 
 # List all packages not in pacman sync dbs, like aur packages.
@@ -127,18 +120,19 @@ FZF-EOF"
 	sort -h
 }
 
-@-show-music-notes() {
-	ffplay -hide_banner -f lavfi \
-		"amovie='$1', asplit [a][out1]; [a] showcqt=size=1400x1052 [out0]";
-}
-
 # Remove orphaned packages from old build packages.
 @-orphans-remove() {
 	paru --remove --nosave --recursive #(pacman -Qtdq)
 }
 
 @-remove-unused-packages() {
-	sudo pacman -Rns $(pacman -Qttdq)
+	sudo pacman -Rns "$(pacman -Qttdq)"
 }
+
+# @-show-music-notes() {
+# 	ffplay -hide_banner -f lavfi \
+# 		"amovie='$1', asplit [a][out1]; [a] showcqt=size=1400x1052 [out0]";
+# }
+
 
 # vi: ft=sh
