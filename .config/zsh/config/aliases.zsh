@@ -18,6 +18,8 @@ alias calc='bc -l <<<' # Simple calculator, only expressions without space.
 alias def='crow' # Word definition.
 alias pbcopy='xclip -selection clipboard' # Copy terminal output.
 alias pbpaste='xclip -selection clipboard -out' # Paste text on clipboard.
+alias d='wget $(xclip -selection clipboard -out)' # Download using link on clipboard.
+alias pi='ping 1.1.1.1' # Tired of ping in google?
 
 # paru/pacman Core
 alias p='paru --sync --noconfirm'

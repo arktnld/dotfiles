@@ -1,32 +1,29 @@
 #!/bin/bash
+# Simple retro game script
+#
+consoles=$(ls ~/Data/Roms | sed ':a;N;$!ba;s/\n/, /g' | sed -E 's/(.*),/\1 and/')
 
-##
-# Func
-##
+### Functions ###
 
 # Print help and List of Consoles
 help () {
 cat << EOF
-  O commando Play executa jogos de forma
-  fácil e simples.
+  Run retro games in a simple way.
 
-  Para usar a busca avançada de jogos:
-  play [console]
+  Advanced search        play [console]
+  Search specific game   play [console] [game]
 
-  Para buscar um jogo específico:
-  play [console] [nome do jogo]
-
-  Lista de consoles disponível:
+  Available consoles:
+  $consoles
 
 EOF
-	ls ~/Data/Roms | nl
 
 	exit 1
 }
 
 # Exit if an error occur
 err () {
-	printf "%s\n\n" "ERROR: $1 \"$2\" NÂO EXISTE, tente novamente."
+	printf "%s\n\n" "ERROR: $1 \"$2\" NOT FOUND, try again."
 	exit 1
 }
 
@@ -41,31 +38,38 @@ getsearch () {
 	echo "$matchlist"
 }
 
-getfzf() {
-	# echo "Busca avançada de jogos do $console:"
-	# selgame="$(ls "$romsdir" | fzf)"
-	selgame=$(command ls "$romsdir" | smenu -d -t 10 -M -W $'\n' -n1000 -m "Busca avançada de jogos do $console:")
+listgames() {
+	selgame=$(command ls "$romsdir" | \
+        sed 's/$/  /' | \
+        smenu -k -d -t 5 -M -W $'\n' -n1000 -m "Advanced search for $console games:" | \
+        xargs)
+    [ -z "$selgame" ] && exit 1
 	rungame "$selgame"
 }
 
 rungame() {
 	game="$romsdir/$1"
-	mednafen -force_module "$console" "$game" \
-		&> /dev/null 2>&1 & disown
+    if [ "$console" == "psx" ]; then
+        duckstation-qt "$game/$1.cue" \
+            &> /dev/null 2>&1 & disown
+    else
+        mednafen -force_module "$console" "$game" \
+            &> /dev/null 2>&1 & disown
+    fi
 }
 
 getgame() {
 	echo -e "\n$1" | nl
-	printf "\n%s" "Escolha uma opção. Digite 0 para sair [0-$(echo "$1" | wc -l)]: "
+    printf "\n%s" "Choose an option (0 to exit) [0-$(echo "$1" | wc -l)]: "
 	read -r sel
 	limit=$(echo "$1" | wc -l)
 	limitc=$(($(echo "$1" | wc -l)+1))
 	while [ "$sel" == "" ] || [ -n "${sel##[0-9]*}" ] ||  [ "$sel" -le "-1" ] ||  [ "$sel" -ge $limitc ] ; do
-		printf "\n%s" "Por favor, selecione um número [0-$limit]: "
+		printf "\n%s" "Please, select a number 0 to $limit: "
 		read -r sel
 	done
 
-	[ $sel == 0 ] && echo -e "Nenhuma opção selecionada, saindo...\n" && exit 1
+	[ $sel == 0 ] && echo -e "No option selected, exiting...\n" && exit 1
 	selgame=$(echo "$1" | sed -n "$sel"'p')
 
 	rungame "$selgame"
@@ -75,23 +79,21 @@ console=$1
 romsdir="$HOME/Data/Roms/$1"; shift
 search=$*
 
-##
-# Logic
-##
+### Logic ###
 
 # if no orgs are given, print help and exit.
 [ -z "$console" ] && help
 
 # exit if console folder don't exits.
-[ ! -d "$romsdir" ] && err Pasta "$console"
+[ ! -d "$romsdir" ] && err Folder "$console"
 
 # get search matches, length and exit if search is zero
 matches="$(getsearch)"
-[ "$matches" == "" ] && err Jogo "$search"
+[ "$matches" == "" ] && err Game "$search"
 [ -z "$search" ] && lenmatches=0 || lenmatches=$(echo "$matches"  | wc -l)
 
 case $lenmatches in
-	0) getfzf ;;
+	0) listgames ;;
 	1) rungame "$matches" ;;
 	*) getgame "$matches"
 esac

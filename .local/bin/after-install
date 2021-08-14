@@ -33,7 +33,7 @@ maininstall() { # Installs all needed programs from main repo.
 aurinstall() { \
 	echo "AUR Installing $1, $2 "
 	echo "$aurinstalled" | grep -q "^$1$" && return 1
-	sudo -u "$name" $aurhelper -S --noconfirm "$1" >/dev/null 2>&1
+	sudo -u "$name" $aurhelper --mflags "--skippgpcheck --skipchecksums" -S --noconfirm "$1" >/dev/null 2>&1
 }
 
 installationloop() { \

@@ -69,10 +69,16 @@ export STARTDICT_DATA_DIR=
 export SDCV_HISTORY=$HOME/.config/stardict/history
 export SDCV_HISTORYSIZE=
 
+
+# nnn
+export NNN_OPTS="cEHo"
+export NNN_OPENER="/usr/share/nnn/plugins/nuke"
+export NNN_TRASH="n (n=1: trash-cli, n=2: gio trash)"
+
 # fzf
 export FZF_DEFAULT_COMMAND="\
   find . \
-  \( -type d -name 'node_modules' -o -type d -name '.git' \) -prune \
+  \( -type d -name 'node_modules' -o -type d -name '.git' -o -type d -name 'Data' \) -prune \
   -o -type f -print"
 export FZF_DEFAULT_COLORS='--color=dark,fg:-1,bg:-1,hl:4,fg+:7,bg+:8,gutter:-1,hl+:4,info:8,border:8,prompt:4,pointer:3,marker:3,spinner:8,header:6'
 export FZF_DEFAULT_OPTS="\
@@ -112,6 +118,3 @@ export LESS_TERMCAP_se="$(printf '%b' '[0m')"
 export LESS_TERMCAP_us="$(printf '%b' '[1;32m')"
 export LESS_TERMCAP_ue="$(printf '%b' '[0m')"
 export LESSOPEN="| /usr/bin/highlight -O ansi %s 2>/dev/null"
-
-# Start graphical server on user's current tty if not already running.
-[ "$(tty)" = "/dev/tty1" ] && ! pidof -s Xorg >/dev/null 2>&1 && exec startx "$XINITRC"

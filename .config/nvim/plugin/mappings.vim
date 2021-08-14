@@ -8,7 +8,7 @@ imap <down> <nop>
 imap <left> <nop>
 imap <right> <nop>
 
-" Normal Mappings
+""" Normal Mappings
 
 " Pane nagivation.
 nnoremap <C-j> <C-w>j
@@ -26,13 +26,13 @@ nnoremap x "_x
 nnoremap / /\v
 nnoremap ? ?\v
 
-
 " Set highlight search when navigate on searching matchers.
 nnoremap n :silent set hlsearch <Bar> normal! n<Enter>
 nnoremap N :silent set hlsearch <Bar> normal! N<Enter>
 nnoremap <silent> <ESC> :set nohlsearch<Enter>
 
-" Command Mappings
+""" Command Mappings
+
 " command mode easy navigation.
 cnoremap <C-a> <Home>
 cnoremap <C-e> <End>
@@ -49,7 +49,7 @@ cnoremap :g global/\v/<Left>
 cnoremap <expr> <Tab> getcmdtype() ==# '/' \|\| getcmdtype() ==# '?' ? '<Enter>/<C-r>/' : '<C-z>'
 cnoremap <expr> <S-Tab> getcmdtype() ==# '/' \|\| getcmdtype() ==# '?' ? '<Enter>?<C-r>/' : '<S-Tab>'
 
-" Leader Mappings
+""" Leader Mappings
 
 " Shortcuts for quiting.
 nnoremap <silent> <Leader>q :quit!<Enter>
@@ -59,7 +59,19 @@ nnoremap <silent> <Leader>Q :quitall<Enter>
 nnoremap <Leader>o o<Esc>k
 nnoremap <Leader>O O<Esc>j
 
-" Insert Mappings
+" Go to tab by number
+noremap <leader>1 1gt
+noremap <leader>2 2gt
+noremap <leader>3 3gt
+noremap <leader>4 4gt
+noremap <leader>5 5gt
+noremap <leader>6 6gt
+noremap <leader>7 7gt
+noremap <leader>8 8gt
+noremap <leader>9 9gt
+noremap <leader>0 :tablast<cr>
+
+""" Insert Mappings
 
 " Cycle through completion items when popup menu is visible, trigger completion upon written words.
 inoremap <silent><expr> <Tab> mappings#insert#handle#tab({ 'key': "\<Tab>" })

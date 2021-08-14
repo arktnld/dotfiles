@@ -46,3 +46,9 @@ A,microsoft-edge-dev-bin,A browser that combines a minimal and sophisticated tec
 A,chrome-gnome-shell-git,Native connector for integration with extensions.gnome.org.
 A,nerd-fonts-noto-sans-mono,Standard variants of Noto Sans Mono patched with Nerd Fonts.
 A,gnome-shell-extension-pop-shell,tiling window management for gnome shell.
+A,neovim-remote,Remote control Neovim session.
+A,crow-translate,
+A,mpv.mpris,
+A,glow-bin,
+A,patool,
+A,googler,

@@ -5,7 +5,7 @@
     "comment": "",
     "cursor-background-color": "#000000",
     "cursor-foreground-color": "#FFFFFF",
-    "foreground-color": "#F0F0F0",
+    "foreground-color": "#CCCCCC",
     "highlight-background-color": "#000000",
     "highlight-foreground-color": "#FFFFFF",
     "name": "Plain",
@@ -19,7 +19,7 @@
         "#4fb8cc",
         "#999999",
 
-        "#999999",
+        "#CCCCCC",
         "#FF1A72",
         "#10a778",
         "#a89c14",
