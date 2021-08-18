@@ -86,7 +86,7 @@ function gitup() {
 
     git add --all
     git commit --message "$cmmt"
-    git push --quiet --set-upstrem origin master
+    git push --quiet --set-upstream origin master
 }
 
 gitcommit() {
