@@ -79,6 +79,11 @@ clone () {
 	shift
 	git clone https://github.com/"$REPO" "$@"
 }
+function acp() {
+git add -A
+git commit -m "$1"
+git push
+}
 
 gitcommit() {
   git log --graph --color=always \
@@ -122,11 +127,11 @@ FZF-EOF"
 
 # Remove orphaned packages from old build packages.
 @-orphans-remove() {
-	paru --remove --nosave --recursive #(pacman -Qtdq)
+	paru --remove --nosave --recursive $(pacman -Qtdq | xargs)
 }
 
 @-remove-unused-packages() {
-	sudo pacman -Rns "$(pacman -Qttdq)"
+	sudo pacman -Rns $(pacman -Qttdq | xargs)
 }
 
 # @-show-music-notes() {

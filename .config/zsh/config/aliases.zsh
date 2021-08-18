@@ -4,10 +4,10 @@ alias rm='trash' # Use `trash` program instead of built-in irrecoverable way to 
 alias mv='mv --interactive --verbose' # Move nodes with interactive mode and extra verbosity.
 alias ln='ln --interactive --verbose' # Link nodes with interactive mode and extra verbosity.
 alias cp='cp --interactive --verbose' # Copy nodes with interactive mode and extra verbosity.
-alias mkdir='mkdir --parents' # Make missing parent directories when creating folders.
+alias mkdir='mkdir --parents --verbose' # Make missing parent directories when creating folders.
 alias du='du --max-depth=1 --si' # Display size of files and folders under current directory.
 alias ag='ag --hidden' # Include hidden folders and files on search results.
-alias grep='grep --color=auto --exclude-dir=".git" --exclude-dir="node_modules"' # Grep with colors and ignore common directories.
+alias grep='grep --ignore-case --color=auto --exclude-dir=".git" --exclude-dir="node_modules"' # Grep with colors and ignore common directories.
 alias ip='ip -color' # Use `ip` utility always with colors.
 alias ls='exa --all --classify --color=always --group-directories-first --sort=extension'  # List name of nodes.
 alias ll="exa --long --all --group --header --classify --group-directories-first --sort=modified --git"
@@ -21,7 +21,13 @@ alias pbpaste='xclip -selection clipboard -out' # Paste text on clipboard.
 alias d='wget $(xclip -selection clipboard -out)' # Download using link on clipboard.
 alias pi='ping 1.1.1.1' # Tired of ping in google?
 
-# paru/pacman Core
+# Archive
+alias au='patool extract' # Unpack one or more archives.
+alias ac='patool create' # Create an archive.
+alias al='patool list' # List members or one or more archives.
+alias arc='patool recompress' # Recompress an archive to smaller size.
+
+# Package Manager
 alias p='paru --sync --noconfirm'
 alias pr='paru --remove --nosave --recursive --noconfirm'
 alias pp='pacman --sync --search' # Search only on Arch Official Repository.
