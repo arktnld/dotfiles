@@ -79,10 +79,12 @@ clone () {
 	shift
 	git clone https://github.com/"$REPO" "$@"
 }
-function acp() {
+function gitup() {
+git status
+echo -ne "\nCommit: "; read -r cmmt
 git add -A
-git commit -m "$1"
-git push
+git commit -m "$cmmt"
+git push -u origin master
 }
 
 gitcommit() {
