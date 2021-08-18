@@ -81,6 +81,7 @@ clone () {
 }
 
 function gitup() {
+    local cmmt
     git status
     echo -ne "\nCommit: "; read -r cmmt
 
