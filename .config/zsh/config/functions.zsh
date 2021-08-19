@@ -84,7 +84,7 @@ function gitup() {
     local cmmt
     git status
     echo -ne "\nCommit: "; read -r cmmt
-
+    echo
     git add --all
     git commit --message "$cmmt"
     git push --quiet --set-upstream origin master
