@@ -1,0 +1,122 @@
+#!/bin/bash
+
+LOCKFILE=/tmp/lock.txt
+if [ -e ${LOCKFILE} ] && kill -0 `cat ${LOCKFILE}`; then
+    echo "already running"
+    exit
+fi
+
+# make sure the lockfile is removed when we exit and then claim it
+trap "rm -f ${LOCKFILE}; exit" INT TERM EXIT
+echo $$ > ${LOCKFILE}
+
+olx=/tmp/olx.html
+diffs=/tmp/diffs
+urlbg=/tmp/urlbg
+game=/tmp/game.html
+
+home=/home/arktnld
+ofhome=$home/.config/olx-fetch
+
+bitly="$home/.local/bin/bitly"
+regs="$ofhome/olxbgs"
+tsconf="$ofhome/olxbg.conf"
+
+getprice() {
+    html2text $game \
+        | grep -E '## R\$ [0-9,]+' \
+        | tr -d '#()[],\-:+.!' \
+        | xargs
+}
+
+getname() {
+    html2text $game \
+        | tr -d '()[],\-:+.!' \
+        | grep -E '^# [a-zA-Z0-9 ]+' \
+        | tr -d '#' \
+        | xargs
+}
+
+getpage() {
+    echo "getpage $1"
+    temp=/tmp/$1
+    # [ -f "$temp" ] && rm "$temp"
+    rm "$temp" >/dev/null 2>&1
+    timeout 30s aria2c --retry-wait=3 -q --dir=/tmp -o "$1" "$2"
+}
+
+geturls() {
+    echo geturls
+    html2text --reference-links --no-wrap-links $olx \
+        | grep -E '//[a-z][a-z].olx.com' \
+        | grep -e 'hobbies-e-colecoes' -e 'artigos-infantis' \
+        | grep -iv 'boneca' \
+        | grep -iv 'xadrez' \
+        | grep -iv 'luccas' \
+        | grep -iv 'Pop It' \
+        | tr -s ' ' \
+        | cut -d' ' -f3 \
+        >| $urlbg
+}
+
+diffurls() {
+    echo diffurls
+    # diff --new-line-format="" --unchanged-line-format="" "$urlbg" "$regs" | tac > $diffs
+    last="$(cat $urlbg | grep -n $(cat $regs) | cut -d: -f1)"
+    echo $last
+    num=$((last - 1))
+    echo $num
+    awk -vs=1 -ve="$num" 'NR>e{exit}NR>=s' "$urlbg" | tac >| $diffs
+}
+
+getcity() {
+    html2text $game \
+        | grep -iA2 '^Município$' \
+        | sed 's/Município//' \
+        | head -n3 \
+        | xargs
+}
+
+getdistrict() {
+    html2text $game \
+        | grep -iA2 '^Bairro$' \
+        | sed 's/Bairro//' \
+        | head -n3 \
+        | xargs \
+        | sed 's/\([a-zA-ZçãāâáǎàêẽēéěèîĩīíǐìôõōóǒòûũūúǔùǖǘǚǜÂÃĀÁǍÀÊẼĒÉĚÈÎĨĪÍǏÌÔÕŌÓǑÒÛŨŪÚǓÙǕǗǙǛ() ]\+\)/\1,/'
+}
+
+## Logic ##
+
+echo init login
+getpage "olx.html" "https://www.olx.com.br/brasil?q=jogo%20de%20tabuleiro&sf=1#"
+geturls
+cat $urlbg
+[ -s "$urlbg" ] || exit 1
+diffurls
+cat $diffs
+[ -s "$diffs" ] || exit 1
+
+echo init while
+# get olx url values and send to telegram
+while read -r url;do
+    echo while loop
+    echo "url: $url"
+    getpage "game.html" "$url"
+
+    name=$(getname)
+    price=$(getprice)
+    tinyurl=$("$bitly" "$url")
+    district=$(getdistrict)
+    city=$(getcity)
+    state=$(echo "$url" | cut -d'/' -f3 | cut -d'.' -f1 | tr "[:lower:]" "[:upper:]")
+
+
+    printf "%s\n\n%s\n\n%s %s #%s\n\n%s" "$price"  "$name" "$district" "$city" "$state" "$tinyurl" \
+        | timeout 30s telegram-send --config "$tsconf" --stdin
+
+done < $diffs
+echo end while
+
+head -n1 $urlbg >| "$regs"
+rm -f $olx $urlbg $diffs ${LOCKFILE}
