@@ -19,7 +19,7 @@ home=/home/arktnld
 ofhome=$home/.config/olx-fetch
 
 bitly="$home/.local/bin/bitly"
-regs="$ofhome/olxbgs"
+regs="$home/olxbgs"
 tsconf="$ofhome/olxbg.conf"
 
 getprice() {
@@ -53,7 +53,9 @@ geturls() {
         | grep -iv 'boneca' \
         | grep -iv 'xadrez' \
         | grep -iv 'luccas' \
-        | grep -iv 'Pop It' \
+        | grep -iv 'pop it' \
+        | grep -iv 'barbie' \
+        | grep -iv 'infantil' \
         | tr -s ' ' \
         | cut -d' ' -f3 \
         >| $urlbg
@@ -61,11 +63,21 @@ geturls() {
 
 diffurls() {
     echo diffurls
-    # diff --new-line-format="" --unchanged-line-format="" "$urlbg" "$regs" | tac > $diffs
-    last="$(cat $urlbg | grep -n $(cat $regs) | cut -d: -f1)"
-    echo $last
-    num=$((last - 1))
-    echo $num
+    num=-1
+    i=1
+    reg=$(sed -n "$i"p "$regs")
+
+    while [ $num -eq -1 ]; do
+        # diff --new-line-format="" --unchanged-line-format="" "$urlbg" "$regs" | tac > $diffs
+        last="$(cat $urlbg | grep -n $reg | cut -d: -f1)"
+        echo $last
+        num=$((last - 1))
+        echo $num
+        i=$((i + 1))
+        reg=$(sed -n "$i"p "$regs")
+        echo $reg
+    done
+
     awk -vs=1 -ve="$num" 'NR>e{exit}NR>=s' "$urlbg" | tac >| $diffs
 }
 
@@ -118,5 +130,5 @@ while read -r url;do
 done < $diffs
 echo end while
 
-head -n1 $urlbg >| "$regs"
+cat $urlbg >| "$regs"
 rm -f $olx $urlbg $diffs ${LOCKFILE}

@@ -1,6 +1,7 @@
 #!/bin/bash
 # Simple retro game script
 #
+
 consoles=$(ls ~/Data/Roms | sed ':a;N;$!ba;s/\n/, /g' | sed -E 's/(.*),/\1 and/')
 
 ### Functions ###
@@ -83,6 +84,8 @@ search=$*
 
 # if no orgs are given, print help and exit.
 [ -z "$console" ] && help
+
+clear # Use all screen.
 
 # exit if console folder don't exits.
 [ ! -d "$romsdir" ] && err Folder "$console"
