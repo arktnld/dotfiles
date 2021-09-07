@@ -9,6 +9,7 @@ consoles=$(ls ~/Data/Roms | sed ':a;N;$!ba;s/\n/, /g' | sed -E 's/(.*),/\1 and/'
 # Print help and List of Consoles
 help () {
 cat << EOF
+  Usage: play [console]... [game]...
   Run retro games in a simple way.
 
   Advanced search        play [console]

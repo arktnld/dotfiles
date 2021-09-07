@@ -1,5 +1,5 @@
 [Added Associations]
-x-scheme-handler/tg=userapp-Telegram Desktop-KLMA30.desktop;
+x-scheme-handler/tg=userapp-Telegram Desktop-KLMA30.desktop;userapp-Kotatogram Desktop-VY6080.desktop;
 application/pdf=org.pwmt.zathura-pdf-mupdf.desktop;
 image/bmp=org.gnome.eog.desktop;sxiv.desktop;
 image/gif=org.gnome.eog.desktop;sxiv.desktop;
@@ -26,11 +26,11 @@ image/x-icns=org.gnome.eog.desktop;
 image/x-tga=sxiv.desktop;
 video/mp4=vlc.desktop;
 application/x-mobipocket-ebook=org.pwmt.zathura-cb.desktop;
-application/epub+zip=calibre-ebook-viewer.desktop;org.gnome.Evince.desktop;org.pwmt.zathura-pdf-mupdf.desktop;
+application/epub+zip=org.pwmt.zathura-pdf-mupdf.desktop;calibre-ebook-viewer.desktop;org.gnome.Evince.desktop;
 text/plain=text.desktop;
 
 [Default Applications]
-x-scheme-handler/tg=userapp-Telegram Desktop-KLMA30.desktop
+x-scheme-handler/tg=userapp-Kotatogram Desktop-VY6080.desktop
 x-scheme-handler/etcher=balena-etcher-electron.desktop
 image/jpg=sxiv.desktop
 image/x-gray=org.gnome.eog.desktop

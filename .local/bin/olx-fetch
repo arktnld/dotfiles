@@ -13,25 +13,21 @@ echo $$ > ${LOCKFILE}
 olx=/tmp/olx.html
 diffs=/tmp/diffs
 urlbg=/tmp/urlbg
-game=/tmp/game.html
+post=/tmp/post.html
 
 home=/home/arktnld
 ofhome=$home/.config/olx-fetch
 
-bitly="$home/.local/bin/bitly"
-regs="$home/olxbgs"
-tsconf="$ofhome/olxbg.conf"
-
 getprice() {
-    html2text $game \
+    html2text $post \
         | grep -E '## R\$ [0-9,]+' \
         | tr -d '#()[],\-:+.!' \
         | xargs
 }
 
 getname() {
-    html2text $game \
-        | tr -d '()[],\-:+.!' \
+    html2text $post \
+        | tr -d "()[],\-:+.!\'" \
         | grep -E '^# [a-zA-Z0-9 ]+' \
         | tr -d '#' \
         | xargs
@@ -48,20 +44,21 @@ getpage() {
 geturls() {
     echo geturls
     html2text --reference-links --no-wrap-links $olx \
-        | grep -E '//[a-z][a-z].olx.com' \
-        | grep -e 'hobbies-e-colecoes' -e 'artigos-infantis' \
-        | grep -iv 'boneca' \
-        | grep -iv 'xadrez' \
-        | grep -iv 'luccas' \
-        | grep -iv 'pop it' \
-        | grep -iv 'barbie' \
-        | grep -iv 'infantil' \
+        | grep -E '//[a-z][a-z].olx.com.br/.*/.*/.*' \
+        | grep -e $(echo $1 | sed 's# #\\|#g') \
+        | grep -iv $(echo $2 | sed 's# #\\|#g') \
         | tr -s ' ' \
         | cut -d' ' -f3 \
         >| $urlbg
 }
 
 diffurls() {
+
+    if [ ! -f "$regs" ]; then
+        cat $urlbg >| "$regs"
+        exit 1
+    fi
+
     echo diffurls
     num=-1
     i=1
@@ -79,56 +76,76 @@ diffurls() {
     done
 
     awk -vs=1 -ve="$num" 'NR>e{exit}NR>=s' "$urlbg" | tac >| $diffs
+    cat $urlbg
 }
 
 getcity() {
-    html2text $game \
+    html2text $post \
         | grep -iA2 '^Município$' \
         | sed 's/Município//' \
         | head -n3 \
+        | tr -d "'" \
         | xargs
 }
 
 getdistrict() {
-    html2text $game \
+    html2text $post \
         | grep -iA2 '^Bairro$' \
         | sed 's/Bairro//' \
         | head -n3 \
+        | tr -d "'" \
         | xargs \
-        | sed 's/\([a-zA-ZçãāâáǎàêẽēéěèîĩīíǐìôõōóǒòûũūúǔùǖǘǚǜÂÃĀÁǍÀÊẼĒÉĚÈÎĨĪÍǏÌÔÕŌÓǑÒÛŨŪÚǓÙǕǗǙǛ() ]\+\)/\1,/'
+        | sed "s/\([0-9a-zA-ZçãāâáǎàêẽēéěèîĩīíǐìôõōóǒòûũūúǔùǖǘǚǜÂÃĀÁǍÀÊẼĒÉĚÈÎĨĪÍǏÌÔÕŌÓǑÒÛŨŪÚǓÙǕǗǙǛ() ]\+\)/\1,/"
+}
+
+loop() {
+    echo init while
+    # get olx url post and send to telegram
+    while read -r url;do
+        echo while loop
+        echo "url: $url"
+        getpage "post.html" "$url"
+
+        name=$(getname)
+        echo "name: $name"
+        price=$(getprice)
+        echo "price: $price"
+        # tinyurl=$("$bitly" "$url")
+        district=$(getdistrict)
+        echo "district: $district"
+        city=$(getcity)
+        echo "city: $city"
+        state=$(echo "$url" | cut -d'/' -f3 | cut -d'.' -f1 | tr "[:lower:]" "[:upper:]")
+        echo "state: $state"
+
+
+        printf "<b>%s</b>\n\n%s\n\n<i>%s %s</i> #%s\n\n<a href='%s'>Link</a>" "$price"  "$name" "$district" "$city" "$state" "$url" \
+            | timeout 30s telegram-send --config "$tsconf" --format html --stdin
+
+    done < $diffs
+    echo end while
 }
 
 ## Logic ##
 
-echo init login
-getpage "olx.html" "https://www.olx.com.br/brasil?q=jogo%20de%20tabuleiro&sf=1#"
-geturls
-cat $urlbg
+tsconf="$ofhome/olxbg.conf"
+regs="$ofhome/olxbgs"
+
+file="olx.html"
+webpg="https://www.olx.com.br/brasil?q=jogo%20de%20tabuleiro&sf=1#"
+
+include="hobbies-e-colecoes artigos-infantis"
+exclude="boneca xadrez luccas pop barbie infantil kosmos brinquedos?\b
+princesas?\b dama imoveis velha gamão brinquedos?\b resta"
+
+echo init script
+getpage "$file" "$webpg"
+geturls "$include" "$exclude"
 [ -s "$urlbg" ] || exit 1
 diffurls
-cat $diffs
-[ -s "$diffs" ] || exit 1
-
-echo init while
-# get olx url values and send to telegram
-while read -r url;do
-    echo while loop
-    echo "url: $url"
-    getpage "game.html" "$url"
-
-    name=$(getname)
-    price=$(getprice)
-    tinyurl=$("$bitly" "$url")
-    district=$(getdistrict)
-    city=$(getcity)
-    state=$(echo "$url" | cut -d'/' -f3 | cut -d'.' -f1 | tr "[:lower:]" "[:upper:]")
-
-
-    printf "%s\n\n%s\n\n%s %s #%s\n\n%s" "$price"  "$name" "$district" "$city" "$state" "$tinyurl" \
-        | timeout 30s telegram-send --config "$tsconf" --stdin
-
-done < $diffs
-echo end while
+loop
 
 cat $urlbg >| "$regs"
-rm -f $olx $urlbg $diffs ${LOCKFILE}
+rm -f $olx $urlbg $diffs
+
+rm -f ${LOCKFILE}

@@ -20,9 +20,10 @@ alias pbcopy='xclip -selection clipboard' # Copy terminal output.
 alias pbpaste='xclip -selection clipboard -out' # Paste text on clipboard.
 alias d='wget $(xclip -selection clipboard -out)' # Download using link on clipboard.
 alias pi='ping 1.1.1.1' # Tired of ping in google?
+alias cht=cht.sh # The only cheat sheet you need
 
 # Archive
-alias au='patool extract' # Unpack one or more archives.
+alias ae='patool extract' # Unpack one or more archives.
 alias ac='patool create' # Create an archive.
 alias al='patool list' # List members or one or more archives.
 alias arc='patool recompress' # Recompress an archive to smaller size.

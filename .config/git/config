@@ -16,3 +16,5 @@
 	signingkey = 05913150387A2A5E
 [pgp]
 	program = pgp
+[credential]
+	helper = store
