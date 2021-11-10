@@ -12,9 +12,9 @@
 	sslVerify = false
 [user]
 	name = arktnld
-	email = arktnld@gmail.com
+	email = clebersongs@gmail.com
 	signingkey = 05913150387A2A5E
 [pgp]
 	program = pgp
 [credential]
-	helper = store
+	helper = cache
