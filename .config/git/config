@@ -12,7 +12,7 @@
 	sslVerify = false
 [user]
 	name = arktnld
-	email = arktnld@gmail.com
+	email = clebersonc@gmail.com
 	signingkey = 05913150387A2A5E
 [pgp]
 	program = pgp
