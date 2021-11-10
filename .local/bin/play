@@ -2,7 +2,7 @@
 # Simple retro game script
 #
 
-consoles=$(ls ~/Data/Roms | sed ':a;N;$!ba;s/\n/, /g' | sed -E 's/(.*),/\1 and/')
+consoles=$(ls ~/Roms | sed ':a;N;$!ba;s/\n/, /g' | sed -E 's/(.*),/\1 and/')
 
 ### Functions ###
 
@@ -78,7 +78,7 @@ getgame() {
 }
 
 console=$1
-romsdir="$HOME/Data/Roms/$1"; shift
+romsdir="$HOME/Roms/$1"; shift
 search=$*
 
 ### Logic ###
@@ -101,4 +101,3 @@ case $lenmatches in
 	1) rungame "$matches" ;;
 	*) getgame "$matches"
 esac
-

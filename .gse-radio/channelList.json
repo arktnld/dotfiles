@@ -153,9 +153,9 @@
 ],
 
   "lastplayed":{
-	"id": "a3821cca-c5b8-4c74-b68f-08bf74edb601",
-	"name": "Groove Salad (SomaFM)",
-	"address": "http://ice3.somafm.com/groovesalad-128-mp3",
+	"id": "8e24fd59-f533-4d2b-86ec-ac259126ac34",
+	"name": "Kiss FM",
+	"address": "http://cloud2.cdnseguro.com:23538/;",
 	"encoding": false
 }
 }

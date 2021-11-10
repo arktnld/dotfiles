@@ -10,6 +10,23 @@ fi
 trap "rm -f ${LOCKFILE}; exit" INT TERM EXIT
 echo $$ > ${LOCKFILE}
 
+listex='boneca xadrez barbie princesa princesas dama
+imoveis gamão fidget frete polegadas capacitores Catálogo
+Ryzen aluguel processador amd intel celular drone
+diversão alegria festa microfone serviços empresas
+informatica funko mudança teclado samsung monitor drag
+impressora acrilico montador memoria mascaras pneu infantil
+escorregador limpeza moeda mascara boneco bonecos cds loja
+maquina pula urso free pelucia andador colete tapete pop
+figure nerfs brinquedos carrinhos carrinho bebê patins
+puff infantis barracas notas selos bolsa telescópio
+massageador canetas prancha capacete barraca chave trena
+vinil cpu miniatura miniaturas jeans moletom jaqueta vapa
+carretinha pods faca roupa mouse espada gamer relógio
+fone lanterna cédulas cédula bateria algemas refil vara
+carretilha pesca fonte miçangas notebook ssd sultam aula
+sultan fantasia casa estabilizador novidade atraente pc'
+
 olx=/tmp/olx.html
 diffs=/tmp/diffs
 urlbg=/tmp/urlbg
@@ -36,7 +53,6 @@ getname() {
 getpage() {
     echo "getpage $1"
     temp=/tmp/$1
-    # [ -f "$temp" ] && rm "$temp"
     rm "$temp" >/dev/null 2>&1
     timeout 30s aria2c --retry-wait=3 -q --dir=/tmp -o "$1" "$2"
 }
@@ -53,28 +69,35 @@ geturls() {
 }
 
 diffurls() {
+    echo diffurls
 
+    # Create reg if not exists.
     if [ ! -f "$regs" ]; then
         cat $urlbg >| "$regs"
         exit 1
     fi
 
-    echo diffurls
     num=-1
     i=1
-    reg=$(sed -n "$i"p "$regs")
 
+    # Get last reg url
+    reg=$(sed -n "$i"p "$regs")
+    echo "reg: $reg"
+
+    # Loop while to get last temp file url position.
     while [ $num -eq -1 ]; do
-        # diff --new-line-format="" --unchanged-line-format="" "$urlbg" "$regs" | tac > $diffs
         last="$(cat $urlbg | grep -n $reg | cut -d: -f1)"
-        echo $last
+        [ -z "$last" ] && last=1 && echo "last is empty"
+        echo "last $last"
         num=$((last - 1))
-        echo $num
+        echo "num: $num"
         i=$((i + 1))
+        echo "i $i"
         reg=$(sed -n "$i"p "$regs")
-        echo $reg
+        echo "reg: $reg"
     done
 
+    # Get all new urls
     awk -vs=1 -ve="$num" 'NR>e{exit}NR>=s' "$urlbg" | tac >| $diffs
     cat $urlbg
 }
@@ -109,7 +132,7 @@ loop() {
         name=$(getname)
         echo "name: $name"
         price=$(getprice)
-        echo "price: $price"
+        echo "prince: $price"
         # tinyurl=$("$bitly" "$url")
         district=$(getdistrict)
         echo "district: $district"
@@ -126,17 +149,112 @@ loop() {
     echo end while
 }
 
-## Logic ##
+
+
+
+## Logic Board Games ##
 
 tsconf="$ofhome/olxbg.conf"
 regs="$ofhome/olxbgs"
 
 file="olx.html"
-webpg="https://www.olx.com.br/brasil?q=jogo%20de%20tabuleiro&sf=1#"
+webpg="https://df.olx.com.br/?q=jogo%20de%20tabuleiro&sf=1#"
 
 include="hobbies-e-colecoes artigos-infantis"
-exclude="boneca xadrez luccas pop barbie infantil kosmos brinquedos?\b
-princesas?\b dama imoveis velha gamão brinquedos?\b resta"
+exclude="$listex"
+
+echo init script
+getpage "$file" "$webpg"
+geturls "$include" "$exclude"
+[ -s "$urlbg" ] || exit 1
+diffurls
+loop
+
+cat $urlbg >| "$regs"
+rm -f $olx $urlbg $diffs
+
+
+
+## Logic Video Games ##
+
+tsconf="$ofhome/olxgm.conf"
+regs="$ofhome/olxgm"
+
+file="olx.html"
+webpg="https://df.olx.com.br/videogames?sf=1"
+
+include="videogames"
+exclude="$listex"
+
+echo init script
+getpage "$file" "$webpg"
+geturls "$include" "$exclude"
+[ -s "$urlbg" ] || exit 1
+diffurls
+loop
+
+cat $urlbg >| "$regs"
+rm -f $olx $urlbg $diffs
+
+
+
+
+## Logic Vagas de Emprego ##
+
+tsconf="$ofhome/olxv.conf"
+regs="$ofhome/olxv"
+
+file="olx.html"
+webpg="https://df.olx.com.br/vagas-de-emprego?sf=1"
+
+include="vagas-de-emprego"
+exclude="frete"
+
+echo init script
+getpage "$file" "$webpg"
+geturls "$include" "$exclude"
+[ -s "$urlbg" ] || exit 1
+diffurls
+loop
+
+cat $urlbg >| "$regs"
+rm -f $olx $urlbg $diffs
+
+
+
+## Logic Hobbies e Coleções ##
+
+tsconf="$ofhome/olxhc.conf"
+regs="$ofhome/olxhc"
+
+file="olx.html"
+webpg="https://df.olx.com.br/hobbies-e-colecoes?sf=1"
+
+include="hobbies-e-colecoes"
+exclude="$listex"
+
+echo init script
+getpage "$file" "$webpg"
+geturls "$include" "$exclude"
+[ -s "$urlbg" ] || exit 1
+diffurls
+loop
+
+cat $urlbg >| "$regs"
+rm -f $olx $urlbg $diffs
+
+
+
+## Logic Brinquedos e Jogos ##
+
+tsconf="$ofhome/olxbj.conf"
+regs="$ofhome/olxbj"
+
+file="olx.html"
+webpg="https://df.olx.com.br/artigos-infantis/brinquedos-e-jogos?sf=1"
+
+include="artigos-infantis"
+exclude="$listex"
 
 echo init script
 getpage "$file" "$webpg"

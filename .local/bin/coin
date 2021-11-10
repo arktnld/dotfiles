@@ -1,0 +1,26 @@
+#!/bin/bash
+
+FLIP1=$(($(($RANDOM%10))%2))
+FLIP2=$(($(($RANDOM%10))%2))
+
+if [ $FLIP1 -eq 1 ];then
+    coin1="cara"
+else
+    coin1="coroa"
+fi
+
+if [ $FLIP2 -eq 1 ];then
+    coin2="cara"
+else
+    coin2="coroa"
+fi
+
+echo "$coin1 e $coin2"
+
+if [ $coin1 = "cara" ] && [ $coin2 = "cara" ]; then
+    echo "Aproveite o dia pra botar tarefas em dia e descançar.";
+elif [ $coin1 = "coroa" ] && [ $coin2 = "coroa" ]; then
+    echo "Exercício em casa";
+else
+    echo "Exercício ao ar livre"
+fi

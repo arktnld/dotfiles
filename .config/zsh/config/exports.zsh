@@ -22,7 +22,7 @@ path=(
 export LANG='en_US.UTF-8'
 export GPG_TTY=$(tty)
 export MANWIDTH='100'
-export MANPAGER="nvim +'set filetype=man' -"
+# export MANPAGER="nvim +'set filetype=man' -"
 export PYTHONUSERBASE="$HOME/.local"
 export CHTSH_QUERY_OPTIONS="style=trac"
 
@@ -42,7 +42,6 @@ export LESSHISTFILE="-"
 export WGETRC="${XDG_CONFIG_HOME:-$HOME/.config}/wget/wgetrc"
 export ZDOTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"
 export GNUPGHOME="${XDG_DATA_HOME:-$HOME/.local/share}/gnupg"
-export WINEPREFIX="${XDG_DATA_HOME:-$HOME/.local/share}/wineprefixes/32"
 export KODI_DATA="${XDG_DATA_HOME:-$HOME/.local/share}/kodi"
 export ANDROID_SDK_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/android"
 export CARGO_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/cargo"
@@ -61,6 +60,7 @@ export MEDNAFEN_HOME="$HOME/.config/mednafen"
 #export XINITRC="${XDG_CONFIG_HOME:-$HOME/.config}/x11/xinitrc"
 #export XAUTHORITY="$XDG_RUNTIME_DIR/Xauthority" # This line will break some DMs.
 # export NOTMUCH_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/notmuch-config"
+# export WINEPREFIX="${XDG_DATA_HOME:-$HOME/.local/share}/wineprefixes/32"
 
 # Other program settings:
 export DICS="/usr/share/stardict/dic/"

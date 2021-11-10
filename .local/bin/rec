@@ -1,11 +1,11 @@
 #!/bin/sh
 
-sleep 1
+sleep 1.5
 
 ffmpeg \
--hide_banner \
--f x11grab \
--s "$(xdpyinfo | awk '/dimensions/ {print $2;}')" \
--i "$DISPLAY" \
--c:v libx264 -qp 0 -r 30 \
-"$HOME/video-$(date '+%y%m%d-%H%M-%S').mp4"
+    -f x11grab \
+    -video_size 1024x768 \
+    -i $DISPLAY \
+    -f pulse \
+    -i default \
+    "$HOME/video-$(date '+%y%m%d-%H%M-%S').mp4"
