@@ -153,9 +153,9 @@
 ],
 
   "lastplayed":{
-	"id": "8e24fd59-f533-4d2b-86ec-ac259126ac34",
-	"name": "Kiss FM",
-	"address": "http://cloud2.cdnseguro.com:23538/;",
+	"id": "9da2dbae-b402-4672-ad8d-9518f291b5fe",
+	"name": "Buzz (181 FM)",
+	"address": "http://relay.181.fm:8126",
 	"encoding": false
 }
 }
