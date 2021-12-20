@@ -17,4 +17,4 @@
 [pgp]
 	program = pgp
 [credential]
-	helper = cache
+	helper = manager-core
