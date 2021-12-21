@@ -1,6 +1,5 @@
 #TAG ,NAME IN REPO ,PURPOSE
 ,exa,ls replacement.
-,xorg-xinit,starts the graphical server.
 ,atool,a script for managing file archives.
 ,fzf,fuzzy finder tool.
 ,neovim,atidier vim with some useful features.
@@ -42,7 +41,8 @@
 ,flake8,Python source code checker.
 ,shellcheck,shell script analysis tool.
 ,expac,pacman database extraction utility.
-A,microsoft-edge-dev-bin,A browser that combines a minimal and sophisticated technology.
+A,librewolf,privacy web browser.
+A,lsix,like ls but with images.
 A,chrome-gnome-shell-git,Native connector for integration with extensions.gnome.org.
 A,nerd-fonts-noto-sans-mono,Standard variants of Noto Sans Mono patched with Nerd Fonts.
 A,gnome-shell-extension-pop-shell,tiling window management for gnome shell.

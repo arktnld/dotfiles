@@ -116,7 +116,7 @@ FZF-EOF"
 
 # List all installed packages, not base or base-devel groups.
 @-packages-list-user() {
-    comm -23 <(pacman -Qeq) <(pacman -Qgq base base-devel)
+    comm -23 <(pacman -Qeq | sort ) <(pacman -Qgq base base-devel | sort)
 }
 
 # List all packages not in pacman sync dbs, like aur packages.
