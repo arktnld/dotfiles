@@ -41,6 +41,8 @@
 ,flake8,Python source code checker.
 ,shellcheck,shell script analysis tool.
 ,expac,pacman database extraction utility.
+,os-prober,make grub detect other systems like Windows.
+A,timeshift,A system snapshot/restore utility for Linux
 A,librewolf,privacy web browser.
 A,lsix,like ls but with images.
 A,chrome-gnome-shell-git,Native connector for integration with extensions.gnome.org.

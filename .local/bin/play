@@ -78,7 +78,7 @@ getgame() {
 }
 
 console=$1
-romsdir="$HOME/Roms/$1"; shift
+romsdir="$HOME/Documents/Roms/$1"; shift
 search=$*
 
 ### Logic ###
