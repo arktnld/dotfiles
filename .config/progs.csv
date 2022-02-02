@@ -1,6 +1,6 @@
 #TAG ,NAME IN REPO ,PURPOSE
+#Basic Programs
 ,exa,ls replacement.
-,atool,a script for managing file archives.
 ,fzf,fuzzy finder tool.
 ,neovim,atidier vim with some useful features.
 ,nnn,a terminal file manager.
@@ -12,21 +12,24 @@
 ,xclip,allows for coping ahd pasting from the commandline.
 ,youtube-dl,can download any YouTube video when given the link.
 ,mlocate,merging locate/updatedb implementation.
-,diff-so-fancy,good-looking diffs with diff-highlight and more.
 ,sdcv,StarDict Console Version.
 ,w3m,text-based Web browser as well as pager.
 ,man-db,a utility for reading man pages.
 ,man-pages,Linux man pages.
+,ntfs-3g,NTFS filesystem driver and utilities.
+,expac,pacman database extraction utility.
+,os-prober,make grub detect other systems like Windows.
+,glow,Markdown renderer for the CLI.
+#Graphics Drivers
 ,lib32-mesa,An open-source implementation of the OpenGL specification.
 ,lib32-sdl2,A library for portable low-level access to a video framebuffer.
 ,libva-mesa-driver,VA-API implementation for gallium.
 ,xf86-video-ati,xorg ati video driver.
 ,lib32-mesa-vdpau,Mesa VDPAU drivers 32bits.
 ,mesa-vdpau,Mesa VDPAU drivers.
-,ntfs-3g,NTFS filesystem driver and utilities.
-,gnome,next generation desktop shell.
-,gnome-extra,extra packages for the gnome desktop.
-,gimp,GNU image manipulation program.
+,xorg-server,
+,xorg-xinit,
+#Graphical Programs
 ,mpv, cross-platform media player.
 ,telegram-desktop,telegram desktop client.
 ,zathura,minimalistic document viewer.
@@ -34,23 +37,24 @@
 ,zathura-pdf-mupdf,adds supports for PDF ePub and OpenXPS.
 ,tilix,a tiling terminal emulator for Linux using GTK+3.
 ,sxiv,simple X Image Viewer.
-,mednafen,commandline multi-system gaming emulator.
+#Conding Programs
 ,prettier,code formatter for JS JSON CSS YAML and much more.
 ,eslint,code checker for JavaScript.
 ,vint,Lint tool for Vim script Language.
 ,flake8,Python source code checker.
 ,shellcheck,shell script analysis tool.
-,expac,pacman database extraction utility.
-,os-prober,make grub detect other systems like Windows.
-A,timeshift,A system snapshot/restore utility for Linux
+#Minimal Gnome Installation
+,gnome-shell,
+,nautilus,
+,gnome-terminal,
+,gnome-tweak-tool,
+,gnome-control-center,
+,xdg-user-dirs,
+#Arch User Repository
 A,librewolf,privacy web browser.
-A,lsix,like ls but with images.
-A,chrome-gnome-shell-git,Native connector for integration with extensions.gnome.org.
-A,nerd-fonts-noto-sans-mono,Standard variants of Noto Sans Mono patched with Nerd Fonts.
-A,gnome-shell-extension-pop-shell,tiling window management for gnome shell.
-A,mpv-mpris,MPRIS (Media Player Remote Interface Spec) plugin for mpv.
-A,glow-bin,Markdown renderer for the CLI.
+A,chrome-gnome-shell,Native connector for integration with extensions.gnome.org.
 A,patool,Portable command line archive file manager.
 A,googler,Google from the command-line.
 A,cht.sh-git,
-A,ix
+A,nerd-fonts-noto-sans-mono,Standard variants of Noto Sans Mono patched with Nerd Fonts.
+A,mpv-mpris,MPRIS (Media Player Remote Interface Spec) plugin for mpv.

@@ -38,6 +38,8 @@ application/x-extension-shtml=librewolf.desktop;
 application/xhtml+xml=librewolf.desktop;
 application/x-extension-xhtml=librewolf.desktop;
 application/x-extension-xht=librewolf.desktop;
+video/mp2t=vlc.desktop;
+audio/x-mpegurl=org.xfce.mousepad.desktop;
 
 [Default Applications]
 x-scheme-handler/tg=userapp-Kotatogram Desktop-VY6080.desktop
@@ -133,3 +135,4 @@ application/x-extension-shtml=librewolf.desktop
 application/xhtml+xml=librewolf.desktop
 application/x-extension-xhtml=librewolf.desktop
 application/x-extension-xht=librewolf.desktop
+x-scheme-handler/tvb=tvbrowserWebstart.desktop
