@@ -107,11 +107,6 @@ manualinstall $aurhelper
 installationloop # The command that does all the install using the progs.csv file.
 putgitrepo "$dotfilesrepo" "/home/$name" "$repobranch" # Install the dotfiles in the user's home directory
 
-### AFTER INSTALL CONFIG FILES ###
-
-cp /etc/X11/xinit/xinitrc /home/"$name"/.xinitrc
-sed -i 's/^exec.*/exec gnome-session/;s/^xterm.*//;s/^twm.*//;s/^xclock.*//' /home/"$name"/.xinitrc
-
 ### INSTALL COMPLETE ###
 
 echo "All done! Congrats! The script completed successfully.";
