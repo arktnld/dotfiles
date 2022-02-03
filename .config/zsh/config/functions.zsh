@@ -139,6 +139,10 @@ FZF-EOF"
 	sudo pacman -Rns $(pacman -Qttdq | xargs)
 }
 
+@-remove-all-keep-base() {
+    sudo pacman -D --asdeps $(pacman -Qe)
+}
+
 # @-show-music-notes() {
 # 	ffplay -hide_banner -f lavfi \
 # 		"amovie='$1', asplit [a][out1]; [a] showcqt=size=1400x1052 [out0]";

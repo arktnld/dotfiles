@@ -23,20 +23,24 @@ adduserandpass() { \
 installpkg(){ pacman --noconfirm --needed -S "$1" >/dev/null 2>&1 ; }
 newperms() { echo "$*" >> /etc/sudoers ; } # Set special sudoers settings for install (or after).
 
-manualinstall() { # Installs $1 manually if not installed. Used only for AUR helper here.
-	[ -f "/usr/bin/$1" ] || (
-	echo "Manual Install \"$1\", an AUR helper..."
-	cd /tmp || exit 1
-	rm -rf /tmp/"$1"*
-	sudo -u "$name" git clone https://aur.archlinux.org/"$1" >/dev/null 2>&1 &&
-	cd "$1" &&
-	sudo -u "$name" makepkg --noconfirm -si >/dev/null 2>&1 || return 1
-	cd /tmp || return 1) ;
+chaoticrepoinstall() { #
+    echo "Enable Chaotic-AUR Repository..."
+    pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com >/dev/null 2>&1
+    echo "Installing Chaotic Primary Key..."
+    pacman-key --lsign-key 3056513887B78AEB >/dev/null 2>&1
+    echo "Installing Chaotic mirrorlist..."
+    pacman -U 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
+    echo "Append Chaotic to /etc/pacman.conf..."
+    echo "\n[chaotic-aur]\nInclude = /etc/pacman.d/chaotic-mirrorlist" >> /etc/pacman.conf
+    echo "Updating mirrorlist..."
+    pacman -Sy
+    echo "Installing \"$aurhelper\" AUR Helper..."
+    maininstall "$aurhelper"
 }
 
 maininstall() { # Installs all needed programs from main repo.
 	echo "Main Install $1, $2 "
-    pacman --noconfirm --needed -S "$1"
+    pacman --noconfirm --needed -S "$1" >/dev/null 2>&1
 }
 
 aurinstall() { \
@@ -77,7 +81,7 @@ echo "Refreshing Arch Keyring..."
 pacman --noconfirm -S archlinux-keyring >/dev/null 2>&1
 
 echo "Installing programs needed for setup..."
-for x in curl base-devel git ntp zsh reflector; do
+for x in curl base-devel git ntp zsh reflector dhcpcd wget ; do
 	echo "Installing $x package."
 	installpkg "$x"
 done
@@ -103,7 +107,7 @@ reflector -c Brazil --save /etc/pacman.d/mirrorlist # Create a mirrorlist file w
 ### THE ACTUAL SCRIPT ###
 
 adduserandpass
-manualinstall $aurhelper
+chaoticrepoinstall
 installationloop # The command that does all the install using the progs.csv file.
 putgitrepo "$dotfilesrepo" "/home/$name" "$repobranch" # Install the dotfiles in the user's home directory
 
