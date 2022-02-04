@@ -20,6 +20,9 @@
 ,expac,pacman database extraction utility.
 ,os-prober,make grub detect other systems like Windows.
 ,glow,Markdown renderer for the CLI.
+,ttf-dejavu,Font family based on the Bitstream Vera Fonts.
+,ttf-liberation,Font family which aims at metric compatibility.
+,noto-fonts,Google Noto TTF fonts.
 #Graphics Drivers
 ,lib32-mesa,An open-source implementation of the OpenGL specification.
 ,lib32-sdl2,A library for portable low-level access to a video framebuffer.
