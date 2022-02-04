@@ -1,5 +1,5 @@
 #!/bin/sh
-# After install script
+# After install script automation.
 # Inspired by Luke Smith's Larbs config script.
 
 dotfilesrepo="https://github.com/arktnld/dotfiles.git"
