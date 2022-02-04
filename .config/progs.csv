@@ -27,8 +27,8 @@
 ,xf86-video-ati,xorg ati video driver.
 ,lib32-mesa-vdpau,Mesa VDPAU drivers 32bits.
 ,mesa-vdpau,Mesa VDPAU drivers.
-,xorg-server,
-,xorg-xinit,
+,xorg-server,Xorg X server.
+,xorg-xinit,Xorg X initialisation program.
 #Graphical Programs
 ,mpv, cross-platform media player.
 ,telegram-desktop,telegram desktop client.
@@ -44,17 +44,20 @@
 ,flake8,Python source code checker.
 ,shellcheck,shell script analysis tool.
 #Minimal Gnome Installation
-,gnome-shell,
-,nautilus,
-,gnome-terminal,
-,gnome-tweak-tool,
-,gnome-control-center,
-,xdg-user-dirs,
+,gnome-shell,Next generation desktop shell.
+,nautilus,Default Gnome file manager.
+,gnome-terminal,Gnome terminal emulator.
+,gnome-tweak-tool,Graphical interface for advanced GNOME 3 settings.
+,gnome-control-center,GNOME's main interface to configure various aspects of the desktop.
+,xdg-user-dirs,Manage user directories like ~/Desktop and ~/Music.
+,gst-plugins-good,Multimedia graph framework.
+,gst-plugins-ugly,Multimedia graph framework.
+,gst-plugins-bad,Multimedia graph framework.
 #Arch User Repository
 A,librewolf,privacy web browser.
 A,chrome-gnome-shell,Native connector for integration with extensions.gnome.org.
 A,patool,Portable command line archive file manager.
 A,googler,Google from the command-line.
-A,cht.sh-git,
+A,cht.sh-git,The only cheat sheet you need (command line client for cheat.sh site).
 A,nerd-fonts-noto-sans-mono,Standard variants of Noto Sans Mono patched with Nerd Fonts.
 A,mpv-mpris,MPRIS (Media Player Remote Interface Spec) plugin for mpv.
