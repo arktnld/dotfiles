@@ -1,0 +1,20 @@
+#!/bin/sh
+# Simple script to cleanup Arch Linux system.
+
+echo "Script to cleanup Arch Linux..."
+
+echo "Vacuum journals cache..."
+sudo journalctl --vacuum-size=500M && sudo journalctl --vacuum-time=7d >/dev/null 2>&1
+
+echo "Remove all uninstalled packages..."
+sudo paccache -rvuk0 >/dev/null 2>&1
+
+echo "Remove old installed packages, leave 3..."
+sudo paccache -rvk3 >/dev/null 2>&1
+
+echo "Clean paru cache..."
+paru --noconfirm -Sc -a >/dev/null 2>&1
+
+echo "Find files not owned by any package..."
+echo
+sudo lostfiles
