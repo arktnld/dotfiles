@@ -20,9 +20,11 @@
 ,expac,pacman database extraction utility.
 ,os-prober,make grub detect other systems like Windows.
 ,glow,Markdown renderer for the CLI.
-,ttf-dejavu,Font family based on the Bitstream Vera Fonts.
-,ttf-liberation,Font family which aims at metric compatibility.
+,ttf-dejavu,font family based on the bitstream vera fonts.
+,ttf-liberation,font family which aims at metric compatibility.
 ,noto-fonts,Google Noto TTF fonts.
+,noto-fonts-extra,Google Noto TTF fonts additional variants.
+,noto-fonts-emoji,Google Noto emoji fonts.
 #Graphics Drivers
 ,lib32-mesa,An open-source implementation of the OpenGL specification.
 ,lib32-sdl2,A library for portable low-level access to a video framebuffer.
@@ -40,12 +42,13 @@
 ,zathura-pdf-mupdf,adds supports for PDF ePub and OpenXPS.
 ,tilix,a tiling terminal emulator for Linux using GTK+3.
 ,sxiv,simple X Image Viewer.
+,adwaita-dark,A dark GTK2 theme for use alongside the dark variant of GTK3 Adwaita.
 #Conding Programs
 ,prettier,code formatter for JS JSON CSS YAML and much more.
 ,eslint,code checker for JavaScript.
 ,vint,Lint tool for Vim script Language.
 ,flake8,Python source code checker.
-,shellcheck,shell script analysis tool.
+,shfmt,shell script analysis tool.
 #Minimal Gnome Installation
 ,gnome-shell,Next generation desktop shell.
 ,nautilus,Default Gnome file manager.
