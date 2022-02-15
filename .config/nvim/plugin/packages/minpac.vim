@@ -15,8 +15,8 @@ function! PackInit() abort
 	call minpac#add('sheerun/vim-polyglot') " code packs configs
 	call minpac#add('tmsvg/pear-tree') " auto pair
     call minpac#add('b3nj5m1n/kommentary') " comment motion
-    call minpac#add('gyim/vim-boxdraw') " draw diagrams
-    " call minpac#add('hrsh7th/nvim-compe') " auto completion
+    call minpac#add('mateusbraga/vim-spell-pt-br') " pt_BR Dict
+    call minpac#add('lukas-reineke/indent-blankline.nvim') " indentation guides lines
 
 	" Additional plugins here.
 	call minpac#add('k-takata/minpac', {'type': 'opt'}) " simple plugin manager
@@ -24,10 +24,7 @@ function! PackInit() abort
 	call minpac#add('lilydjwg/colorizer', {'type': 'opt'}) " color rgb text
 	call minpac#add('mcchrish/nnn.vim', {'type': 'opt'}) " file manager
     call minpac#add('sunaku/vim-dasht', {'type': 'opt'}) " code docs
-    call minpac#add('npxbr/glow.nvim',  {'type': 'opt'}) " markdown Preview
-    call minpac#add('akinsho/nvim-toggleterm.lua', {'type': 'opt'}) " floating terminal
-    call minpac#add('iamcco/markdown-preview.nvim', {'type': 'opt', 'do': 'packadd markdown-preview.nvim | call mkdp#util#install()'})
-
+    call minpac#add('iamcco/markdown-preview.nvim',{'type': 'opt'}) " Markdown Browser Preview
 endfunction
 
 " Plugin settings here.
@@ -35,6 +32,6 @@ endfunction
 " Define user commands for updating/cleaning the plugins.
 " Each of them loads minpac, reloads .vimrc to register the
 " information of plugins, then performs the task.
-command! PackUpdate call PackInit() | call minpac#update()
-command! PackClean  call PackInit() | call minpac#clean()
-command! PackStatus call PackInit() | call minpac#status()
+command! MinpackUpdate call PackInit() | call minpac#update()
+command! MinpackClean  call PackInit() | call minpac#clean()
+command! MinpackStatus call PackInit() | call minpac#status()

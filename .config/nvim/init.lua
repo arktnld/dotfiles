@@ -25,3 +25,4 @@ g.loaded_getscriptPlugin = true
 g.loaded_logipat = true
 g.loaded_tutor_mode_plugin = true
 g.loaded_matchit = true
+g.loaded_cfilter = true

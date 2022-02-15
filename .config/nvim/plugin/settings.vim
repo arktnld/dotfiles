@@ -107,6 +107,9 @@ set wildignorecase " Ignore case when completing in command menu.
 set wildmenu " Command-line completion operates in an enhanced mode.
 set wildmode=full " Wildmenu options.
 
+" Spell
+set spelllang=en,pt " Add portuguese dict to vim spell.
+
 " Neovim
 if has('nvim')
 	set guicursor=n-v-c-sm:underline,i-ci:ver25,r-cr-o-ve:hor20 " Configures the cursor style for each mode.

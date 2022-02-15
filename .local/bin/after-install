@@ -7,7 +7,7 @@ progsfile="https://raw.githubusercontent.com/arktnld/dotfiles/master/.config/pro
 aurhelper="paru"
 repobranch="master"
 name="arktnld"
-pass="npndtdes"
+pass=""
 
 
 ### FUNCTIONS ###
@@ -56,6 +56,13 @@ installationloop() { \
 	done < /tmp/progs.csv ;
 }
 
+systemctlenable() {
+    for x in "$@"; do
+        echo "Enabling $x service."
+        systemctl enable "$x"
+    done
+}
+
 putgitrepo() { # Downloads a gitrepo $1 and places the files in $2 only overwriting conflicts
 	echo "Downloading and installing config files..."
 	[ -z "$3" ] && branch="master" || branch="$repobranch"
@@ -99,6 +106,7 @@ reflector -c Brazil --save /etc/pacman.d/mirrorlist # Create a mirrorlist file w
 adduserandpass
 chaoticrepoinstall
 installationloop # The command that does all the install using the progs.csv file.
+systemctlenable cronie ly
 putgitrepo "$dotfilesrepo" "/home/$name" "$repobranch" # Install the dotfiles in the user's home directory
 
 ### INSTALL COMPLETE ###
