@@ -7,7 +7,7 @@
 [user]
   name = arktnld
   email = arktnld@gmail.com
-  signingkey = AF237E0B541F580669D790D02D4EF3D4AA482783
+  signingkey = 2D4EF3D4AA482783
 
 [core]
   editor = $EDITOR
