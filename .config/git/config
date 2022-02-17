@@ -13,6 +13,6 @@
 [user]
 	name = arktnld
 	email = clebersongs@gmail.com
-	signingkey = 05913150387A2A5E
+	signingkey = AF237E0B541F580669D790D02D4EF3D4AA482783
 [pgp]
 	program = pgp
