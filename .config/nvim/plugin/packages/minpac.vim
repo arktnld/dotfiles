@@ -24,7 +24,7 @@ function! PackInit() abort
 	call minpac#add('lilydjwg/colorizer', {'type': 'opt'}) " color rgb text
 	call minpac#add('mcchrish/nnn.vim', {'type': 'opt'}) " file manager
     call minpac#add('sunaku/vim-dasht', {'type': 'opt'}) " code docs
-    call minpac#add('iamcco/markdown-preview.nvim',{'type': 'opt'}) " Markdown Browser Preview
+    call minpac#add('iamcco/markdown-preview.nvim',{'type': 'opt'}) " markdown Browser Preview
 endfunction
 
 " Plugin settings here.

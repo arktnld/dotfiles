@@ -12,6 +12,35 @@ pass=""
 
 ### FUNCTIONS ###
 
+initialsetup() {
+    echo "Starting ´After Install´ script setup.";
+
+    echo "Refreshing Arch Keyring..."
+    pacman --noconfirm -S archlinux-keyring >/dev/null 2>&1
+
+    echo "Installing programs needed for setup..."
+    for x in curl base-devel git ntp zsh reflector fontconfig; do
+        echo "Installing $x package."
+        installpkg "$x"
+    done
+
+    echo "Synchronizing system time to ensure secure installation..."
+    ntpdate 0.br.pool.ntp.org >/dev/null 2>&1
+
+    echo "Make zsh the default shell for the user..."
+    chsh -s /bin/zsh "$name" >/dev/null 2>&1
+}
+
+configfiles() {
+    echo "Config password permission, pacman, keyboard and mirrorlist..."
+    [ -f /etc/sudoers.pacnew ] && cp /etc/sudoers.pacnew /etc/sudoers # Just in case
+    newperms "%wheel ALL=(ALL) NOPASSWD: ALL" # Allow user to run sudo without password. Since AUR programs must be installed
+    sed -i "s/^#ParallelDownloads/ParallelDownloads/;s/^#Color$/Color/;s/^#ILoveCandy/ILoveCandy/" /etc/pacman.conf
+    echo -e "Section \"InputClass\"\n\tIdentifier \"system-keyboard\"\n\tMatchIsKeyboard \"on\"\n\tOption \"XkbLayout\" \"br\"\nEndSection" >> /etc/X11/xorg.conf.d/00-keyboard.conf
+    reflector -c Brazil --save /etc/pacman.d/mirrorlist # Create a mirrorlist file with the best mirrors from a given country.
+    ln -s /usr/share/fontconfig/conf.avail/10-scale-bitmap-fonts.conf /etc/fonts/conf.d # Fix emoji scale
+}
+
 adduserandpass() { \
 	# Adds user `$name` with password $pass1.
 	echo "Adding user \"$name\"..."
@@ -73,36 +102,10 @@ putgitrepo() { # Downloads a gitrepo $1 and places the files in $2 only overwrit
 	sudo -u "$name" cp -rfT "$dir" "$2"
 }
 
-
-### INITIAL SETUP ###
-
-echo "Starting ´After Install´ script setup.";
-
-echo "Refreshing Arch Keyring..."
-pacman --noconfirm -S archlinux-keyring >/dev/null 2>&1
-
-echo "Installing programs needed for setup..."
-for x in curl base-devel git ntp zsh reflector; do
-	echo "Installing $x package."
-	installpkg "$x"
-done
-
-echo "Synchronizing system time to ensure secure installation..."
-ntpdate 0.br.pool.ntp.org >/dev/null 2>&1
-
-echo "Make zsh the default shell for the user..."
-chsh -s /bin/zsh "$name" >/dev/null 2>&1
-
-### CONFIG FILES ###
-echo "Config password permission, pacman, keyboard and mirrorlist..."
-[ -f /etc/sudoers.pacnew ] && cp /etc/sudoers.pacnew /etc/sudoers # Just in case
-newperms "%wheel ALL=(ALL) NOPASSWD: ALL" # Allow user to run sudo without password. Since AUR programs must be installed
-sed -i "s/^#ParallelDownloads/ParallelDownloads/;s/^#Color$/Color/;s/^#ILoveCandy/ILoveCandy/" /etc/pacman.conf
-echo -e "Section \"InputClass\"\n\tIdentifier \"system-keyboard\"\n\tMatchIsKeyboard \"on\"\n\tOption \"XkbLayout\" \"br\"\nEndSection" >> /etc/X11/xorg.conf.d/00-keyboard.conf
-reflector -c Brazil --save /etc/pacman.d/mirrorlist # Create a mirrorlist file with the best mirrors from a given country.
-
 ### THE ACTUAL SCRIPT ###
 
+initialsetup
+configfiles
 adduserandpass
 chaoticrepoinstall
 installationloop # The command that does all the install using the progs.csv file.

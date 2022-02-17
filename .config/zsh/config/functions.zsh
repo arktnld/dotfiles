@@ -8,12 +8,6 @@ youtube-mp3() {
 	youtube-dl --extract-audio --audio-format mp3 "$@"
 }
 
-# Preview markdown files.
-function mdvw() {
-	smu -n "$1" > /tmp/preview.html
-	w3m /tmp/preview.html
-}
-
 function cd() {
 	# if empty search for a file
 	if [[ -z "$1" ]]; then
@@ -101,6 +95,21 @@ gitcommit() {
 FZF-EOF"
 }
 
+gitls() {
+    local dir="$@"
+    if [[ -z "$dir" ]] && dir="."
+    local bold=$(tput bold)
+    local normal=$(tput sgr0)
+
+    ls "$dir"
+
+    local ignored=$(git ls-files "$dir" --ignored --exclude-standard --others)
+    if [[ ! -z "$ignored" ]] && echo -e "\n""$bold""Ignored Files""$normal\n""\n$ignored" || echo -e "$bold""\nNo Ignored Files""$normal"
+
+    local untracked=$(git ls-files "$dir" --exclude-standard --others )
+    if [[ ! -z "$untracked" ]] && echo -e "\n""$bold""Untracked Files""$normal\n""\n$ignored" || echo -e "$bold""\nNo Untracked Files""$normal"
+}
+
 # Useful scripts
 
 # Always look on your most used commands and create shotcuts.
@@ -133,10 +142,6 @@ FZF-EOF"
 # Remove orphaned packages from old build packages.
 @-orphans-remove() {
 	paru --remove --nosave --recursive $(pacman -Qtdq | xargs)
-}
-
-@-remove-unused-packages() {
-	sudo pacman -Rns $(pacman -Qttdq | xargs)
 }
 
 @-remove-all-keep-base() {

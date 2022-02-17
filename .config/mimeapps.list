@@ -47,6 +47,7 @@ application/rss+xml=userapp-Thunderbird-MSM9G1.desktop;
 application/x-extension-rss=userapp-Thunderbird-MSM9G1.desktop;
 x-scheme-handler/webcal=userapp-Thunderbird-74UEH1.desktop;
 x-scheme-handler/webcals=userapp-Thunderbird-74UEH1.desktop;
+text/csv=org.gnome.gedit.desktop;
 
 [Default Applications]
 x-scheme-handler/tg=userapp-Kotatogram Desktop-VY6080.desktop
@@ -148,7 +149,7 @@ x-scheme-handler/mid=userapp-Thunderbird-HWYAH1.desktop
 x-scheme-handler/feed=userapp-Thunderbird-MSM9G1.desktop
 application/rss+xml=userapp-Thunderbird-MSM9G1.desktop
 application/x-extension-rss=userapp-Thunderbird-MSM9G1.desktop
-x-scheme-handler/webcal=userapp-Thunderbird-74UEH1.desktop
+x-scheme-handler/webcal=chromium.desktop
 text/calendar=userapp-Thunderbird-74UEH1.desktop
 application/x-extension-ics=userapp-Thunderbird-74UEH1.desktop
 x-scheme-handler/webcals=userapp-Thunderbird-74UEH1.desktop

@@ -121,3 +121,6 @@ export LESSOPEN="| /usr/bin/highlight -O ansi %s 2>/dev/null"
 
 # flutter
 export CHROME_EXECUTABLE="/usr/bin/google-chrome-stable"
+
+# pass
+export PASSWORD_STORE_DIR="$HOME/.config/password-store/"

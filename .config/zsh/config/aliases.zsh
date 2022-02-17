@@ -21,7 +21,7 @@ alias pbpaste='xclip -selection clipboard -out' # Paste text on clipboard.
 alias d='wget $(xclip -selection clipboard -out)' # Download using link on clipboard.
 alias pi='ping 1.1.1.1' # Tired of ping in google?
 alias cht=cht.sh # The only cheat sheet you need
-alias mega=megatools
+alias mutt='mailsync && neomutt'
 
 # Archive
 alias ae='patool extract' # Unpack one or more archives.
