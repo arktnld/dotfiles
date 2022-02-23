@@ -1,5 +1,5 @@
 [Added Associations]
-x-scheme-handler/tg=userapp-Telegram Desktop-KLMA30.desktop;userapp-Kotatogram Desktop-VY6080.desktop;
+x-scheme-handler/tg=userapp-Telegram Desktop-KLMA30.desktop;userapp-Kotatogram Desktop-VY6080.desktop;userapp-Telegram Desktop-TDP8H1.desktop;
 application/pdf=org.pwmt.zathura-pdf-mupdf.desktop;
 image/bmp=org.gnome.eog.desktop;sxiv.desktop;
 image/gif=org.gnome.eog.desktop;sxiv.desktop;
@@ -40,7 +40,7 @@ application/x-extension-xhtml=librewolf.desktop;
 application/x-extension-xht=librewolf.desktop;
 video/mp2t=vlc.desktop;
 audio/x-mpegurl=org.xfce.mousepad.desktop;
-x-scheme-handler/mailto=userapp-Thunderbird-HWYAH1.desktop;
+x-scheme-handler/mailto=userapp-Thunderbird-HWYAH1.desktop;userapp-Evolution-WN5RH1.desktop;viagee.desktop;
 x-scheme-handler/mid=userapp-Thunderbird-HWYAH1.desktop;
 x-scheme-handler/feed=userapp-Thunderbird-MSM9G1.desktop;
 application/rss+xml=userapp-Thunderbird-MSM9G1.desktop;
@@ -50,7 +50,7 @@ x-scheme-handler/webcals=userapp-Thunderbird-74UEH1.desktop;
 text/csv=org.gnome.gedit.desktop;
 
 [Default Applications]
-x-scheme-handler/tg=userapp-Kotatogram Desktop-VY6080.desktop
+x-scheme-handler/tg=userapp-Telegram Desktop-TDP8H1.desktop
 x-scheme-handler/etcher=balena-etcher-electron.desktop
 image/jpg=sxiv.desktop
 image/x-gray=org.gnome.eog.desktop
@@ -133,7 +133,7 @@ x-scheme-handler/http=chromium.desktop
 x-scheme-handler/https=chromium.desktop
 x-scheme-handler/about=chromium.desktop
 x-scheme-handler/unknown=chromium.desktop
-x-scheme-handler/mailto=userapp-Thunderbird-HWYAH1.desktop
+x-scheme-handler/mailto=viagee.desktop
 x-scheme-handler/discord-712465656758665259=discord-712465656758665259.desktop
 x-scheme-handler/discord-719647875465871400=discord-719647875465871400.desktop
 x-scheme-handler/chrome=librewolf.desktop
@@ -153,3 +153,4 @@ x-scheme-handler/webcal=chromium.desktop
 text/calendar=userapp-Thunderbird-74UEH1.desktop
 application/x-extension-ics=userapp-Thunderbird-74UEH1.desktop
 x-scheme-handler/webcals=userapp-Thunderbird-74UEH1.desktop
+x-scheme-handler/mailspring=Mailspring.desktop

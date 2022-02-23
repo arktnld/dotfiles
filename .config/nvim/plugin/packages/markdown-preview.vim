@@ -1,3 +1,9 @@
+"" Add optional plugin to 'runtimepath' without sourcing anything.
+packadd! vimwiki
+
+" Source plugin file and run command.
+noremap <silent> <Leader>m :runtime! plugin/**/markdown-preview.vim <Bar> :MarkdownPreview<Enter>
+
 " set to 1, nvim will open the preview window after entering the markdown buffer
 " default: 0
 let g:mkdp_auto_start = 0

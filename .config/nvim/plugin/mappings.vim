@@ -23,8 +23,11 @@ nnoremap Q @q
 nnoremap x "_x
 
 " Always search with 'very magic' mode.
-nnoremap / /\v
-nnoremap ? ?\v
+" nnoremap / /\v
+" nnoremap ? ?\v
+nnoremap <M-/> /\v
+nnoremap <M-?> ?\v
+
 
 " Set highlight search when navigate on searching matchers.
 nnoremap n :silent set hlsearch <Bar> normal! n<Enter>

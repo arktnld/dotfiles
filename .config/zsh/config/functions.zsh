@@ -153,5 +153,8 @@ gitls() {
 # 		"amovie='$1', asplit [a][out1]; [a] showcqt=size=1400x1052 [out0]";
 # }
 
+@-file-owner() {
+    pamac search --files "$1"
+}
 
 # vi: ft=sh

@@ -15,13 +15,12 @@ alias ll="exa --long --all --group --header --classify --group-directories-first
 # Shortcuts
 alias q='exit'
 alias calc='bc -l <<<' # Simple calculator, only expressions without space.
-alias def='crow' # Word definition.
 alias pbcopy='xclip -selection clipboard' # Copy terminal output.
 alias pbpaste='xclip -selection clipboard -out' # Paste text on clipboard.
 alias d='wget $(xclip -selection clipboard -out)' # Download using link on clipboard.
 alias pi='ping 1.1.1.1' # Tired of ping in google?
 alias cht=cht.sh # The only cheat sheet you need
-alias mutt='mailsync && neomutt'
+alias mail='himalaya -a ark; himalaya -a cle'
 
 # Archive
 alias ae='patool extract' # Unpack one or more archives.
@@ -40,4 +39,3 @@ alias up='paru --sync --refresh --sysupgrade'
 alias pkglist='paru -Ql' # List all files in a package.
 alias pkgowns='paru -Qo' # Shows the package that owns a command.
 alias pkginfo='paru -Si' # Info about a package.
-alias aurcomments='paru -C' # Show commends in an aur pack.

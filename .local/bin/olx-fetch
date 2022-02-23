@@ -28,8 +28,8 @@ carretilha pesca fonte miçangas notebook ssd sultam aula
 sultan fantasia casa estabilizador novidade atraente pc
 htvi btvi recarga violão escaleta brigadeiros oxímetro
 Whisky porta telefônicos cruzeiro molinete automotivo
-carro canivetes desentpupidora manutençao computador
-gincho'
+carro canivetes desentupidora manutençao computador
+gincho locação'
 
 olx=/tmp/olx.html
 diffs=/tmp/diffs
@@ -48,7 +48,7 @@ getprice() {
 
 getname() {
     html2text $post \
-        | tr -d "()[],\-:+.!\'" \
+        | tr -d "<>()[],\-:+.!\'" \
         | grep -E '^# [a-zA-Z0-9 ]+' \
         | tr -d '#' \
         | xargs
@@ -153,9 +153,6 @@ loop() {
     echo end while
 }
 
-
-
-
 ## Logic Board Games ##
 
 tsconf="$ofhome/olxbg.conf"
@@ -181,24 +178,24 @@ rm -f $olx $urlbg $diffs
 
 ## Logic Video Games ##
 
-tsconf="$ofhome/olxgm.conf"
-regs="$ofhome/olxgm"
+# tsconf="$ofhome/olxgm.conf"
+# regs="$ofhome/olxgm"
 
-file="olx.html"
-webpg="https://df.olx.com.br/videogames?sf=1"
+# file="olx.html"
+# webpg="https://df.olx.com.br/videogames?sf=1"
 
-include="videogames"
-exclude="$listex"
+# include="videogames"
+# exclude="$listex"
 
-echo init script
-getpage "$file" "$webpg"
-geturls "$include" "$exclude"
-[ -s "$urlbg" ] || exit 1
-diffurls
-loop
+# echo init script
+# getpage "$file" "$webpg"
+# geturls "$include" "$exclude"
+# [ -s "$urlbg" ] || exit 1
+# diffurls
+# loop
 
-cat $urlbg >| "$regs"
-rm -f $olx $urlbg $diffs
+# cat $urlbg >| "$regs"
+# rm -f $olx $urlbg $diffs
 
 
 
