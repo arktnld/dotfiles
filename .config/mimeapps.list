@@ -39,7 +39,7 @@ application/xhtml+xml=librewolf.desktop;
 application/x-extension-xhtml=librewolf.desktop;
 application/x-extension-xht=librewolf.desktop;
 video/mp2t=vlc.desktop;
-audio/x-mpegurl=org.xfce.mousepad.desktop;
+audio/x-mpegurl=org.gnome.gedit.desktop;org.xfce.mousepad.desktop;
 x-scheme-handler/mailto=userapp-Thunderbird-HWYAH1.desktop;userapp-Evolution-WN5RH1.desktop;viagee.desktop;
 x-scheme-handler/mid=userapp-Thunderbird-HWYAH1.desktop;
 x-scheme-handler/feed=userapp-Thunderbird-MSM9G1.desktop;
@@ -48,6 +48,7 @@ application/x-extension-rss=userapp-Thunderbird-MSM9G1.desktop;
 x-scheme-handler/webcal=userapp-Thunderbird-74UEH1.desktop;
 x-scheme-handler/webcals=userapp-Thunderbird-74UEH1.desktop;
 text/csv=org.gnome.gedit.desktop;
+application/xml=org.gnome.gedit.desktop;
 
 [Default Applications]
 x-scheme-handler/tg=userapp-Telegram Desktop-TDP8H1.desktop

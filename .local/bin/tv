@@ -137,11 +137,11 @@ _play() {
             WID=$(xdo id)
             xdo hide
             # shellcheck disable=SC2086
-            mpv "$2" ${TERMV_MPV_FLAGS} --force-media-title="$1" --force-window=immediate
+            mpv "$2" ${TERMV_MPV_FLAGS} --user-agent="Mozilla/5.0 (Linux; Android 8.0.0; SM-G960F Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.84 Mobile Safari/537.36" --force-media-title="$1" --force-window=immediate
             xdo show "$WID" && xdo activate "$WID"
         else
             # shellcheck disable=SC2086
-            mpv "$2" ${TERMV_MPV_FLAGS} --force-media-title="$1"
+            mpv "$2" ${TERMV_MPV_FLAGS} --user-agent="Mozilla/5.0 (Linux; Android 8.0.0; SM-G960F Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.84 Mobile Safari/537.36" --force-media-title="$1"
         fi
     fi
 }

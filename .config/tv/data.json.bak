@@ -1,0 +1,1808 @@
+[
+    {
+		"name": "Band HD (RBA)",
+		"logo": "",
+		"url": "https://streaming.gruporba.com.br/rba.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "TV ABERTA",
+			"slug": "tv aberta"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Band HD (MG)",
+		"logo": "",
+		"url": "http://evpp.mm.uol.com.br:1935/bandpracas/debatemg/chunklist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "TV ABERTA",
+			"slug": "tv aberta"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Band HD (Interior)",
+		"logo": "",
+		"url": "http://evpp.mm.uol.com.br:1935/bandpracas/debatemg/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "TV ABERTA",
+			"slug": "tv aberta"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "TV Cultura HD (SP)",
+		"logo": "",
+		"url": "http://origin-02.nxplay.com.br/TV_CULTURA_HD_PFZ1/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "TV ABERTA",
+			"slug": "tv aberta"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Futura",
+		"logo": "",
+		"url": "https://stmv1.transmissaodigital.com/ronald6259/ronald6259/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "TV ABERTA",
+			"slug": "tv aberta"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Globo HD",
+		"logo": "",
+		"url": "http://200.4.97.162:8000/play/a01t/index.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "TV ABERTA",
+			"slug": "tv aberta"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Globo HD (MG)",
+		"logo": "",
+		"url": "http://168.205.87.198:8555/live/1499/123456/70.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "TV ABERTA",
+			"slug": "tv aberta"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Globo HD (BA)",
+		"logo": "",
+		"url": "https://canal1.proxy.tokplay.com.br:443/videos/TV_BAHIA/format720p_TV_BAHIA.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "TV ABERTA",
+			"slug": "tv aberta"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Record TV HD (SP)",
+		"logo": "",
+		"url": "https://playplusspo-lh.akamaihd.net/i/pp_sp@350176/index_720_av-p.m3u8?sd=10&rebase=on",
+		"category": [{
+			"name": "TV ABERTA",
+			"slug": "tv aberta"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Record TV HD (RJ)",
+		"logo": "",
+		"url": "https://playplusrjo-lh.akamaihd.net/i/pp_rj@377859/master.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "TV ABERTA",
+			"slug": "tv aberta"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Record TV HD (MT)",
+		"logo": "",
+		"url": "http://tvconquistalrv.duckdns.org:8080/hls/tvconquistalrv.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "TV ABERTA",
+			"slug": "tv aberta"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Rede Brasil HD",
+		"logo": "",
+		"url": "https://59f2354c05961.streamlock.net:1443/rbtv/_definst_/rbtv/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "TV ABERTA",
+			"slug": "tv aberta"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Rede TV HD (SP)",
+		"logo": "",
+		"url": "http://177.20.208.58:8000/play/a03p/index.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "TV ABERTA",
+			"slug": "tv aberta"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Rede TV (RS)",
+		"logo": "",
+		"url": "https://59f1cbe63db89.streamlock.net:1443/tvpampa/_definst_/tvpampa/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "TV ABERTA",
+			"slug": "tv aberta"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "SBT HD (AM)",
+		"logo": "",
+		"url": "https://livefocamundo.com:8081/tvguajaraonline2/tracks-v1a1/mono.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "TV ABERTA",
+			"slug": "tv aberta"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "SBT HD (MT)",
+		"logo": "",
+		"url": "http://wz4.dnip.com.br/bemtv/bemtv.sdp/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "TV ABERTA",
+			"slug": "tv aberta"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "SBT HD (PI)",
+		"logo": "",
+		"url": "http://stmv1.transmissaodigital.com:1935/cidadeverdenovo/cidadeverdenovo/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "TV ABERTA",
+			"slug": "tv aberta"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "TV Brasil 2 HD",
+		"logo": "",
+		"url": "http://origin-02.nxplay.com.br/TV_BRASIL_2/index.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "TV ABERTA",
+			"slug": "tv aberta"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Ghost",
+		"logo": "",
+		"url": "https://stmv.video.expressolider.com.br/ghostv/ghostv/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "DOCUMENTARIO",
+			"slug": "documentario"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Love Nature HD",
+		"logo": "",
+		"url": "http://177.20.208.58:8000/play/a04i/index.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "DOCUMENTARIO",
+			"slug": "documentario"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Vida Real HD",
+		"logo": "",
+		"url": "http://stitcher-ipv4.pluto.tv/v1/stitch/embed/hls/channel/5f32d4d9ec194100070c7449/master.m3u8?deviceType=samsung-tvplus&deviceMake=samsung&deviceModel=samsung&deviceVersion=unknown&appVersion=unknown&deviceLat=0&deviceLon=0&deviceDNT=%7BTARGETOPT%7D",
+		"category": [{
+			"name": "DOCUMENTARIO",
+			"slug": "documentario"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Tastemade² HD",
+		"logo": "",
+		"url": "https://tastemade-pt16intl-samsungbrazil.amagi.tv/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "DOCUMENTARIO",
+			"slug": "documentario"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "YEEAAH HD",
+		"logo": "",
+		"url": "http://srv3.zcast.com.br/yeeaah/yeeaah/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "DOCUMENTARIO",
+			"slug": "documentario"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "All Sports HD",
+		"logo": "",
+		"url": "https://5cf4a2c2512a2.streamlock.net/dgrau/dgrau/chunklist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "SPORTE",
+			"slug": "sporte"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "BMTV",
+		"logo": "",
+		"url": "https://srv5.zcast.com.br/bmtv/bmtv/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "SPORTE",
+			"slug": "sporte"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "TNT Sports 1 HD",
+		"logo": "",
+		"url": "http://glxlmn026c.singularcdn.net.br/playout_01/playlist-720p.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "SPORTE",
+			"slug": "sporte"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "TNT Sports 1² HD",
+		"logo": "",
+		"url": "http://glxlmn026c.singularcdn.net.br/playout_01/playlist-720p.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "SPORTE",
+			"slug": "sporte"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "TNT Sports 2 HD",
+		"logo": "",
+		"url": "https://glxlmn026c.singularcdn.net.br/playout_02/playlist-720p.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "SPORTE",
+			"slug": "sporte"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "TNT Sports 3 HD",
+		"logo": "",
+		"url": "https://glxlmn026c.singularcdn.net.br/playout_03/playlist-720p.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "SPORTE",
+			"slug": "sporte"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "TNT Sports 4 HD",
+		"logo": "",
+		"url": "https://glxlmn026c.singularcdn.net.br/playout_04/playlist-720p.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "SPORTE",
+			"slug": "sporte"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "TNT Sports 5 HD",
+		"logo": "",
+		"url": "https://glxlmn026c.singularcdn.net.br/playout_05/playlist-720p.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "SPORTE",
+			"slug": "sporte"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Classique (RETRO)",
+		"logo": "",
+		"url": "https://stmv1.srvif.com/classique/classique/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "FILME",
+			"slug": "filme"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Classique 2 (RETRO)",
+		"logo": "",
+		"url": "https://stmv1.srvif.com/classiquetv1/classiquetv1/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "FILME",
+			"slug": "filme"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Classique Western (RETRO)",
+		"logo": "",
+		"url": "https://stmv1.srvif.com/classiquew/classiquew/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "FILME",
+			"slug": "filme"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Colina",
+		"logo": "",
+		"url": "https://srv1.zcast.com.br/paulohenrique7705/paulohenrique7705/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "FILME",
+			"slug": "filme"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Dark Flix HD (TERROR)",
+		"logo": "",
+		"url": "https://video01.soultv.com.br/darkflix/darkflix/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "FILME",
+			"slug": "filme"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Entorno Sul",
+		"logo": "",
+		"url": "http://video02.kshost.com.br/manoel2072/manoel2072/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "FILME",
+			"slug": "filme"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Londrina",
+		"logo": "",
+		"url": "https://video01.kshost.com.br/clodoaldo3320/clodoaldo3320/chunklist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "FILME",
+			"slug": "filme"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Liberdade HD",
+		"logo": "",
+		"url": "https://5cf4a2c2512a2.streamlock.net/tvliberdade/tvliberdade/chunklist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "FILME",
+			"slug": "filme"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Rede Sul HD",
+		"logo": "",
+		"url": "https://5a0c3936c25c8.streamlock.net/8032/8032/chunklist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "FILME",
+			"slug": "filme"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Runtime HD",
+		"logo": "",
+		"url": "https://runtimebrazil-samsungbrazil.amagi.tv/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "FILME",
+			"slug": "filme"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Top Sul",
+		"logo": "",
+		"url": "https://srv2.zcast.com.br/tvtopsul/tvtopsul/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "FILME",
+			"slug": "filme"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Brasil Hits (NACIONAL)",
+		"logo": "",
+		"url": "https://video01.logicahost.com.br/brasilhits/brasilhits/chunklist_w1407789719.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "FILME",
+			"slug": "filme"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Urban Movies HD",
+		"logo": "",
+		"url": "https://5ad482a77183d.streamlock.net/urbantvmoviesgmail.com/urbantvmoviesgmail.com/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "FILME",
+			"slug": "filme"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Urban Series HD",
+		"logo": "",
+		"url": "https://5ad482a77183d.streamlock.net/urbantvseriesgmail.com/urbantvseriesgmail.com/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "FILME",
+			"slug": "filme"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Classicos Do Cinema",
+		"logo": "",
+		"url": "https://cdnhd.iblups.com/hls/KjpAu5k2I3.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "FILME",
+			"slug": "filme"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "GLN HD",
+		"logo": "",
+		"url": "https://srv2.zcast.com.br/glnfilmes/glnfilmes/chunklist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "FILME",
+			"slug": "filme"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Nova Gazeta HD",
+		"logo": "",
+		"url": "https://video02.kshost.com.br/sueli3485/sueli3485/chunklist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "FILME",
+			"slug": "filme"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Bob Esponja (24h)",
+		"logo": "",
+		"url": "http://dns.ccdns2.xyz/live/homevod/ihxOy9YYvoH4bO1qBvf1zuU6m/13269.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "DESENHO",
+			"slug": "desenho"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Chaves (24h)",
+		"logo": "",
+		"url": "https://stmv1.vhcast.com/tvcine/tvcine/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "DESENHO",
+			"slug": "desenho"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Fandom HD",
+		"logo": "",
+		"url": "http://187.95.95.241:7988/fabic/tracks-v1a1/mono.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "DESENHO",
+			"slug": "desenho"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Cartoon (RETRO)",
+		"logo": "",
+		"url": "https://stmv1.srvif.com/retrotv/retrotv/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "DESENHO",
+			"slug": "desenho"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Potengi (RETRO)",
+		"logo": "",
+		"url": "https://stmv4.samcast.com.br/jeova3318/jeova3318/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "DESENHO",
+			"slug": "desenho"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Urban Kids HD (RETRO)",
+		"logo": "",
+		"url": "https://5ad482a77183d.streamlock.net/urbantvkidsgmail.com/urbantvkidsgmail.com/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "DESENHO",
+			"slug": "desenho"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Xtreme (RETRO)",
+		"logo": "",
+		"url": "https://stmv5.samcast.com.br/everton7487/everton7487/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "DESENHO",
+			"slug": "desenho"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Anime",
+		"logo": "",
+		"url": "https://stmv1.srvif.com/animetv/animetv/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "DESENHO",
+			"slug": "desenho"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Loading HD",
+		"logo": "",
+		"url": "https://stmv.video.expressolider.com.br/loadingtv/loadingtv/chunklist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "DESENHO",
+			"slug": "desenho"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "CNN Brasil HD",
+		"logo": "",
+		"url": "https://video01.soultv.com.br/cnnbrasil/cnnbrasil/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "JORNAL",
+			"slug": "jornal"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Jovem Pan News HD",
+		"logo": "",
+		"url": "https://d6yfbj4xxtrod.cloudfront.net/out/v1/7836eb391ec24452b149f3dc6df15bbd/index_5.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "JORNAL",
+			"slug": "jornal"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Record News HD",
+		"logo": "",
+		"url": "https://playplusnews-lh.akamaihd.net/i/pp_nws@377849/master.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "JORNAL",
+			"slug": "jornal"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "1Mus.com HD",
+		"logo": "",
+		"url": "http://hz1.teleport.cc/HLS/HD.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "MUSICA",
+			"slug": "musica"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "America Latino HD",
+		"logo": "",
+		"url": "http://origin-02.nxplay.com.br/AMERICOLATINO/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "MUSICA",
+			"slug": "musica"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Blast Channel HD",
+		"logo": "",
+		"url": "https://video01.logicahost.com.br/blast/blast/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "MUSICA",
+			"slug": "musica"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Catedral Do Rock",
+		"logo": "",
+		"url": "https://stmv1.srvstm.com/catedraldorock/catedraldorock/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "MUSICA",
+			"slug": "musica"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Classic Hits",
+		"logo": "",
+		"url": "http://origin-02.nxplay.com.br/classichit/video.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "MUSICA",
+			"slug": "musica"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Clubbing HD",
+		"logo": "",
+		"url": "https://clubbingtv-samsungbrazil.amagi.tv/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "MUSICA",
+			"slug": "musica"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Country HD",
+		"logo": "",
+		"url": "https://cmctv.ios.internapcdn.net/cmctv_vitalstream_com/live_1/CMCU-92/chunklist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "MUSICA",
+			"slug": "musica"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "H!tts HD",
+		"logo": "",
+		"url": "http://origin-02.nxplay.com.br/HITTS/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "MUSICA",
+			"slug": "musica"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Loop 80's HD",
+		"logo": "",
+		"url": "https://loop-80s-2.roku.wurl.com/manifest/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "MUSICA",
+			"slug": "musica"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Loop 90's HD",
+		"logo": "",
+		"url": "https://loop-90s-2.roku.wurl.com/manifest/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "MUSICA",
+			"slug": "musica"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "M2O HD",
+		"logo": "",
+		"url": "https://m2otv-lh.akamaihd.net/i/m2oTv_1@186074/index_600_av-b.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "MUSICA",
+			"slug": "musica"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Mega HD",
+		"logo": "",
+		"url": "http://origin-02.nxplay.com.br/MEGA/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "MUSICA",
+			"slug": "musica"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Metal HD",
+		"logo": "",
+		"url": "https://v2.catcast.tv/content/33816/index.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "MUSICA",
+			"slug": "musica"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "MTV Live HD",
+		"logo": "",
+		"url": "http://origin-02.nxplay.com.br/MTVLIVE/video.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "MUSICA",
+			"slug": "musica"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Ocko Express HD",
+		"logo": "",
+		"url": "http://ocko-live.ssl.cdn.cra.cz/channels/ocko_expres/playlist/cze/live_hq.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "MUSICA",
+			"slug": "musica"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Ocko Star HD",
+		"logo": "",
+		"url": "https://ocko-live-dash.ssl.cdn.cra.cz/cra_live2/ocko_gold.stream.1.smil/manifest.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "MUSICA",
+			"slug": "musica"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Qello Concerts HD",
+		"logo": "",
+		"url": "https://dai.google.com/linear/hls/event/BakMHO8xRSmGKYeiyhsq3A/master.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "MUSICA",
+			"slug": "musica"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Qwest Classical HD",
+		"logo": "",
+		"url": "https://qwest-classic-rakuten-samsung.amagi.tv/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "MUSICA",
+			"slug": "musica"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Qwest Jazz and Beyond HD",
+		"logo": "",
+		"url": "https://qwest-jazz-rakuten-samsung.amagi.tv/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "MUSICA",
+			"slug": "musica"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Qwest Mix HD",
+		"logo": "",
+		"url": "https://qwest-mix-rakuten-samsung.amagi.tv/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "MUSICA",
+			"slug": "musica"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Radio Capital",
+		"logo": "",
+		"url": "http://capital-live-tv-01-hls.akamai.media.kataweb.it/i/CapitalTv_1@183098/index_5_av-p.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "MUSICA",
+			"slug": "musica"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Rede RC",
+		"logo": "",
+		"url": "https://59f2354c05961.streamlock.net:1443/rederc/_definst_/rederc/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "MUSICA",
+			"slug": "musica"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Retro Plus",
+		"logo": "",
+		"url": "https://59f1cbe63db89.streamlock.net:1443/retroplustv/_definst_/retroplustv/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "MUSICA",
+			"slug": "musica"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Rock",
+		"logo": "",
+		"url": "http://fms-https1.mediadirect.ro/live3/_definst_/rocktv/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "MUSICA",
+			"slug": "musica"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Shows HD",
+		"logo": "",
+		"url": "https://cdnlive.myspirit.tv/LS-ATL-43240-2/index.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "MUSICA",
+			"slug": "musica"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	},
+	{
+		"name": "Vevo 2K HD",
+		"logo": "",
+		"url": "https://srv5.zcast.com.br/pedro3742/pedro3742/playlist.m3u8?ROGERIOTORRES",
+		"category": [{
+			"name": "MUSICA",
+			"slug": "musica"
+		}],
+		"countries": [{
+			"name": "Brasil",
+			"slug": "BR"
+		}],
+		"languages": [{
+			"name": "Brasil",
+			"slug": "br"
+		}],
+		"tvg": [{
+			"name": "",
+			"slug": ""
+		}]
+	}
+]
