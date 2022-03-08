@@ -1,5 +1,5 @@
 #!/bin/bash
-# Simple script to show used products
+# Simple script to show used products.
 
 LOCKFILE=/tmp/lock.txt
 if [ -e ${LOCKFILE} ] && kill -0 `cat ${LOCKFILE}`; then
