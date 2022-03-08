@@ -1,8 +1,6 @@
-"" Add optional plugin to 'runtimepath' without sourcing anything.
-packadd! vimwiki
 
-" Source plugin file and run command.
-noremap <silent> <Leader>m :runtime! plugin/**/markdown-preview.vim <Bar> :MarkdownPreview<Enter>
+"" Add optional plugin to 'runtimepath' without sourcing anything.
+packadd! markdown-preview.nvim
 
 " set to 1, nvim will open the preview window after entering the markdown buffer
 " default: 0
@@ -105,3 +103,20 @@ let g:mkdp_filetypes = ['markdown']
 nmap <C-s> <Plug>MarkdownPreview
 nmap <M-s> <Plug>MarkdownPreviewStop
 nmap <C-p> <Plug>MarkdownPreviewToggle
+
+
+" Source plugin file and run command.
+nnoremap <silent> <leader>m :call PreviewToggle()<cr>
+
+let s:mkdp_running = 0
+
+function! PreviewToggle()
+    runtime! plugin/**/markdown-preview.nvim
+    if s:mkdp_running !=# 1
+        call mkdp#util#open_preview_page()
+        let s:mkdp_running = 1
+    else
+        call mkdp#util#stop_preview()
+        let s:mkdp_running = 0
+    endif
+endfunction

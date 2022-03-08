@@ -1,4 +1,5 @@
 #!/bin/bash
+# Simple script to show used products
 
 LOCKFILE=/tmp/lock.txt
 if [ -e ${LOCKFILE} ] && kill -0 `cat ${LOCKFILE}`; then
@@ -179,13 +180,60 @@ rm -f $olx $urlbg $diffs
 
 ## Logic Video Games ##
 
-# tsconf="$ofhome/olxgm.conf"
-# regs="$ofhome/olxgm"
+tsconf="$ofhome/olxgm.conf"
+regs="$ofhome/olxgm"
+
+file="olx.html"
+webpg="https://df.olx.com.br/?q=nintendo&sf=1#"
+
+include="videogames"
+exclude="$listex"
+
+echo init script
+getpage "$file" "$webpg"
+geturls "$include" "$exclude"
+[ -s "$urlbg" ] || exit 1
+diffurls
+loop
+
+cat $urlbg >| "$regs"
+rm -f $olx $urlbg $diffs
+
+
+
+
+## Logic Vagas de Emprego ##
+
+# tsconf="$ofhome/olxv.conf"
+# regs="$ofhome/olxv"
 
 # file="olx.html"
-# webpg="https://df.olx.com.br/videogames?sf=1"
+# webpg="https://df.olx.com.br/vagas-de-emprego?sf=1"
 
-# include="videogames"
+# include="vagas-de-emprego"
+# exclude="frete"
+
+# echo init script
+# getpage "$file" "$webpg"
+# geturls "$include" "$exclude"
+# [ -s "$urlbg" ] || exit 1
+# diffurls
+# loop
+
+# cat $urlbg >| "$regs"
+# rm -f $olx $urlbg $diffs
+
+
+
+## Logic Hobbies e Coleções ##
+
+# tsconf="$ofhome/olxhc.conf"
+# regs="$ofhome/olxhc"
+
+# file="olx.html"
+# webpg="https://df.olx.com.br/hobbies-e-colecoes?sf=1"
+
+# include="hobbies-e-colecoes"
 # exclude="$listex"
 
 # echo init script
@@ -200,72 +248,25 @@ rm -f $olx $urlbg $diffs
 
 
 
-
-## Logic Vagas de Emprego ##
-
-tsconf="$ofhome/olxv.conf"
-regs="$ofhome/olxv"
-
-file="olx.html"
-webpg="https://df.olx.com.br/vagas-de-emprego?sf=1"
-
-include="vagas-de-emprego"
-exclude="frete"
-
-echo init script
-getpage "$file" "$webpg"
-geturls "$include" "$exclude"
-[ -s "$urlbg" ] || exit 1
-diffurls
-loop
-
-cat $urlbg >| "$regs"
-rm -f $olx $urlbg $diffs
-
-
-
-## Logic Hobbies e Coleções ##
-
-tsconf="$ofhome/olxhc.conf"
-regs="$ofhome/olxhc"
-
-file="olx.html"
-webpg="https://df.olx.com.br/hobbies-e-colecoes?sf=1"
-
-include="hobbies-e-colecoes"
-exclude="$listex"
-
-echo init script
-getpage "$file" "$webpg"
-geturls "$include" "$exclude"
-[ -s "$urlbg" ] || exit 1
-diffurls
-loop
-
-cat $urlbg >| "$regs"
-rm -f $olx $urlbg $diffs
-
-
-
 ## Logic Brinquedos e Jogos ##
 
-tsconf="$ofhome/olxbj.conf"
-regs="$ofhome/olxbj"
+# tsconf="$ofhome/olxbj.conf"
+# regs="$ofhome/olxbj"
 
-file="olx.html"
-webpg="https://df.olx.com.br/artigos-infantis/brinquedos-e-jogos?sf=1"
+# file="olx.html"
+# webpg="https://df.olx.com.br/artigos-infantis/brinquedos-e-jogos?sf=1"
 
-include="artigos-infantis"
-exclude="$listex"
+# include="artigos-infantis"
+# exclude="$listex"
 
-echo init script
-getpage "$file" "$webpg"
-geturls "$include" "$exclude"
-[ -s "$urlbg" ] || exit 1
-diffurls
-loop
+# echo init script
+# getpage "$file" "$webpg"
+# geturls "$include" "$exclude"
+# [ -s "$urlbg" ] || exit 1
+# diffurls
+# loop
 
-cat $urlbg >| "$regs"
-rm -f $olx $urlbg $diffs
+# cat $urlbg >| "$regs"
+# rm -f $olx $urlbg $diffs
 
 rm -f ${LOCKFILE}

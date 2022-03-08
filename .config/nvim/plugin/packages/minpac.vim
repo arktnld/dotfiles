@@ -17,6 +17,7 @@ function! PackInit() abort
     call minpac#add('b3nj5m1n/kommentary') " comment motion
     call minpac#add('mateusbraga/vim-spell-pt-br') " pt_BR Dict
     call minpac#add('lukas-reineke/indent-blankline.nvim') " indentation guides lines
+    call minpac#add('vigoux/LanguageTool.nvim') " Gramma check
 
 	" Additional plugins here.
 	call minpac#add('k-takata/minpac', {'type': 'opt'}) " simple plugin manager
@@ -24,7 +25,8 @@ function! PackInit() abort
 	call minpac#add('lilydjwg/colorizer', {'type': 'opt'}) " color rgb text
 	call minpac#add('mcchrish/nnn.vim', {'type': 'opt'}) " file manager
     call minpac#add('sunaku/vim-dasht', {'type': 'opt'}) " code docs
-    call minpac#add('iamcco/markdown-preview.nvim',{'type': 'opt'}) " markdown Browser Preview
+    call minpac#add('iamcco/markdown-preview.nvim', {'type': 'opt', 'do': 'packadd markdown-preview.nvim | call mkdp#util#install()'}) " markdown Browser Preview
+
 endfunction
 
 " Plugin settings here.

@@ -157,4 +157,7 @@ gitls() {
     pamac search --files "$1"
 }
 
+@-gnome-reset() {
+    dconf reset -f /org/gnome/
+}
 # vi: ft=sh

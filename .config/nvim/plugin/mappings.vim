@@ -23,10 +23,8 @@ nnoremap Q @q
 nnoremap x "_x
 
 " Always search with 'very magic' mode.
-" nnoremap / /\v
-" nnoremap ? ?\v
-nnoremap <M-/> /\v
-nnoremap <M-?> ?\v
+nnoremap / /\v
+nnoremap ? ?\v
 
 
 " Set highlight search when navigate on searching matchers.

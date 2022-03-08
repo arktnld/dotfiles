@@ -3568,5 +3568,13 @@
 	{
 		"name": "playkids HD",
 		"url": "http://api.magiaiptv.com/live/800196/128093/m3_x0FulhVfp2IP2Ffe_720p"
-	}
+	},
+    {
+        "name": "Dragon Ball",
+        "url": "http://tv.factoryiptv.com:80/live/avelino1/123456/58094.m3u8"
+    },
+    {
+        "name": "Dragon Ball GT",
+        "url": "http://dns.ccdns2.xyz:80/live/homevod/ihxOy9YYvoH4bO1qBvf1zuU6m/22487.m3u8"
+    }
 ]
