@@ -3,12 +3,21 @@ no-large-media: behind-the-scene false
 no-large-media: www.facebook.com false
 no-popups: www.youtube.com true
 no-remote-fonts: www.facebook.com true
+no-remote-fonts: news.google.com true
 no-remote-fonts: www.instagram.com true
 no-remote-fonts: www.youtube.com true
 * * 3p block
 * * 3p-frame block
 * * 3p-script block
 * * image block
+www.amazon.com.br * 3p noop
+www.amazon.com.br * image noop
+www.amazon.com.br * inline-script noop
+askubuntu.com * 3p noop
+askubuntu.com * 3p-script noop
+www.bbc.com * 3p noop
+www.bbc.com * 3p-script noop
+www.bbc.com * image noop
 behind-the-scene * * noop
 behind-the-scene * 1p-script noop
 behind-the-scene * 3p noop
@@ -16,18 +25,25 @@ behind-the-scene * 3p-frame noop
 behind-the-scene * 3p-script noop
 behind-the-scene * image noop
 behind-the-scene * inline-script noop
-www.facebook.com * 1p-script noop
 www.facebook.com * 3p block
 www.facebook.com * 3p-frame block
 www.facebook.com * 3p-script block
-www.facebook.com * inline-script noop
-www.facebook.com facebook.com * noop
-www.facebook.com www.facebook.com * noop
 www.facebook.com fbcdn.net * noop
+www.facebook.com external.fbsb1-1.fna.fbcdn.net * noop
 github.com * 1p-script noop
 github.com * 3p noop
+github.com * 3p-script noop
 github.com * inline-script noop
 github.com github.com * noop
+docs.github.com * image noop
+accounts.google.com * 3p noop
+accounts.google.com * 3p-script noop
+mail.google.com * 3p noop
+mail.google.com * 3p-script noop
+news.google.com * 3p block
+news.google.com * 3p-frame block
+news.google.com * 3p-script noop
+www.google.com * 3p noop
 www.instagram.com * 1p-script block
 www.instagram.com * 3p noop
 www.instagram.com * 3p-frame block
@@ -36,6 +52,14 @@ www.instagram.com * image noop
 www.instagram.com * inline-script noop
 www.instagram.com instagram.com * noop
 www.instagram.com www.instagram.com * noop
+ludopedia.com.br * 3p noop
+ludopedia.com.br * image noop
+www.ludopedia.com.br * 3p-script noop
+conta.olx.com.br * image noop
+df.olx.com.br * image noop
+old.reddit.com * 3p noop
+old.reddit.com * image noop
+superuser.com * 3p noop
 www.youtube.com * 1p-script block
 www.youtube.com * 3p block
 www.youtube.com * 3p-frame block

@@ -1,0 +1,244 @@
+{
+   "checksum": "18f2f78644485af49cc869276f4bf28c",
+   "roots": {
+      "bookmark_bar": {
+         "children": [ {
+            "children": [ {
+               "children": [ {
+                  "date_added": "13291243344978210",
+                  "guid": "477482cb-f046-4366-ad72-bb5e84018466",
+                  "id": "51",
+                  "name": "Math Is Fun",
+                  "type": "url",
+                  "url": "http://www.mathsisfun.com/"
+               } ],
+               "date_added": "13291243335237140",
+               "date_modified": "13291243389421261",
+               "guid": "b44f27fc-ee73-4dbc-8211-27272fd4e1e0",
+               "id": "50",
+               "name": "Source",
+               "type": "folder"
+            }, {
+               "children": [ {
+                  "date_added": "13291243169682031",
+                  "guid": "f8e81be9-16b6-4b9e-8da4-ba085a9a50cf",
+                  "id": "49",
+                  "name": "Lynda bitdl",
+                  "type": "url",
+                  "url": "http://s13.bitdl.ir/Learning.3/Lynda/"
+               }, {
+                  "date_added": "13291243089793729",
+                  "guid": "9bdee59c-d031-488b-bb33-76a1242ba183",
+                  "id": "47",
+                  "name": "ScanLibs",
+                  "type": "url",
+                  "url": "https://scanlibs.com/"
+               } ],
+               "date_added": "13291243165964947",
+               "date_modified": "13291243190154119",
+               "guid": "6d5ef7a4-76ee-4605-8177-b702ab7e5699",
+               "id": "48",
+               "name": "Courses",
+               "type": "folder"
+            }, {
+               "children": [ {
+                  "date_added": "13291242855980897",
+                  "guid": "322a5702-fe3c-4955-87a1-c0c50bcd8f82",
+                  "id": "42",
+                  "name": "PDF Drive",
+                  "type": "url",
+                  "url": "https://www.pdfdrive.com/"
+               }, {
+                  "date_added": "13291243001668440",
+                  "guid": "97475da6-6855-4a29-80d6-e933c45458cf",
+                  "id": "45",
+                  "name": "GetComics",
+                  "type": "url",
+                  "url": "https://getcomics.info/"
+               }, {
+                  "date_added": "13291243074082680",
+                  "guid": "a67b8aef-8ba8-4c17-9916-cba7b3f4e237",
+                  "id": "46",
+                  "name": "FoxGreat",
+                  "type": "url",
+                  "url": "https://foxgreat.com/"
+               } ],
+               "date_added": "13291242847836934",
+               "date_modified": "13291243089793729",
+               "guid": "5029127d-e4c2-4e0e-8239-3d609cc9d79f",
+               "id": "41",
+               "name": "Ebook",
+               "type": "folder"
+            } ],
+            "date_added": "13291243427141146",
+            "date_modified": "13291243433506466",
+            "guid": "e71a8cb0-9c9f-437e-b41d-9332211b1701",
+            "id": "53",
+            "name": "Knowledge",
+            "type": "folder"
+         }, {
+            "children": [ {
+               "children": [ {
+                  "date_added": "13291142488756562",
+                  "guid": "77f5a382-3509-4aff-8baa-8aa6c6890dd6",
+                  "id": "35",
+                  "name": "Places Status Indicator - GNOME Shell Extensions",
+                  "type": "url",
+                  "url": "https://extensions.gnome.org/extension/8/places-status-indicator/"
+               }, {
+                  "date_added": "13291142493131940",
+                  "guid": "d055e56e-6322-4894-933a-69a36255aa41",
+                  "id": "36",
+                  "name": "Lock Keys - GNOME Shell Extensions",
+                  "type": "url",
+                  "url": "https://extensions.gnome.org/extension/36/lock-keys/"
+               }, {
+                  "date_added": "13291142496450719",
+                  "guid": "998aa036-fe10-4bdc-ada9-fd8ae5636ddd",
+                  "id": "37",
+                  "name": "Internet Radio - GNOME Shell Extensions",
+                  "type": "url",
+                  "url": "https://extensions.gnome.org/extension/836/internet-radio/"
+               }, {
+                  "date_added": "13291142498850979",
+                  "guid": "78a85376-e40a-469a-99b6-9e5e0ae7f67e",
+                  "id": "38",
+                  "name": "Arch Linux Updates Indicator - GNOME Shell Extensions",
+                  "type": "url",
+                  "url": "https://extensions.gnome.org/extension/1010/archlinux-updates-indicator/"
+               }, {
+                  "date_added": "13291142502233851",
+                  "guid": "8c58d526-bc32-4b30-80d9-d07264fd2469",
+                  "id": "39",
+                  "name": "AppIndicator and KStatusNotifierItem Support - GNOME Shell Extensions",
+                  "type": "url",
+                  "url": "https://extensions.gnome.org/extension/615/appindicator-support/"
+               } ],
+               "date_added": "13291142485119704",
+               "date_modified": "13291142502233851",
+               "guid": "1cbf5e5d-5364-4af3-ab12-8a67c999264a",
+               "id": "34",
+               "name": "GNOME Extension",
+               "type": "folder"
+            } ],
+            "date_added": "13291243619124883",
+            "date_modified": "13291243622162057",
+            "guid": "b56bada4-793f-49b7-84c3-c34632a6488c",
+            "id": "54",
+            "name": "Linux",
+            "type": "folder"
+         }, {
+            "children": [ {
+               "children": [ {
+                  "date_added": "13291127188055294",
+                  "guid": "6d3a4f0d-8b43-42fa-b2e7-d9d61173117b",
+                  "id": "17",
+                  "name": "Capa 3C",
+                  "type": "url",
+                  "url": "https://pt.aliexpress.com/item/1005003656763295.html?spm=a2g0o.productlist.0.0.97431d0bB9iHtK&algo_pvid=e31d7e74-519f-4543-94c3-0543b45f6842&algo_exp_id=e31d7e74-519f-4543-94c3-0543b45f6842-51&pdp_ext_f=%7B%22sku_id%22%3A%2212000026676299710%22%7D&pdp_pi=-1%3B6.87%3B-1%3B2867%40salePrice%3BBRL%3Bsearch-mainSearch"
+               }, {
+                  "date_added": "13291128986092432",
+                  "guid": "f2d751e4-e5c2-4831-a97f-d24ed6c18f87",
+                  "id": "24",
+                  "name": "Capa2 3C",
+                  "type": "url",
+                  "url": "https://pt.aliexpress.com/item/1005003672411742.html?spm=a2g0o.store_pc_topSellerIng.8148356.7.31c644a6Zns5q2"
+               }, {
+                  "date_added": "13291129195101713",
+                  "guid": "5763fe85-b0d0-4528-b101-bbde1fea4abf",
+                  "id": "25",
+                  "name": "6 Analógico 3C",
+                  "type": "url",
+                  "url": "https://pt.aliexpress.com/item/1005003936657804.html?spm=a2g0o.store_pc_groupList.8148356.51.69a948bad26kVn"
+               }, {
+                  "date_added": "13291129410434713",
+                  "guid": "7174bf9a-0045-4a0e-a3d2-6e66d0ea410a",
+                  "id": "26",
+                  "name": "3 Pelicula 3C",
+                  "type": "url",
+                  "url": "https://pt.aliexpress.com/item/1005003891195335.html?spm=a2g0o.store_pc_groupList.8148356.31.266548baHRzpEz"
+               }, {
+                  "date_added": "13291129641657016",
+                  "guid": "f24f23b7-d401-49a1-9015-819220b6170f",
+                  "id": "27",
+                  "name": "Cartucho case 3C",
+                  "type": "url",
+                  "url": "https://pt.aliexpress.com/item/1005003672508363.html?spm=a2g0o.store_pc_allProduct.8148356.19.71cd70f6JBoORq"
+               }, {
+                  "date_added": "13291127237006951",
+                  "guid": "8acfd8db-7c77-4fa3-b488-c18a7f36ba0a",
+                  "id": "18",
+                  "name": "Capa",
+                  "type": "url",
+                  "url": "https://pt.aliexpress.com/item/1005003300137244.html?spm=a2g0o.detail.1000014.8.2d6514f4dKjCdg&gps-id=pcDetailBottomMoreOtherSeller&scm=1007.40050.266918.0&scm_id=1007.40050.266918.0&scm-url=1007.40050.266918.0&pvid=cb0587da-da84-4bf0-b078-641a56ebd9ec&_t=gps-id:pcDetailBottomMoreOtherSeller,scm-url:1007.40050.266918.0,pvid:cb0587da-da84-4bf0-b078-641a56ebd9ec,tpp_buckets:668%232846%238115%232000&pdp_ext_f=%257B%2522sku_id%2522%253A%252212000025093102805%2522%252C%2522sceneId%2522%253A%252230050%2522%257D&pdp_pi=-1%253B33.47%253B-1%253B-1%2540salePrice%253BBRL%253Brecommend-recommend"
+               }, {
+                  "date_added": "13291134967537521",
+                  "guid": "2ca3940f-9f90-491d-b6be-6a8650a09894",
+                  "id": "28",
+                  "name": "6 análogico barato",
+                  "type": "url",
+                  "url": "https://pt.aliexpress.com/item/1005003003372265.html?spm=a2g0o.productlist.0.0.7db67f9fR0QFpf&algo_pvid=8f701fd3-f34d-4e28-b110-b8e8cf360cbc&algo_exp_id=8f701fd3-f34d-4e28-b110-b8e8cf360cbc-27&pdp_ext_f=%7B%22sku_id%22%3A%2212000023165190640%22%7D&pdp_pi=-1%3B0.69%3B-1%3B2158%40salePrice%3BBRL%3Bsearch-mainSearch"
+               }, {
+                  "date_added": "13291135221271757",
+                  "guid": "fdb848a5-814f-4a2b-ac9d-2fd566129d05",
+                  "id": "29",
+                  "name": "Catucho case barato",
+                  "type": "url",
+                  "url": "https://pt.aliexpress.com/item/1005002329620827.html?spm=a2g0o.productlist.0.0.7db67f9fR0QFpf&algo_pvid=2c5d2486-ee79-427e-9ed4-4286fe8a0fe6&algo_exp_id=2c5d2486-ee79-427e-9ed4-4286fe8a0fe6-22&pdp_ext_f=%7B%22sku_id%22%3A%2212000020112921982%22%7D&pdp_pi=-1%3B5.54%3B-1%3B2025%40salePrice%3BBRL%3Bsearch-mainSearch"
+               }, {
+                  "date_added": "13291136443633962",
+                  "guid": "02343969-630b-4b57-81b3-ab93fd5f2e7a",
+                  "id": "30",
+                  "name": "Fone",
+                  "type": "url",
+                  "url": "https://pt.aliexpress.com/item/4001212290069.html?spm=a2g0o.productlist.0.0.261e6645zUTxlE&algo_pvid=3f051f67-4720-4d7d-9cfe-cf87c482700d&algo_exp_id=3f051f67-4720-4d7d-9cfe-cf87c482700d-30&pdp_ext_f=%7B%22sku_id%22%3A%2210000015319026761%22%7D&pdp_pi=-1%3B8.85%3B-1%3B2473%40salePrice%3BBRL%3Bsearch-mainSearch"
+               } ],
+               "date_added": "13291126957555845",
+               "date_modified": "13291136443633962",
+               "guid": "43424716-2566-49a5-a710-c3ecf4752e24",
+               "id": "11",
+               "name": "Nintendo Switch",
+               "type": "folder"
+            }, {
+               "date_added": "13290006938024842",
+               "guid": "663fe228-b4f5-4418-b331-03eb3fde42f9",
+               "id": "6",
+               "name": "Caneca De Porcelana divertida meme figurinha sticker bonecos palito flork com e sem café | Shopee Brasil",
+               "type": "url",
+               "url": "https://shopee.com.br/Caneca-De-Porcelana-divertida-meme-figurinha-sticker-bonecos-palito-flork-com-e-sem-caf%C3%A9-i.403254418.14328071293?sp_atk=999fcbb8-433f-4149-8476-e3e461411340"
+            } ],
+            "date_added": "13291243639644962",
+            "date_modified": "13291243643865843",
+            "guid": "8819640a-ead8-4f49-8c5d-a09a842e1f26",
+            "id": "55",
+            "name": "Shop",
+            "type": "folder"
+         } ],
+         "date_added": "13289424696279415",
+         "date_modified": "13291243639645429",
+         "guid": "0bc5d13f-2cba-5d74-951f-3f233fe6c908",
+         "id": "1",
+         "name": "Bookmarks bar",
+         "type": "folder"
+      },
+      "other": {
+         "children": [  ],
+         "date_added": "13289424696279433",
+         "date_modified": "0",
+         "guid": "82b081ec-3dd3-529c-8475-ab6c344590dd",
+         "id": "2",
+         "name": "Other bookmarks",
+         "type": "folder"
+      },
+      "synced": {
+         "children": [  ],
+         "date_added": "13289424696279435",
+         "date_modified": "0",
+         "guid": "4cf2e351-0e85-532b-bb37-df045d8f8d0f",
+         "id": "3",
+         "name": "Mobile bookmarks",
+         "type": "folder"
+      }
+   },
+   "version": 1
+}

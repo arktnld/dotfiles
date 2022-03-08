@@ -33,6 +33,7 @@ www.youtube.com###clarify-box > .ytd-watch-flexy.style-scope
 www.youtube.com##ytd-playlist-thumbnail.ytd-playlist-sidebar-primary-info-renderer.style-scope
 www.youtube.com##ytd-button-renderer.size-default.style-default.force-icon-button.ytd-menu-renderer.style-scope:nth-of-type(1)
 www.youtube.com##ytd-toggle-button-renderer.style-text.force-icon-button.ytd-menu-renderer.style-scope:nth-of-type(2)
+www.youtube.com###avatar-section
 
 ! 2022-03-08 https://www.facebook.com
 www.facebook.com##.l9j0dhe7.cxgpxx05.jbae33se.stjgntxs.ni8dbmo4.rl04r1d5.dlv3wnog.jifvfom9.owycx6da.btwxx1t3.j83agx80.gs1a9yip
@@ -114,3 +115,39 @@ duckduckgo.com###m2-0
 www.google.com###rso > .ULSxyf
 www.google.com##.oIk2Cb
 www.google.com##.mSAqxd.TrMVnc.f6F9Be
+www.google.com###media_result_group
+
+! 2022-03-08 https://askubuntu.com
+askubuntu.com##.js-dismissable-hero.ps-relative.fc-black-200.bg-black-750.py24.sm\:d-none
+askubuntu.com##.js-sticky-leftnav.left-sidebar--sticky-container
+
+! 2022-03-08 https://old.reddit.com
+old.reddit.com##.listingsignupbar.infobar
+old.reddit.com##.premium-banner
+old.reddit.com##.warn-on-unload.usertext
+old.reddit.com##.sidecontentbox
+old.reddit.com##.tabmenu > li:nth-of-type(6) > .choice
+old.reddit.com##.tabmenu > li:nth-of-type(5) > .choice
+old.reddit.com##.tabmenu > li:nth-of-type(4) > .choice
+old.reddit.com##.tabmenu > li:nth-of-type(3) > .choice
+old.reddit.com###sr-bar
+old.reddit.com##.redditname.pagename.hover
+old.reddit.com##.tabmenu > .selected > .choice
+old.reddit.com##.tabmenu > li:nth-of-type(2) > .choice
+old.reddit.com##.tabmenu > li:nth-of-type(7) > .choice
+old.reddit.com##ul.hover.sr-bar.flat-list:nth-of-type(2)
+old.reddit.com##span.separator:nth-of-type(2)
+old.reddit.com##.bottom
+old.reddit.com##.awardings-bar
+old.reddit.com##.domain
+old.reddit.com##.share
+old.reddit.com##.crosspost-button
+old.reddit.com##.login-required.report-button
+old.reddit.com##.give-gold-button
+old.reddit.com##.hide-button.state-button
+old.reddit.com##.login-required.save-button.link-save-button
+old.reddit.com##.unvoted.midcol
+old.reddit.com##.rank
+old.reddit.com##.linkflairlabel
+old.reddit.com##.rounded.footer
+old.reddit.com##.tabmenu

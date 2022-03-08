@@ -47,6 +47,7 @@
 ,tilix,a tiling terminal emulator for Linux using GTK+3.
 ,sxiv,simple X Image Viewer.
 ,adwaita-dark,A dark GTK2 theme for use alongside the dark variant of GTK3 Adwaita.
+,gnome-passwordsafe,Password manager for GNOME which makes use of the KeePass v.4 format
 #Conding Programs
 ,prettier,code formatter for JS JSON CSS YAML and much more.
 ,eslint,code checker for JavaScript.
@@ -71,3 +72,4 @@ A,googler,Google from the command-line.
 A,cht.sh-git,The only cheat sheet you need (command line client for cheat.sh site).
 A,nerd-fonts-noto-sans-mono,Standard variants of Noto Sans Mono patched with Nerd Fonts.
 A,mpv-mpris,MPRIS (Media Player Remote Interface Spec) plugin for mpv.
+A,bubblemail,New and Unread mail notification service for local mailboxes and gnome online accounts.
