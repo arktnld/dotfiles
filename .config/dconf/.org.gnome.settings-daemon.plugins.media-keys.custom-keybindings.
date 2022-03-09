@@ -1,0 +1,24 @@
+[custom0]
+binding='<Super>d'
+command='tilix -q'
+name='Tilix Quake'
+
+[custom1]
+binding='<Super>m'
+command='tdrop -h 50% -w 50% -x 410 -y 270 -ma -n yewtune tilix -p tdrop --window-style=borderless -e /home/arktnld/.local/bin/yt'
+name='yewtube'
+
+[custom2]
+binding='<Super>n'
+command='tdrop -h 50% -w 50% -x 410 -y 270 -ma -n nnn tilix -p tdrop  --window-style=borderless -e nnn'
+name='nnn'
+
+[custom3]
+binding='<Super>y'
+command='tdrop -h 70% -w 70% -x 250 -y 150 -ma -n mpv mpv --force-window'
+name='mpv'
+
+[custom4]
+binding='<Super>i'
+command='tdrop -h 70% -w 70% -x 250 -y 150 -ma -n telegram telegram-desktop'
+name='telegram'
