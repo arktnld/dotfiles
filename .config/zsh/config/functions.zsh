@@ -31,8 +31,6 @@ function cd() {
 }
 
 function v() {
-
-
 	# check if output is from stdin.
 	if [ ! -t 0 ]; then
 		nvim < /dev/stdin
@@ -60,9 +58,7 @@ function v() {
 	else
 		nvim "$@"
 	fi
-
 }
-
 
 # Git
 
@@ -144,8 +140,19 @@ gitls() {
 	paru --remove --nosave --recursive $(pacman -Qtdq | xargs)
 }
 
-@-remove-all-keep-base() {
-    sudo pacman -D --asdeps $(pacman -Qe)
+@-file-owner() {
+    # needs pamac package.
+    pamac search --files "$1"
+}
+
+@-gnome-reset() {
+    dconf reset -f /org/gnome/
+}
+
+@-packages-last-installed() {
+    # needs paclast package.
+    paclast | tac | tail -n20
+
 }
 
 # @-show-music-notes() {
@@ -153,11 +160,4 @@ gitls() {
 # 		"amovie='$1', asplit [a][out1]; [a] showcqt=size=1400x1052 [out0]";
 # }
 
-@-file-owner() {
-    pamac search --files "$1"
-}
-
-@-gnome-reset() {
-    dconf reset -f /org/gnome/
-}
 # vi: ft=sh

@@ -47,7 +47,7 @@
 ,tilix,a tiling terminal emulator for Linux using GTK+3.
 ,sxiv,simple X Image Viewer.
 ,adwaita-dark,A dark GTK2 theme for use alongside the dark variant of GTK3 Adwaita.
-,gnome-passwordsafe,Password manager for GNOME which makes use of the KeePass v.4 format
+,rofi,A window switcher application launcher and dmenu replacement.
 #Conding Programs
 ,prettier,code formatter for JS JSON CSS YAML and much more.
 ,eslint,code checker for JavaScript.
@@ -74,3 +74,5 @@ A,nerd-fonts-noto-sans-mono,Standard variants of Noto Sans Mono patched with Ner
 A,mpv-mpris,MPRIS (Media Player Remote Interface Spec) plugin for mpv.
 A,bubblemail,New and Unread mail notification service for local mailboxes and gnome online accounts.
 A,tdrop-git,A WM-Independent dropdown window and terminal creator.
+A,keepmenu,Dmenu/Rofi frontend for Keepass databases.
+A,paclast,list installed pacman packages in chronological order.
