@@ -11,13 +11,12 @@ function! PackInit() abort
 
 	" Core plugins on startup.
 	call minpac#add('dense-analysis/ale') " linting
-	call minpac#add('mhinz/vim-signify') " git status diff
-	call minpac#add('sheerun/vim-polyglot') " code packs configs
-	call minpac#add('tmsvg/pear-tree') " auto pair
     call minpac#add('b3nj5m1n/kommentary') " comment motion
     call minpac#add('mateusbraga/vim-spell-pt-br') " pt_BR Dict
-    call minpac#add('lukas-reineke/indent-blankline.nvim') " indentation guides lines
-    call minpac#add('vigoux/LanguageTool.nvim') " Gramma check
+	" call minpac#add('tmsvg/pear-tree') " auto pair
+	" call minpac#add('mhinz/vim-signify') " git status diff
+    " call minpac#add('lukas-reineke/indent-blankline.nvim') " indentation guides lines
+	" call minpac#add('sheerun/vim-polyglot') " code packs configs
 
 	" Additional plugins here.
 	call minpac#add('k-takata/minpac', {'type': 'opt'}) " simple plugin manager

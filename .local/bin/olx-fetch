@@ -1,5 +1,5 @@
 #!/bin/bash
-# Simple script to show used products.
+# Simple script to show used products
 
 LOCKFILE=/tmp/lock.txt
 if [ -e ${LOCKFILE} ] && kill -0 `cat ${LOCKFILE}`; then
@@ -15,23 +15,32 @@ listex='boneca xadrez barbie princesa princesas dama
 imoveis gamão fidget frete polegadas capacitores Catálogo
 Ryzen aluguel processador amd intel celular drone
 diversão alegria festa microfone serviços empresas
-informatica funko mudança teclado samsung monitor drag
-impressora acrilico montador memoria mascaras pneu
-escorregador limpeza moeda mascara boneco bonecos cds loja
-maquina pula urso free pelucia andador colete tapete pop
+funko mudança samsung drag acrilico montador memoria mascaras pneu
+escorregador limpeza moeda moedas mascara boneco bonecos cds loja
+pula urso free pelucia andador colete tapete
 figure nerfs carrinhos carrinho bebê patins
-puff barracas notas selos bolsa telescópio
+puff barracas notas selos bolsa telescópio vapi
 massageador canetas prancha capacete barraca chave trena
-vinil cpu miniatura miniaturas jeans moletom jaqueta vapa
-carretinha pods faca roupa mouse espada gamer relógio
+vinil miniatura miniaturas jeans moletom jaqueta vapa
+carretinha pods faca roupa espada relógio
 fone lanterna cédulas cédula bateria algemas refil vara
-carretilha pesca fonte miçangas notebook ssd sultam aula
-sultan fantasia casa estabilizador novidade atraente pc
+carretilha pesca fonte miçangas sultam aula
+sultan fantasia casa estabilizador novidade atraente
 htvi btvi recarga violão escaleta brigadeiros oxímetro
 Whisky porta telefônicos cruzeiro molinete automotivo
-carro canivetes desentupidora manutençao computador
+carro canivetes desentupidora manutençao
 gincho locação desentupimento vazamentos vazamento
-dedetizadora'
+dedetizadora desentupir iphone figura hotwheels disco
+bonsai seios pinto aerógrafo minhocas luneta
+viola estátua pullip caneca canecas vinho vinhos vodka bicicleta
+culer poltrona resina arquitetura comemorativo comemorativa
+desentupidor dedetização residenciais pinturas pintura fogareiro
+camping quadro protetor protetora telefônico adesiva adesivo
+módulo abridor garrafas garrafa externo conserto jardinhagem
+internet cadeado alicate orelhão selim farol overboard bike
+som dvds album albuns bone capa canivete led lenço conversor
+adaptador professor vhs vitrificador mangá costura insignea
+baratex cortadores celulite'
 
 olx=/tmp/olx.html
 diffs=/tmp/diffs
@@ -180,24 +189,24 @@ rm -f $olx $urlbg $diffs
 
 ## Logic Video Games ##
 
-tsconf="$ofhome/olxgm.conf"
-regs="$ofhome/olxgm"
+# tsconf="$ofhome/olxgm.conf"
+# regs="$ofhome/olxgm"
 
-file="olx.html"
-webpg="https://df.olx.com.br/?q=nintendo&sf=1#"
+# file="olx.html"
+# webpg="https://df.olx.com.br/?q=nintendo&sf=1#"
 
-include="videogames"
-exclude="$listex"
+# include="videogames"
+# exclude="$listex"
 
-echo init script
-getpage "$file" "$webpg"
-geturls "$include" "$exclude"
-[ -s "$urlbg" ] || exit 1
-diffurls
-loop
+# echo init script
+# getpage "$file" "$webpg"
+# geturls "$include" "$exclude"
+# [ -s "$urlbg" ] || exit 1
+# diffurls
+# loop
 
-cat $urlbg >| "$regs"
-rm -f $olx $urlbg $diffs
+# cat $urlbg >| "$regs"
+# rm -f $olx $urlbg $diffs
 
 
 
@@ -227,24 +236,24 @@ rm -f $olx $urlbg $diffs
 
 ## Logic Hobbies e Coleções ##
 
-# tsconf="$ofhome/olxhc.conf"
-# regs="$ofhome/olxhc"
+tsconf="$ofhome/olxhc.conf"
+regs="$ofhome/olxhc"
 
-# file="olx.html"
-# webpg="https://df.olx.com.br/hobbies-e-colecoes?sf=1"
+file="olx.html"
+webpg="https://df.olx.com.br/hobbies-e-colecoes?sf=1"
 
-# include="hobbies-e-colecoes"
-# exclude="$listex"
+include="hobbies-e-colecoes"
+exclude="$listex"
 
-# echo init script
-# getpage "$file" "$webpg"
-# geturls "$include" "$exclude"
-# [ -s "$urlbg" ] || exit 1
-# diffurls
-# loop
+echo init script
+getpage "$file" "$webpg"
+geturls "$include" "$exclude"
+[ -s "$urlbg" ] || exit 1
+diffurls
+loop
 
-# cat $urlbg >| "$regs"
-# rm -f $olx $urlbg $diffs
+cat $urlbg >| "$regs"
+rm -f $olx $urlbg $diffs
 
 
 

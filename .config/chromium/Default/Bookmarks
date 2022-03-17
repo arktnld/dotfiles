@@ -1,5 +1,5 @@
 {
-   "checksum": "f31a2beba4ca27391269203645c3e100",
+   "checksum": "50a72227a87222b5bc1391586a207285",
    "roots": {
       "bookmark_bar": {
          "children": [ {
@@ -243,9 +243,23 @@
             "id": "55",
             "name": "Shop",
             "type": "folder"
+         }, {
+            "date_added": "13291479155026836",
+            "guid": "8c5f22b9-6fa7-4b46-8327-641d4fa9c2dd",
+            "id": "62",
+            "name": "Associados Amazon.com.br",
+            "type": "url",
+            "url": "https://associados.amazon.com.br/home"
+         }, {
+            "date_added": "13291936770223981",
+            "guid": "8c114e50-7759-4386-a265-41b6aeb40797",
+            "id": "64",
+            "name": "bg -50%",
+            "type": "url",
+            "url": "https://www.amazon.com.br/s?k=jogo+de+tabuleiro&i=toys&rh=p_8%3A50-"
          } ],
          "date_added": "13289424696279415",
-         "date_modified": "13291331401419583",
+         "date_modified": "13291936770223981",
          "guid": "0bc5d13f-2cba-5d74-951f-3f233fe6c908",
          "id": "1",
          "name": "Bookmarks bar",

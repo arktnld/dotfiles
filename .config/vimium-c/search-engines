@@ -1,0 +1,39 @@
+g|go|gg|google|Google: https://www.google.com/search?q=%s \
+  www.google.com re=/^(?:\.[a-z]{2,4})?\/search\b.*?[#&?]q=([^#&]*)/i\
+  blank=https://www.google.com/ Google
+b|bing: https://www.bing.com/search?q=%s \
+  blank=https://www.bing.com/ Bing
+d|dd|ddg|duckduckgo: https://duckduckgo.com/?q=%s DuckDuckGo
+
+y|yt: https://www.youtube.com/results?search_query=%s \
+  blank=https://www.youtube.com/ YouTube
+w|wiki: https://www.wikipedia.org/w/index.php?search=%s Wikipedia
+l|ludo|ludopedia: https://www.ludopedia.com.br/search?search=%s \
+  blank=https://www.ludopedia.com.br Ludopedia
+c|comp|comparajogos: https://www.comparajogos.com.br/todos?q=%s \
+  blank=https://www.comparajogos.com.br/amazon Compara Jogos
+n|g.n|news: https://news.google.com/search?q=%s&hl=pt-BR \
+  blank=https://news.google.com Google News
+r|reddit: https://old.reddit.com/search?q=%s \
+  blank=https://old.reddit.com Reddit
+
+a|amazon: https://www.amazon.com.br/s/?field-keywords=%s \
+  blank=https://www.amazon.com.br/ Amazon
+o|olx: https://df.olx.com.br/?q=%s \
+    blank=https://df.olx.com.br OLX
+ae|ali|alie|aliexp: https://www.aliexpress.com/wholesale?SearchText=%s \
+  blank=https://www.aliexpress.com/ AliExpress
+
+enpt: https://translate.google.com/?sl=en&tl=pt&text=%s \
+    blank=https://translate.google.com/ Google Translate
+pten: https://translate.google.com/?sl=pt&tl=en&text=%s \
+    blank=https://translate.google.com/ Google Translate
+si|sin|sinonimos: https://www.sinonimos.com.br/%s \
+    blank=https://www.sinonimos.com.br Sinonimos
+
+gh|github: https://github.com/search?q=$s \
+  blank=https://github.com/ GitHub Repo
+js\:|Js: javascript:\ $S; JavaScript
+
+gm1: https://mail.google.com/mail/u/0/#inbox
+gm2: https://mail.google.com/mail/u/1/#inbox

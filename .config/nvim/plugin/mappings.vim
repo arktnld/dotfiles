@@ -72,10 +72,14 @@ noremap <leader>8 8gt
 noremap <leader>9 9gt
 noremap <leader>0 :tablast<cr>
 
+" Quick settings
+noremap <leader>s :set spell<cr>
+noremap <leader>l :set list<cr>
+noremap <leader>w :set wrap<cr>
+
 """ Insert Mappings
 
 " Cycle through completion items when popup menu is visible, trigger completion upon written words.
 inoremap <silent><expr> <Tab> mappings#insert#handle#tab({ 'key': "\<Tab>" })
 inoremap <silent><expr> <S-Tab> mappings#insert#handle#tab({ 'key': "\<S-Tab>" })
 inoremap <silent><expr> <Enter> mappings#insert#handle#enter()
-
