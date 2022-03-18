@@ -3,7 +3,7 @@
 "
 
 "" Add optional plugin to 'runtimepath' without sourcing anything.
-packadd! nnn.vim
+packadd! nnn
 
 " Source plugin file and run command.
 noremap <silent> <Leader>n :runtime! plugin/**/nnn.vim <Bar> :NnnPicker %:p:h<Enter>

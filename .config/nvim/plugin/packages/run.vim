@@ -2,6 +2,8 @@
 " Run any file and show output inside vim.
 "
 
+packadd! run
+
 nnoremap <silent> <leader>o :packadd vim-run <Bar> call CmdRun()<cr>
 
 function! CmdRun()
