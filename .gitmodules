@@ -1,0 +1,36 @@
+[submodule "autosuggestions"]
+  path = .config/zsh/plugins/autosuggestions
+  url = https://github.com/zsh-users/zsh-autosuggestions
+ url = https://github.com/kutsan/fast-syntax-highlighting
+
+[submodule "autopairs"]
+  path = .config/nvim/pack/bundle/start/autopairs
+  url = https://github.com/windwp/nvim-autopairs
+[submodule "colorizer"]
+  path = .config/nvim/pack/bundle/start/colorizer
+  url = https://github.com/norcalli/nvim-colorizer.lua
+[submodule "lspconfig"]
+  path = .config/nvim/pack/bundle/start/lspconfig
+  url = https://github.com/neovim/nvim-lspconfig
+
+[submodule "kommentary"]
+  path = .config/nvim/pack/bundle/opt/kommentary
+  url = https://github.com/b3nj5m1n/kommentary
+[submodule "vim-spell-pt-br"]
+  path = .config/nvim/pack/bundle/opt/spellptbr
+  url = https://github.com/mateusbraga/vim-spell-pt-br
+[submodule "vimwiki"]
+  path = .config/nvim/pack/bundle/opt/vimwiki
+  url = https://github.com/vimwiki/vimwiki
+[submodule "colorizer"]
+  path = .config/nvim/pack/bundle/opt/colorizer
+  url = https://github.com/lilydjwg/colorizer
+[submodule "nnn.vim"]
+  path = .config/nvim/pack/bundle/opt/nnn
+  url = https://github.com/mcchrish/nnn.vim
+[submodule "vim-run"]
+  path = .config/nvim/pack/bundle/opt/run
+  url = https://github.com/leafOfTree/vim-run
+[submodule "markdown-preview"]
+  path = .config/nvim/pack/bundle/opt/mdpreview
+  url = https://github.com/iamcco/markdown-preview.nvim

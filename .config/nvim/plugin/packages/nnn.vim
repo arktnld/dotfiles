@@ -24,5 +24,5 @@ let $NNN_TRASH="n (n=1: trash-cli, n=2: gio trash)"
 let g:nnn#action = {
     \ '<c-p>': 'tab split',
     \ '<c-x>': 'split',
-   \ '<c-v>': 'vsplit' }
-
+   \ '<c-v>': 'vsplit',
+   \ '<c-[>': 'close' }

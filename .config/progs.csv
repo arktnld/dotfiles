@@ -51,9 +51,9 @@
 #Conding Programs
 ,prettier,code formatter for JS JSON CSS YAML and much more.
 ,eslint,code checker for JavaScript.
-,vint,Lint tool for Vim script Language.
-,flake8,Python source code checker.
-,shfmt,shell script analysis tool.
+,pyright,Python source code checker.
+,vim-language-server,Lint tool for Vim script Language.
+,bash-language-server,shell script analysis tool.
 #Minimal Gnome Installation
 ,gnome-shell,Next generation desktop shell.
 ,nautilus,Default Gnome file manager.

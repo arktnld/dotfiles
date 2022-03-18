@@ -1,3 +1,7 @@
+"
+" Preview markdown on your browser with synchronised
+" scrolling and flexible configuration.
+"
 
 "" Add optional plugin to 'runtimepath' without sourcing anything.
 packadd! markdown-preview.nvim

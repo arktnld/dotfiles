@@ -13,11 +13,11 @@ scriptencoding UTF-8
 
 " [1] Linter status, error and warnings count with Unicode symbols.
 set statusline+=%{repeat('\ ',2)} " Generate space characters given number of times.
-set statusline+=%#LinterError#
-set statusline+=%{statusline#errors()}
-set statusline+=%#LinterWarning#
-set statusline+=%{statusline#warnings()}
-set statusline+=%#StatusLine#
+" set statusline+=%#LinterError#
+" set statusline+=%{statusline#errors()}
+" set statusline+=%#LinterWarning#
+" set statusline+=%{statusline#warnings()}
+" set statusline+=%#StatusLine#
 
 " Truncate lines to left if they are too long.
 set statusline+=%<

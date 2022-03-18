@@ -102,7 +102,7 @@ set wildcharm=<C-z> " The key to start wildcard expansion inside macro.
 set wildignorecase " Ignore case when completing in command menu.
 
 " Spell
-set spelllang=en,pt " Add portuguese dict to vim spell.
+set spelllang=en,pt_br " Add portuguese dict to vim spell.
 
 " Neovim
 if has('nvim')

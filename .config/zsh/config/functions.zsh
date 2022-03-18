@@ -1,5 +1,11 @@
 # Functions
 
+cht-plain() {
+    export CHTSH_QUERY_OPTIONS="T"
+    cht.sh "$@";
+    export CHTSH_QUERY_OPTIONS="style=trac"
+}
+
 torrent() {
 	aria2c --follow-torrent=mem --seed-time=0 --console-log-leve=error "$@"
 }
