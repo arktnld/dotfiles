@@ -7,6 +7,7 @@ foreach file (
   functions.zsh
   aliases.zsh
   mappings.zsh
+  plugins.zsh
 ) {
   source $ZDOTDIR/config/$file
 }

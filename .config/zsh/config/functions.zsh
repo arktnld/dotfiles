@@ -112,6 +112,14 @@ gitls() {
     if [[ ! -z "$untracked" ]] && echo -e "\n""$bold""Untracked Files""$normal\n""\n$ignored" || echo -e "$bold""\nNo Untracked Files""$normal"
 }
 
+github() { # see ditfiles on github
+    user=$(whoami)
+    local args="$@"
+
+    xdg-open "https://github.com/$user/dotfiles/tree/master/$args" >/dev/null 2>&1
+
+}
+
 # Useful scripts
 
 # Always look on your most used commands and create shotcuts.
