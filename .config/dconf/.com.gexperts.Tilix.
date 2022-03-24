@@ -75,16 +75,17 @@ list=['2b7c4080-0ddd-46c5-8f23-563fd3ba789d', '347c39e9-b092-4682-8f29-f49bdf294
 
 [profiles/2b7c4080-0ddd-46c5-8f23-563fd3ba789d]
 background-color='#222222'
-background-transparency-percent=20
+background-transparency-percent=23
 badge-color-set=false
 bold-color-set=false
 cursor-colors-set=false
 dim-transparency-percent=0
-font='NotoSansMono Nerd Font 12'
+font='Source Code Pro 13'
 foreground-color='#CCCCCC'
 highlight-colors-set=false
 login-shell=true
 palette=['#424242', '#E32791', '#5FD7A7', '#F3E430', '#B6D6FD', '#6855DE', '#4FB8CC', '#999999', '#CCCCCC', '#FF1A72', '#10A778', '#A89C14', '#008EC4', '#523C79', '#20A5BA', '#FFFFFF']
+select-by-word-chars='-,./?%&#:_'
 show-scrollbar=false
 use-system-font=false
 use-theme-colors=false

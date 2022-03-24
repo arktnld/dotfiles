@@ -4,7 +4,7 @@
 
 packadd! run
 
-nnoremap <silent> <leader>o :packadd vim-run <Bar> call CmdRun()<cr>
+nnoremap <silent> <leader>r :packadd vim-run <Bar> call CmdRun()<cr>
 
 function! CmdRun()
     call run#Update()

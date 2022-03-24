@@ -19,8 +19,8 @@ export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_CACHE_HOME="$HOME/.cache"
 
 # man
-export MANWIDTH='100'
 export MANPAGER='nvim +Man!'
+export MANWIDTH=999
 
 # GnuPG
 export GPG_TTY=$(tty)
@@ -30,8 +30,8 @@ export GNUPGHOME="$HOME/.config/gnupg"
 export WGETRC="$HOME/.config/wget/wgetrc"
 
 # golang
-# export GOPATH="$HOME/.local/share/go"
-# export GOROOT="/usr/lib/go"
+export GOPATH="$HOME/.local/share/go"
+export GOROOT="/usr/lib/go"
 
 # cheat.sh
 export CHTSH_QUERY_OPTIONS="style=trac"

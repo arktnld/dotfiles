@@ -20,6 +20,7 @@
 ,expac,pacman database extraction utility.
 ,os-prober,make grub detect other systems like Windows.
 ,glow,Markdown renderer for the CLI.
+,adobe-source-code-pro-fonts,Monospaced font family for user interface and coding environments.
 ,ttf-dejavu,font family based on the bitstream vera fonts.
 ,ttf-liberation,font family which aims at metric compatibility.
 ,noto-fonts,Google Noto TTF fonts.
@@ -76,3 +77,4 @@ A,bubblemail,New and Unread mail notification service for local mailboxes and gn
 A,tdrop-git,A WM-Independent dropdown window and terminal creator.
 A,keepmenu,Dmenu/Rofi frontend for Keepass databases.
 A,paclast,list installed pacman packages in chronological order.
+A,ltex-ls-bin,LSP language server for LanguageTool.

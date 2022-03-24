@@ -113,11 +113,9 @@ gitls() {
 }
 
 github() { # see ditfiles on github
-    user=$(whoami)
-    local args="$@"
-
+    local user=$(whoami)
+    local args="${@/$HOME\//}"
     xdg-open "https://github.com/$user/dotfiles/tree/master/$args" >/dev/null 2>&1
-
 }
 
 # Useful scripts

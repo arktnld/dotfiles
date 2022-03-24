@@ -4,7 +4,7 @@
 "
 
 "" Add optional plugin to 'runtimepath' without sourcing anything.
-packadd! mdpreview
+packadd! markdown-preview.nvim
 
 " set to 1, nvim will open the preview window after entering the markdown buffer
 " default: 0

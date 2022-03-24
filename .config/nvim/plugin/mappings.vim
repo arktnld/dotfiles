@@ -32,6 +32,7 @@ nnoremap n :silent set hlsearch <Bar> normal! n<Enter>
 nnoremap N :silent set hlsearch <Bar> normal! N<Enter>
 nnoremap <silent> <ESC> :set nohlsearch<Enter>
 
+
 """ Command Mappings
 
 " command mode easy navigation.
@@ -83,3 +84,9 @@ noremap <leader>w :set wrap<cr>
 inoremap <silent><expr> <Tab> mappings#insert#handle#tab({ 'key': "\<Tab>" })
 inoremap <silent><expr> <S-Tab> mappings#insert#handle#tab({ 'key': "\<S-Tab>" })
 inoremap <silent><expr> <Enter> mappings#insert#handle#enter()
+
+""" Operator
+
+" Comment lines
+nnoremap <silent> gc :<C-u>set opfunc=mappings#operator#comment#<Enter>g@
+xnoremap <silent> gc :<C-u>call mappings#operator#comment#(visualmode())<Enter>

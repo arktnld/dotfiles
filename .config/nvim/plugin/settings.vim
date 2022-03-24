@@ -68,6 +68,7 @@ set smartindent " Automatically inserts one extra level of indentation in some c
 set foldlevelstart=99 " Start editing with all folds open.
 set foldmethod=indent " Use indent model for folding mechanism.
 
+
 " Search
 let &grepprg = 'ag' " Program to use for the :grep command.
 set grepformat=%f:%l:%c:%m,%f:%l:%m " Format to recognize for the :grep command output.
