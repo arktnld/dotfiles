@@ -1,5 +1,35 @@
 # Functions
 
+wiki() {
+
+    if [ -z "$@" ]; then
+        # local oldpath=$(pwd)
+        # builtin cd ~/Documents/wiki
+        # local file=$(find ~/Documents/wiki -type f -not -path ".git/*" | fzf --exact --prompt='wiki ')
+        local file=$(find ~/Documents/wiki -type f -not -path "/home/arktnld/Documents/wiki/.*" |
+            sed 's#/home/arktnld/Documents/wiki/##' |
+            fzf --exact --prompt='wiki ')
+        [[ -n "$file" ]] && nvim "$HOME/Documents/wiki/$file"
+        # builtin cd $oldpath
+    elif [ "$@" == "main" ]; then
+        nvim "$HOME/Documents/wiki/index.md"
+    elif [ "$@" == "dev" ]; then
+        nvim "$HOME/Documents/wiki/dev/index.md" || return
+    elif [ "$@" == "plan" ]; then
+        nvim "$HOME/Documents/wiki/plan/index.md" || return
+    elif [ "$@" == "study" ]; then
+        nvim "$HOME/Documents/wiki/study/index.md" || return
+    elif [ "$@" == "self" ]; then
+        nvim "$HOME/Documents/wiki/self/index.md" || return
+    else
+        echo "Wiki \"$@\" NOT Found."
+        echo "Available wiki's are:"
+        echo "main dev plan self study"
+    fi
+
+    return 0
+}
+
 cht-plain() {
     export CHTSH_QUERY_OPTIONS="T"
     cht.sh "$@";

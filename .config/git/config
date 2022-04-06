@@ -91,5 +91,6 @@
 [url "git@github.com:"]
   insteadOf = "g:"
   pushInsteadOf = "g:"
+
 [credential]
 	helper = cache

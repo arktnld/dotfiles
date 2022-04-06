@@ -23,16 +23,17 @@ set statusline+=%{repeat('\ ',2)} " Generate space characters given number of ti
 set statusline+=%<
 
 " [2] Git HEAD status.
-set statusline+=%{statusline#git()}
+set statusline+=%{statusline#git#sign()}
 
 " [3] Relative path to file's directory with trailing '/'.
-set statusline+=%{statusline#fileprefix()}
+set statusline+=%{statusline#file#prefix()}
 
 " Align all items to right from this point on.
 set statusline+=%=
 
+
 " [4] Line numbers and column numbers in <Line>:<Column> format.
 set statusline+=%02l/%02c
-set statusline+=%{statusline#spell()} " Show icon for spell option.
+set statusline+=%{statusline#file#spell()} " Show icon for spell option.
 set statusline+=%02L
 set statusline+=%{repeat('\ ',2)}

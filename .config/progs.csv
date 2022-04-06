@@ -30,6 +30,7 @@
 ,bc,An arbitrary precision calculator language.
 ,ly,TUI display manager.
 ,cronie,Daemon that runs specified programs at scheduled times and related tools.
+,zsh-completions,Additional completion definitions for Zsh.
 #Graphics Drivers
 ,lib32-mesa,An open-source implementation of the OpenGL specification.
 ,lib32-sdl2,A library for portable low-level access to a video framebuffer.

@@ -1,3 +1,8 @@
+#
+# To output the character zsh associates with each key,
+# type `ctrl + v` then the character.
+#
+
 # Insert Mode
 bindkey -M viins '^K' up-history
 bindkey -M viins '^J' down-history
@@ -52,4 +57,3 @@ function user-fuzzy-history() {
   zle reset-prompt
   return $stat
 }
-

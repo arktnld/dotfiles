@@ -41,6 +41,19 @@ export NNN_OPTS="cEHo"
 export NNN_OPENER="/usr/share/nnn/plugins/nuke"
 export NNN_TRASH="n (n=1: trash-cli, n=2: gio trash)"
 
+# zsh plugin
+export ZSH_AUTOSUGGEST_STRATEGY=(completion history)
+export ZSH_AUTOSUGGEST_COMPLETION_IGNORE=""
+unset ZSH_AUTOSUGGEST_USE_ASYNC
+# export ZSH_AUTOSUGGEST_HISTORY_IGNORE="cd *"
+ZSH_AUTOSUGGEST_ACCEPT_WIDGETS=(
+    forward-word
+)
+ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS=(
+    forward-char
+)
+# export ZSH_AUTOSUGGEST_MANUAL_REBIND=""
+
 # fzf
 export FZF_DEFAULT_COMMAND="\
   find . \
@@ -99,3 +112,5 @@ export LESSOPEN="| /usr/bin/highlight -O ansi %s 2>/dev/null"
 # export PYTHONUSERBASE="$HOME/.local"
 # export CARGO_HOME="$HOME/.local/share/cargo"
 # export GTK2_RC_FILES="$HOME/.config/gtk-2.0/gtkrc-2.0"
+#
+export NODE_PATH=$NODE_PATH:$(npm root -g)
