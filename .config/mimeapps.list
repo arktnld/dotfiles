@@ -49,6 +49,7 @@ x-scheme-handler/webcal=userapp-Thunderbird-74UEH1.desktop;
 x-scheme-handler/webcals=userapp-Thunderbird-74UEH1.desktop;
 text/csv=org.gnome.gedit.desktop;
 application/xml=org.gnome.gedit.desktop;
+application/json=org.gnome.gedit.desktop;
 
 [Default Applications]
 x-scheme-handler/tg=userapp-Telegram Desktop-TDP8H1.desktop

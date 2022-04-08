@@ -141,9 +141,9 @@
 ],
 
   "lastplayed":{
-	"id": "8e24fd59-f533-4d2b-86ec-ac259126ac34",
-	"name": "KissFM",
-	"address": "http://cloud2.cdnseguro.com:23538/;",
+	"id": "51cb7f9f-db9a-4d8d-bfb2-e056947e2c28",
+	"name": "JovemPan",
+	"address": "https://ssl1.transmissaodigital.com:2274/stream",
 	"encoding": false
 }
 }
