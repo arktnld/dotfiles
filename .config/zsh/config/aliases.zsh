@@ -19,8 +19,7 @@ alias pbcopy='xclip -selection clipboard' # Copy terminal output.
 alias pbpaste='xclip -selection clipboard -out' # Paste text on clipboard.
 alias d='wget $(xclip -selection clipboard -out)' # Download using link on clipboard.
 alias pi='ping 1.1.1.1' # Tired of ping in google?
-alias cht=cht.sh # The only cheat sheet you need
-alias mail='himalaya -a ark; himalaya -a cle'
+alias cht='cht.sh' # The only cheat sheet you need
 
 # Archive
 alias ae='patool extract' # Unpack one or more archives.

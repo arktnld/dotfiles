@@ -48,7 +48,6 @@
 ,zathura-pdf-mupdf,adds supports for PDF ePub and OpenXPS.
 ,tilix,a tiling terminal emulator for Linux using GTK+3.
 ,sxiv,simple X Image Viewer.
-,adwaita-dark,A dark GTK2 theme for use alongside the dark variant of GTK3 Adwaita.
 ,rofi,A window switcher application launcher and dmenu replacement.
 ,qutebrowser,A keyboard-driven vim-like browser based on PyQt5.
 #Conding Programs

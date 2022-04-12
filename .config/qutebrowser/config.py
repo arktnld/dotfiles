@@ -16,7 +16,7 @@ c.content.pdfjs = False
 # qutebrowser behavior
 c.hints.mode = 'number'
 c.scrolling.bar = 'never'
-c.tabs.position = 'bottom'
+c.tabs.position = 'left'
 c.url.start_pages = "https://calendar.google.com/"
 c.spellcheck.languages = ['en-US', 'pt-BR']
 c.downloads.location.directory = os.path.expanduser("~/Downloads")
@@ -92,8 +92,9 @@ c.aliases['w'] = 'session-save'
 c.aliases['q'] = 'quit'
 c.aliases['wq'] = 'quit --save'
 c.aliases['timer'] = 'open -t https://fitlb.com/tabata-timer'
-c.aliases['mpv'] = 'spawn --userscript ~/.local/bin/view_in_mpv'
-c.aliases['ytdl'] = """spawn -v -m bash -c 'cd ~/vid/yt && youtube-dl "$@"' _ {url}"""
+c.aliases['empty'] = 'open -t ~/.config/qutebrowser/templates/empty.html'
+c.aliases['mpv'] = 'spawn --userscript view_in_mpv'
+c.aliases['ytdl'] = """spawn -v -m bash -c 'cd ~/Videos && youtube-dl "$@"' _ {url}"""
 
 # mappings
 c.bindings.key_mappings['<Ctrl-[>'] = '<Escape>'
@@ -110,12 +111,12 @@ c.url.searchengines['c'] = 'https://www.comparajogos.com.br/todos?q={}'
 c.url.searchengines['g'] = 'https://www.google.com/search?q={}'
 c.url.searchengines['l'] = 'https://www.ludopedia.com.br/search?search={}'
 c.url.searchengines['o'] = 'https://df.olx.com.br/?q={}'
-c.url.searchengines['y'] = 'https://www.youtube.com/results?search_query={}'
 c.url.searchengines['gh'] = 'https://github.com/search?q={}'
 c.url.searchengines['ghc'] = 'https://github.com/search?q={}&type=Code'
 c.url.searchengines['si'] = 'sinonimos: https://www.sinonimos.com.br/{}'
 c.url.searchengines['enpt'] = 'https://translate.google.com/?sl=en&tl=pt&text={}'
 c.url.searchengines['pten'] = 'https://translate.google.com/?sl=pt&tl=en&text={}'
+# c.url.searchengines['y'] = 'https://www.youtube.com/results?search_query={}'
 
 ## bindings
 config.bind('O', 'set-cmd-text -s :open')
@@ -132,10 +133,9 @@ config.bind('?', 'open -t qute://help/img/cheatsheet-big.png')
 config.bind(',q', 'close')
 config.bind(',c', 'spawn -d chromium {url}')
 config.bind(',r', 'spawn --userscript readability-js')
-config.bind(',v', 'hint links spawn tdrop -h 70% -w 70% -x 250 -y 150 -ma -n mpv mpv {hint-url}')
-config.bind(',a', 'hint links spawn ~/.local/bin/umpv --no-video {hint-url}')
-config.bind(',V', 'hint --rapid links tag-bg spawn ~/.local/bin/umpv {hint-url}')
 config.bind(',d', 'config-cycle colors.webpage.darkmode.enabled ;; restart')
+config.bind(',v', 'hint links spawn tdrop -h 70% -w 70% -x 250 -y 150 -ma -n mpv mpv {hint-url}')
+config.bind(',V', 'hint links spawn mpv --no-video {hint-url}')
 
 # javascript, images and cookies whitelist
 config.set('content.cookies.accept', 'never', '*') # Desable cookies for all websites with the exception of sites specified to use.
@@ -146,36 +146,36 @@ config.set('content.images', True, 'qute://*/*')               #
 config.set('content.javascript.enabled', True, 'chrome://*/*') #
 config.set('content.javascript.enabled', True, '*://*.duckduckgo.com/*') # duckduckgo
 config.set('content.images', True, '*://*.duckduckgo.com/*')             #
-config.set('content.javascript.enabled', True, '*://*.bing.com/*') # bing
-config.set('content.images', True, '*://*.bing.com/*')             #
+# config.set('content.javascript.enabled', True, '*://*.bing.com/*') # bing
+# config.set('content.images', True, '*://*.bing.com/*')             #
 config.set('content.javascript.enabled', True, '*://*.google.com/*') # google
 config.set('content.images', True, '*://*.google.com/*')             #
 config.set('content.cookies.accept', 'all', '*://*.google.com/*')    #
-config.set('content.javascript.enabled', True, '*://*.youtube.com/*') # youtube
-config.set('content.images', True, '*://*.youtube.com/*')             #
-config.set('content.cookies.accept', 'all', '*://*.youtube.com/*')    #
+# config.set('content.javascript.enabled', True, '*://*.youtube.com/*') # youtube
+# config.set('content.images', True, '*://*.youtube.com/*')             #
+# config.set('content.cookies.accept', 'all', '*://*.youtube.com/*')    #
 config.set('content.javascript.enabled', True, '*://*.github.com/*') # github
 config.set('content.images', True, '*://*.github.com/*')             #
 config.set('content.cookies.accept', 'all', '*://*.github.com/*')    #
 config.set('content.javascript.enabled', True, '*://*.reddit.com/*') # reddit
 config.set('content.images', True, '*://*.reddit.com/*')             #
 config.set('content.cookies.accept', 'all', '*://*.reddit.com/*')    #
-config.set('content.javascript.enabled', True, '*://*.comparajogos.com.br/*') # comparajogos
-config.set('content.images', True, '*://*.comparajogos.com.br/*')             #
-config.set('content.cookies.accept', 'all', '*://*.comparajogos.com.br/*')    #
-config.set('content.javascript.enabled', True, '*://*.ludopedia.com.br/*') # ludopedia
-config.set('content.images', True, '*://*.ludopedia.com.br/*')             #
-config.set('content.cookies.accept', 'all', '*://*.ludopedia.com.br/*')    #
+# config.set('content.javascript.enabled', True, '*://*.comparajogos.com.br/*') # comparajogos
+# config.set('content.images', True, '*://*.comparajogos.com.br/*')             #
+# config.set('content.cookies.accept', 'all', '*://*.comparajogos.com.br/*')    #
+# config.set('content.javascript.enabled', True, '*://*.ludopedia.com.br/*') # ludopedia
+# config.set('content.images', True, '*://*.ludopedia.com.br/*')             #
+# config.set('content.cookies.accept', 'all', '*://*.ludopedia.com.br/*')    #
 config.set('content.javascript.enabled', True, '*://*.olx.com.br/*') # olx
 config.set('content.images', True, '*://*.olx.com.br/*')             #
 config.set('content.cookies.accept', 'all', '*://*.olx.com.br/*')    #
 config.set('content.javascript.enabled', True, '*://*.messenger.com/*') # messenger
 config.set('content.images', True, '*://*.messenger.com/*')             #
 config.set('content.cookies.accept', 'all', '*://*.messenger.com/*')    #
-config.set('content.javascript.enabled', True, '*://*.amazon.com.br/*') # amazon
-config.set('content.images', True, '*://*.amazon.com.br/*')             #
-config.set('content.javascript.enabled', True, '*://*.tiendamia.com/*') # tiendamia
-config.set('content.images', True, '*://*.tiendamia.com/*')             #
+# config.set('content.javascript.enabled', True, '*://*.amazon.com.br/*') # amazon
+# config.set('content.images', True, '*://*.amazon.com.br/*')             #
+# config.set('content.javascript.enabled', True, '*://*.tiendamia.com/*') # tiendamia
+# config.set('content.images', True, '*://*.tiendamia.com/*')             #
 config.set('content.javascript.enabled', True, '*://*.unip.br/*') # unip
 config.set('content.images', True, '*://*.unip.br/*')             #
 config.set('content.cookies.accept', 'all', '*://*.unip.br/*')    #

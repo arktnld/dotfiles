@@ -13,6 +13,7 @@ let g:markdown_folding=1
 
 " Map `tab` to cicle trought links.
 nnoremap <silent> <Tab> :call search('\[.*\](.*)')<Enter>
+nnoremap <silent> <S-Tab> :call search('\[.*\](.*)', 'b')<Enter>
 nnoremap <silent> <enter> :call mappings#normal#markdown#nextfile()<enter>
 nnoremap <silent> <backspace> :call mappings#normal#markdown#previousfile()<enter>
 

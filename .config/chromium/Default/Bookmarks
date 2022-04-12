@@ -1,5 +1,5 @@
 {
-   "checksum": "9e9ca88be473e8e6337cbc85c60678b9",
+   "checksum": "ca9ceeb7ceb615c24e84416610518c88",
    "roots": {
       "bookmark_bar": {
          "children": [ {
@@ -137,15 +137,15 @@
                   "type": "url",
                   "url": "https://extensions.gnome.org/extension/1010/archlinux-updates-indicator/"
                }, {
-                  "date_added": "13291142502233851",
-                  "guid": "8c58d526-bc32-4b30-80d9-d07264fd2469",
-                  "id": "39",
-                  "name": "AppIndicator and KStatusNotifierItem Support - GNOME Shell Extensions",
+                  "date_added": "13293920153490144",
+                  "guid": "24ea53c3-eebf-4cc5-b3d9-cd7ddd3e71d2",
+                  "id": "64",
+                  "name": "Tray Icons: Reloaded - GNOME Shell Extensions",
                   "type": "url",
-                  "url": "https://extensions.gnome.org/extension/615/appindicator-support/"
+                  "url": "https://extensions.gnome.org/extension/2890/tray-icons-reloaded/"
                } ],
                "date_added": "13291142485119704",
-               "date_modified": "13291142502233851",
+               "date_modified": "13293920153490144",
                "guid": "1cbf5e5d-5364-4af3-ab12-8a67c999264a",
                "id": "34",
                "name": "GNOME Extension",
