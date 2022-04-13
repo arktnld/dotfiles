@@ -17,10 +17,13 @@ c.content.pdfjs = False
 c.hints.mode = 'number'
 c.scrolling.bar = 'never'
 c.tabs.position = 'left'
-c.url.start_pages = "https://calendar.google.com/"
 c.spellcheck.languages = ['en-US', 'pt-BR']
 c.downloads.location.directory = os.path.expanduser("~/Downloads")
 c.window.hide_decoration = False
+c.url.start_pages = [
+    "https://calendar.google.com/",
+    "https://google.com",
+    "~/.config/qutebrowser/templates/empty.html" ]
 
 # other options
 c.content.canvas_reading = False
@@ -69,7 +72,6 @@ c.content.blocking.adblock.lists = [
 ]
 c.content.blocking.hosts.lists = [
     'https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts',
-    "https://gitcdn.xyz/repo/curbengh/urlhaus-filter/master/urlhaus-filter-online.txt",
     "https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=1&mimetype=plaintext"
 ]
 
@@ -105,12 +107,7 @@ c.bindings.key_mappings['>'] = 'gJ'
 
 # search Engines
 c.url.searchengines['DEFAULT'] = 'https://duckduckgo.com/?q={}'
-c.url.searchengines['a'] = 'https://www.amazon.com.br/s/?field-keywords={}'
 c.url.searchengines['b'] = 'https://www.bing.com/search?q={}'
-c.url.searchengines['c'] = 'https://www.comparajogos.com.br/todos?q={}'
-c.url.searchengines['g'] = 'https://www.google.com/search?q={}'
-c.url.searchengines['l'] = 'https://www.ludopedia.com.br/search?search={}'
-c.url.searchengines['o'] = 'https://df.olx.com.br/?q={}'
 c.url.searchengines['gh'] = 'https://github.com/search?q={}'
 c.url.searchengines['ghc'] = 'https://github.com/search?q={}&type=Code'
 c.url.searchengines['si'] = 'sinonimos: https://www.sinonimos.com.br/{}'
@@ -146,36 +143,17 @@ config.set('content.images', True, 'qute://*/*')               #
 config.set('content.javascript.enabled', True, 'chrome://*/*') #
 config.set('content.javascript.enabled', True, '*://*.duckduckgo.com/*') # duckduckgo
 config.set('content.images', True, '*://*.duckduckgo.com/*')             #
-# config.set('content.javascript.enabled', True, '*://*.bing.com/*') # bing
-# config.set('content.images', True, '*://*.bing.com/*')             #
-config.set('content.javascript.enabled', True, '*://*.google.com/*') # google
-config.set('content.images', True, '*://*.google.com/*')             #
-config.set('content.cookies.accept', 'all', '*://*.google.com/*')    #
-# config.set('content.javascript.enabled', True, '*://*.youtube.com/*') # youtube
-# config.set('content.images', True, '*://*.youtube.com/*')             #
-# config.set('content.cookies.accept', 'all', '*://*.youtube.com/*')    #
+config.set('content.javascript.enabled', True, '*://*.bing.com/*') # bing
+config.set('content.images', True, '*://*.bing.com/*')             #
 config.set('content.javascript.enabled', True, '*://*.github.com/*') # github
 config.set('content.images', True, '*://*.github.com/*')             #
 config.set('content.cookies.accept', 'all', '*://*.github.com/*')    #
 config.set('content.javascript.enabled', True, '*://*.reddit.com/*') # reddit
 config.set('content.images', True, '*://*.reddit.com/*')             #
 config.set('content.cookies.accept', 'all', '*://*.reddit.com/*')    #
-# config.set('content.javascript.enabled', True, '*://*.comparajogos.com.br/*') # comparajogos
-# config.set('content.images', True, '*://*.comparajogos.com.br/*')             #
-# config.set('content.cookies.accept', 'all', '*://*.comparajogos.com.br/*')    #
-# config.set('content.javascript.enabled', True, '*://*.ludopedia.com.br/*') # ludopedia
-# config.set('content.images', True, '*://*.ludopedia.com.br/*')             #
-# config.set('content.cookies.accept', 'all', '*://*.ludopedia.com.br/*')    #
-config.set('content.javascript.enabled', True, '*://*.olx.com.br/*') # olx
-config.set('content.images', True, '*://*.olx.com.br/*')             #
-config.set('content.cookies.accept', 'all', '*://*.olx.com.br/*')    #
-config.set('content.javascript.enabled', True, '*://*.messenger.com/*') # messenger
-config.set('content.images', True, '*://*.messenger.com/*')             #
-config.set('content.cookies.accept', 'all', '*://*.messenger.com/*')    #
-# config.set('content.javascript.enabled', True, '*://*.amazon.com.br/*') # amazon
-# config.set('content.images', True, '*://*.amazon.com.br/*')             #
-# config.set('content.javascript.enabled', True, '*://*.tiendamia.com/*') # tiendamia
-# config.set('content.images', True, '*://*.tiendamia.com/*')             #
+config.set('content.javascript.enabled', True, '*://calendar.google.com/*') # calendar
+config.set('content.images', True, '*://calendar.google.com/*')             #
+config.set('content.cookies.accept', 'all', '*://calendar.google.com/*')    #
 config.set('content.javascript.enabled', True, '*://*.unip.br/*') # unip
 config.set('content.images', True, '*://*.unip.br/*')             #
 config.set('content.cookies.accept', 'all', '*://*.unip.br/*')    #

@@ -4,8 +4,10 @@ sleep 1.5
 
 ffmpeg \
     -f x11grab \
-    -video_size 1024x768 \
+    -video_size 1680x1050 \
+    -framerate 50 \
     -i $DISPLAY \
     -f pulse \
     -i default \
+    -vf format=yuv420p \
     "$HOME/video-$(date '+%y%m%d-%H%M-%S').mp4"
