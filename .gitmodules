@@ -15,9 +15,6 @@
 [submodule ".config/nvim/pack/bundle/opt/colorizer"]
 	path = .config/nvim/pack/bundle/opt/colorizer
 	url = https://github.com/norcalli/nvim-colorizer.lua
-[submodule ".config/nvim/pack/bundle/opt/nnn"]
-	path = .config/nvim/pack/bundle/opt/nnn
-	url = https://github.com/mcchrish/nnn.vim
 [submodule ".config/nvim/pack/bundle/opt/run"]
 	path = .config/nvim/pack/bundle/opt/run
 	url = https://github.com/leafOfTree/vim-run

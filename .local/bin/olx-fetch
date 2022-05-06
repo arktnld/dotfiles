@@ -40,7 +40,9 @@ módulo abridor garrafas garrafa externo conserto jardinhagem
 internet cadeado alicate orelhão selim farol overboard bike
 som dvds album albuns bone capa canivete led lenço conversor
 adaptador professor vhs vitrificador mangá costura insignea
-baratex cortadores celulite dedetizaçao Detetização'
+baratex cortadores celulite dedetizaçao Detetização piscina
+painel sofá cadeiras silicone knup MacBook macbook sinuca
+festas eventos apartamento '
 
 olx=/tmp/olx.html
 diffs=/tmp/diffs
@@ -183,7 +185,28 @@ diffurls
 loop
 
 cat $urlbg >| "$regs"
-rm -f $olx $urlbg $diffs
+rm -f $file $olx $urlbg $diffs
+
+## Logic Board Games 2 ##
+
+tsconf="$ofhome/olxbg2.conf"
+regs="$ofhome/olxbgs2"
+
+file="olx.html"
+webpg="https://df.olx.com.br/?q=board%20game&sf=1#"
+
+include="hobbies-e-colecoes artigos-infantis"
+exclude="$listex"
+
+echo init script
+getpage "$file" "$webpg"
+geturls "$include" "$exclude"
+[ -s "$urlbg" ] || exit 1
+diffurls
+loop
+
+cat $urlbg >| "$regs"
+rm -f $file $olx $urlbg $diffs
 
 
 
@@ -253,7 +276,7 @@ diffurls
 loop
 
 cat $urlbg >| "$regs"
-rm -f $olx $urlbg $diffs
+rm -f $olx $file $urlbg $diffs
 
 
 

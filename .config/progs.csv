@@ -50,6 +50,7 @@
 ,sxiv,simple X Image Viewer.
 ,rofi,A window switcher application launcher and dmenu replacement.
 ,qutebrowser,A keyboard-driven vim-like browser based on PyQt5.
+,simplescreenrecorder,A feature-rich screen recorder that supports X11 and OpenGL.
 #Conding Programs
 ,prettier,code formatter for JS JSON CSS YAML and much more.
 ,eslint,code checker for JavaScript.
@@ -68,6 +69,8 @@
 ,gst-plugins-bad,Multimedia graph framework.
 ,gdm,Display manager and login screen.
 ,gnome-backgrounds,Background images and data for GNOME.
+A,gnome-shell-extension-tray-icons-reloaded-git,Shows legacy tray icons on top.
+A,gnome-shell-extension-vitals-git,Displays system vitals in a GNOME Shell top bar pop-down.
 #Arch User Repository
 A,chrome-gnome-shell,Native connector for integration with extensions.gnome.org.
 A,patool,Portable command line archive file manager.
@@ -79,3 +82,4 @@ A,tdrop-git,A WM-Independent dropdown window and terminal creator.
 A,keepmenu,Dmenu/Rofi frontend for Keepass databases.
 A,paclast,list installed pacman packages in chronological order.
 A,ltex-ls-bin,LSP language server for LanguageTool.
+

@@ -1,5 +1,8 @@
 # Functions
 
+rec() {
+    simplescreenrecorder --start-recording --start-hidden --settingsfile="$HOME/.config/ssr/settings.conf"
+}
 wiki() {
 
     if [ -z "$@" ]; then

@@ -22,7 +22,7 @@ c.downloads.location.directory = os.path.expanduser("~/Downloads")
 c.window.hide_decoration = False
 c.url.start_pages = [
     "https://calendar.google.com/",
-    "https://google.com",
+    "https://tinyurl.com/2s3htuvv",
     "~/.config/qutebrowser/templates/empty.html" ]
 
 # other options
@@ -107,13 +107,18 @@ c.bindings.key_mappings['>'] = 'gJ'
 
 # search Engines
 c.url.searchengines['DEFAULT'] = 'https://duckduckgo.com/?q={}'
+c.url.searchengines['a'] = 'https://www.amazon.com.br/s?k={}'
 c.url.searchengines['b'] = 'https://www.bing.com/search?q={}'
+c.url.searchengines['c'] = 'https://www.comparajogos.com.br/todos?q={}'
+c.url.searchengines['g'] = 'https://www.google.com/search?q={}'
+c.url.searchengines['l'] = 'https://www.ludopedia.com.br/search_jogo?search={}'
+c.url.searchengines['o'] = 'https://df.olx.com.br/?q={}'
+c.url.searchengines['y'] = 'https://www.youtube.com/results?search_query={}'
 c.url.searchengines['gh'] = 'https://github.com/search?q={}'
 c.url.searchengines['ghc'] = 'https://github.com/search?q={}&type=Code'
-c.url.searchengines['si'] = 'sinonimos: https://www.sinonimos.com.br/{}'
+c.url.searchengines['si'] = 'https://www.sinonimos.com.br/{}'
 c.url.searchengines['enpt'] = 'https://translate.google.com/?sl=en&tl=pt&text={}'
 c.url.searchengines['pten'] = 'https://translate.google.com/?sl=pt&tl=en&text={}'
-# c.url.searchengines['y'] = 'https://www.youtube.com/results?search_query={}'
 
 ## bindings
 config.bind('O', 'set-cmd-text -s :open')
@@ -148,17 +153,50 @@ config.set('content.images', True, '*://*.bing.com/*')             #
 config.set('content.javascript.enabled', True, '*://*.github.com/*') # github
 config.set('content.images', True, '*://*.github.com/*')             #
 config.set('content.cookies.accept', 'all', '*://*.github.com/*')    #
+config.set('content.javascript.enabled', True, '*://*.youtube.com/watch*')   # youtube
+config.set('content.javascript.enabled', True, '*://*.youtube.com/results*') #
+config.set('content.javascript.enabled', True, '*://*.youtube.com/user/*')   #
+config.set('content.javascript.enabled', True, '*://*.youtube.com/c/*')      #
+config.set('content.images', True, '*://*.youtube.com/watch*')               #
+config.set('content.images', True, '*://*.youtube.com/results*')             #
+config.set('content.images', True, '*://*.youtube.com/user/*')               #
+config.set('content.cookies.accept', 'all', '*://*.youtube.com/watch*')      #
+config.set('content.cookies.accept', 'all', '*://*.youtube.com/user/*')      #
 config.set('content.javascript.enabled', True, '*://*.reddit.com/*') # reddit
 config.set('content.images', True, '*://*.reddit.com/*')             #
 config.set('content.cookies.accept', 'all', '*://*.reddit.com/*')    #
-config.set('content.javascript.enabled', True, '*://calendar.google.com/*') # calendar
-config.set('content.images', True, '*://calendar.google.com/*')             #
-config.set('content.cookies.accept', 'all', '*://calendar.google.com/*')    #
+config.set('content.javascript.enabled', True, '*://*.google.com/*')     # Google
+config.set('content.images', True, '*://*.google.com/*')                 #
+config.set('content.cookies.accept', 'all', '*://mail.google.com/*')     #
+config.set('content.cookies.accept', 'all', '*://calendar.google.com/*') #
 config.set('content.javascript.enabled', True, '*://*.unip.br/*') # unip
 config.set('content.images', True, '*://*.unip.br/*')             #
 config.set('content.cookies.accept', 'all', '*://*.unip.br/*')    #
 config.set('content.javascript.enabled', True, '*://*.catho.com.br/*') # catho
 config.set('content.images', True, '*://*.catho.com.br/*')             #
 config.set('content.cookies.accept', 'all', '*://*.catho.com.br/*')    #
-config.set('content.javascript.enabled', True, '*://fitlb.com/*')         # others
-config.set('content.javascript.enabled', True, '*://stackoverflow.com/*') #
+config.set('content.javascript.enabled', True, '*://*.ludopedia.com.br/*') # Ludopedia
+config.set('content.images', True, '*://*.ludopedia.com.br/*')             #
+config.set('content.cookies.accept', 'all',    '*://*.ludopedia.com.br/*') #
+config.set('content.javascript.enabled', True, '*://*.olx.com.br/*') # Olx
+config.set('content.images', True, '*://*.olx.com.br/*')             #
+config.set('content.cookies.accept', 'all',    '*://*.olx.com.br/*') #
+config.set('content.javascript.enabled', True, '*://*.boardgamegeek.com/*') # Boardgamegeek
+config.set('content.images', True, '*://*.boardgamegeek.com/*')             #
+config.set('content.cookies.accept', 'all', '*://*.boardgamegeek.com/*')    #
+config.set('content.javascript.enabled', True, '*://*.comparajogos.com.br/*') # comparajogos
+config.set('content.images', True, '*://*.comparajogos.com.br/*')             #
+config.set('content.cookies.accept', 'all', '*://*.comparajogos.com.br/*')    #
+config.set('content.javascript.enabled', True, '*://*.tabulaquadrada.com.br/*') # tabulaquadrada
+config.set('content.images', True,             '*://*.tabulaquadrada.com.br/*') #
+config.set('content.cookies.accept', 'all',    '*://*.tabulaquadrada.com.br/*') #
+config.set('content.javascript.enabled', True, '*://*.amazon.com.br/*') # amazon
+config.set('content.images', True,             '*://*.amazon.com.br/*') #
+config.set('content.cookies.accept', 'all',    '*://*.amazon.com.br/*') #
+config.set('content.javascript.enabled', True, '*://fitlb.com/*')            # others
+config.set('content.javascript.enabled', True, '*://stackoverflow.com/*')    #
+config.set('content.javascript.enabled', True, '*://*.ycombinator.com/*')    #
+config.set('content.javascript.enabled', True, '*://*.stackexchange.com/*')  #
+config.set('content.javascript.enabled', True, '*://*.learn-anything.xyz/*') #
+config.set('content.javascript.enabled', True, '*://*.itsfoss.com/*')        #
+config.set('content.javascript.enabled', True, '*://*.makeuseof.com/*')      #

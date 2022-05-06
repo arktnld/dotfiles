@@ -1,5 +1,5 @@
 {
-   "checksum": "ca9ceeb7ceb615c24e84416610518c88",
+   "checksum": "fc7b54d6bf971d4aa03b67ef433b1849",
    "roots": {
       "bookmark_bar": {
          "children": [ {
@@ -145,7 +145,7 @@
                   "url": "https://extensions.gnome.org/extension/2890/tray-icons-reloaded/"
                } ],
                "date_added": "13291142485119704",
-               "date_modified": "13293920153490144",
+               "date_modified": "13296083124337913",
                "guid": "1cbf5e5d-5364-4af3-ab12-8a67c999264a",
                "id": "34",
                "name": "GNOME Extension",
@@ -250,9 +250,16 @@
             "name": "GitHub - jiangmiao/auto-pairs: Vim plugin, insert or delete brackets, parens, quotes in pair",
             "type": "url",
             "url": "https://github.com/jiangmiao/auto-pairs"
+         }, {
+            "date_added": "13296083124337913",
+            "guid": "b02c3e87-4d3f-4035-94e7-9a6be4d5ae45",
+            "id": "67",
+            "name": "BG Promo",
+            "type": "url",
+            "url": "https://www.amazon.com.br/s?rh=n%3A16746975011%2Cp_8%3A50-100&s=review-rank&pf_rd_i=16746749011&pf_rd_m=A3RN7G7QC5MWSZ&pf_rd_p=f8f0cc89-8254-485e-aae9-86a88db56c5f&pf_rd_r=ZT3GGYDN8SV8A9HD40RE&pf_rd_s=merchandised-search-15&pf_rd_t=101&ref=s9_acsd_hps_bw_c2_x_c2cl"
          } ],
          "date_added": "13289424696279415",
-         "date_modified": "13292104317212387",
+         "date_modified": "13296083141225100",
          "guid": "0bc5d13f-2cba-5d74-951f-3f233fe6c908",
          "id": "1",
          "name": "Bookmarks bar",
