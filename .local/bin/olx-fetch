@@ -42,7 +42,8 @@ som dvds album albuns bone capa canivete led lenço conversor
 adaptador professor vhs vitrificador mangá costura insignea
 baratex cortadores celulite dedetizaçao Detetização piscina
 painel sofá cadeiras silicone knup MacBook macbook sinuca
-festas eventos apartamento '
+festas eventos apartamento figurinhas copa figurinha mesa
+balcão cozinha fruteira cromo panini neymar tatuagem cartão'
 
 olx=/tmp/olx.html
 diffs=/tmp/diffs
@@ -193,7 +194,7 @@ tsconf="$ofhome/olxbg2.conf"
 regs="$ofhome/olxbgs2"
 
 file="olx.html"
-webpg="https://df.olx.com.br/?q=board%20game&sf=1#"
+webpg="https://df.olx.com.br/?q=board%20games&sf=1#"
 
 include="hobbies-e-colecoes artigos-infantis"
 exclude="$listex"

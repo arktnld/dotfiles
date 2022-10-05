@@ -22,7 +22,12 @@ c.downloads.location.directory = os.path.expanduser("~/Downloads")
 c.window.hide_decoration = False
 c.url.start_pages = [
     "https://calendar.google.com/",
-    "https://tinyurl.com/2s3htuvv",
+    "https://tinyurl.com/arktnld2",
+    "http://bred.com.br/estagiosApp/index.html",
+    "https://ciee-app.taqe.com.br/#!/taqe/tabs/missions",
+    "https://pp.ciee.org.br/dashboard-candidato/meus-processos",
+    "https://pp.ciee.org.br/vitrine",
+    "https://www.coursera.org/learn/fundamentos-do-gerenciamento-de-projetos/home/",
     "~/.config/qutebrowser/templates/empty.html" ]
 
 # other options
@@ -96,7 +101,9 @@ c.aliases['wq'] = 'quit --save'
 c.aliases['timer'] = 'open -t https://fitlb.com/tabata-timer'
 c.aliases['empty'] = 'open -t ~/.config/qutebrowser/templates/empty.html'
 c.aliases['mpv'] = 'spawn --userscript view_in_mpv'
-c.aliases['ytdl'] = """spawn -v -m bash -c 'cd ~/Videos && youtube-dl "$@"' _ {url}"""
+c.aliases['browser'] = 'spawn -d surf {url}'
+c.aliases['readmode'] = 'spawn --userscript readability-js'
+c.aliases['darktoggle'] = 'config-cycle colors.webpage.darkmode.enabled ;; restart'
 
 # mappings
 c.bindings.key_mappings['<Ctrl-[>'] = '<Escape>'
@@ -108,17 +115,18 @@ c.bindings.key_mappings['>'] = 'gJ'
 # search Engines
 c.url.searchengines['DEFAULT'] = 'https://duckduckgo.com/?q={}'
 c.url.searchengines['a'] = 'https://www.amazon.com.br/s?k={}'
+c.url.searchengines['g'] = 'https://www.google.com/search?q={}'
 c.url.searchengines['b'] = 'https://www.bing.com/search?q={}'
 c.url.searchengines['c'] = 'https://www.comparajogos.com.br/todos?q={}'
-c.url.searchengines['g'] = 'https://www.google.com/search?q={}'
 c.url.searchengines['l'] = 'https://www.ludopedia.com.br/search_jogo?search={}'
 c.url.searchengines['o'] = 'https://df.olx.com.br/?q={}'
-c.url.searchengines['y'] = 'https://www.youtube.com/results?search_query={}'
+c.url.searchengines['v'] = 'https://piped.kavin.rocks/results?search_query={}'
 c.url.searchengines['gh'] = 'https://github.com/search?q={}'
 c.url.searchengines['ghc'] = 'https://github.com/search?q={}&type=Code'
 c.url.searchengines['si'] = 'https://www.sinonimos.com.br/{}'
-c.url.searchengines['enpt'] = 'https://translate.google.com/?sl=en&tl=pt&text={}'
-c.url.searchengines['pten'] = 'https://translate.google.com/?sl=pt&tl=en&text={}'
+c.url.searchengines['enpt'] = 'https://lingva.ml/en/pt/{}'
+c.url.searchengines['pten'] = 'https://lingva.ml/pt/en/{}'
+c.url.searchengines['pdf'] = 'https://www.pdfdrive.com/search?q={}'
 
 ## bindings
 config.bind('O', 'set-cmd-text -s :open')
@@ -133,11 +141,10 @@ config.bind('?', 'open -t qute://help/img/cheatsheet-big.png')
 
 # custom bindings
 config.bind(',q', 'close')
-config.bind(',c', 'spawn -d chromium {url}')
-config.bind(',r', 'spawn --userscript readability-js')
-config.bind(',d', 'config-cycle colors.webpage.darkmode.enabled ;; restart')
-config.bind(',v', 'hint links spawn tdrop -h 70% -w 70% -x 250 -y 150 -ma -n mpv mpv {hint-url}')
-config.bind(',V', 'hint links spawn mpv --no-video {hint-url}')
+config.bind(',t', 'config-cycle tabs.show always never ;; config-cycle statusbar.show always never')
+config.bind(',w', 'spawn -d surf {url}')
+# config.bind(',r', 'spawn ~/.local/bin/readability-js ;; later 2000 spawn tdrop -h 50% -w 50% -x 410 -y 270 -ma -n w3m tilix -p tdrop  --window-style=borderless -e w3m ~/.local/share/qutebrowser/userscripts/readability.html')
+config.bind(',r', 'spawn --userscripts readability')
 
 # javascript, images and cookies whitelist
 config.set('content.cookies.accept', 'never', '*') # Desable cookies for all websites with the exception of sites specified to use.
@@ -146,29 +153,15 @@ config.set('content.images', True, 'file://*/*')               #
 config.set('content.javascript.enabled', True, 'qute://*/*')   #
 config.set('content.images', True, 'qute://*/*')               #
 config.set('content.javascript.enabled', True, 'chrome://*/*') #
-config.set('content.javascript.enabled', True, '*://*.duckduckgo.com/*') # duckduckgo
-config.set('content.images', True, '*://*.duckduckgo.com/*')             #
-config.set('content.javascript.enabled', True, '*://*.bing.com/*') # bing
-config.set('content.images', True, '*://*.bing.com/*')             #
+config.set('content.javascript.enabled', True, '*://*.youtube.com/*') # youtube
+config.set('content.images', True, '*://*.youtube.com/*')             #
+config.set('content.cookies.accept', 'all', '*://*.youtube.com/*')    #
+config.set('content.javascript.enabled', True, '*://*.google.com/*') # google
+config.set('content.images', True, '*://*.google.com/*')             #
+config.set('content.cookies.accept', 'all', '*://*.google.com/*')    #
 config.set('content.javascript.enabled', True, '*://*.github.com/*') # github
 config.set('content.images', True, '*://*.github.com/*')             #
 config.set('content.cookies.accept', 'all', '*://*.github.com/*')    #
-config.set('content.javascript.enabled', True, '*://*.youtube.com/watch*')   # youtube
-config.set('content.javascript.enabled', True, '*://*.youtube.com/results*') #
-config.set('content.javascript.enabled', True, '*://*.youtube.com/user/*')   #
-config.set('content.javascript.enabled', True, '*://*.youtube.com/c/*')      #
-config.set('content.images', True, '*://*.youtube.com/watch*')               #
-config.set('content.images', True, '*://*.youtube.com/results*')             #
-config.set('content.images', True, '*://*.youtube.com/user/*')               #
-config.set('content.cookies.accept', 'all', '*://*.youtube.com/watch*')      #
-config.set('content.cookies.accept', 'all', '*://*.youtube.com/user/*')      #
-config.set('content.javascript.enabled', True, '*://*.reddit.com/*') # reddit
-config.set('content.images', True, '*://*.reddit.com/*')             #
-config.set('content.cookies.accept', 'all', '*://*.reddit.com/*')    #
-config.set('content.javascript.enabled', True, '*://*.google.com/*')     # Google
-config.set('content.images', True, '*://*.google.com/*')                 #
-config.set('content.cookies.accept', 'all', '*://mail.google.com/*')     #
-config.set('content.cookies.accept', 'all', '*://calendar.google.com/*') #
 config.set('content.javascript.enabled', True, '*://*.unip.br/*') # unip
 config.set('content.images', True, '*://*.unip.br/*')             #
 config.set('content.cookies.accept', 'all', '*://*.unip.br/*')    #
@@ -184,19 +177,79 @@ config.set('content.cookies.accept', 'all',    '*://*.olx.com.br/*') #
 config.set('content.javascript.enabled', True, '*://*.boardgamegeek.com/*') # Boardgamegeek
 config.set('content.images', True, '*://*.boardgamegeek.com/*')             #
 config.set('content.cookies.accept', 'all', '*://*.boardgamegeek.com/*')    #
-config.set('content.javascript.enabled', True, '*://*.comparajogos.com.br/*') # comparajogos
-config.set('content.images', True, '*://*.comparajogos.com.br/*')             #
-config.set('content.cookies.accept', 'all', '*://*.comparajogos.com.br/*')    #
-config.set('content.javascript.enabled', True, '*://*.tabulaquadrada.com.br/*') # tabulaquadrada
-config.set('content.images', True,             '*://*.tabulaquadrada.com.br/*') #
-config.set('content.cookies.accept', 'all',    '*://*.tabulaquadrada.com.br/*') #
 config.set('content.javascript.enabled', True, '*://*.amazon.com.br/*') # amazon
 config.set('content.images', True,             '*://*.amazon.com.br/*') #
 config.set('content.cookies.accept', 'all',    '*://*.amazon.com.br/*') #
+config.set('content.javascript.enabled', True, '*://stackoverflow.com/*')    # Stackoverflow
+config.set('content.images', True, '*://stackoverflow.com/*')
+config.set('content.cookies.accept', 'all', '*://stackoverflow.com/*')
+config.set('content.javascript.enabled', True, '*://libreddit.kavin.rocks/*') # libreddit(reddit)
+config.set('content.images', True,             '*://libreddit.kavin.rocks/*') #
+config.set('content.cookies.accept', 'all', '*://libreddit.kavin.rocks/*')
+config.set('content.javascript.enabled', True, '*://nitter.kavin.rocks/*') # nitter(twitter)
+config.set('content.images', True,             '*://nitter.kavin.rocks/*') #
+config.set('content.cookies.accept', 'all', '*://nitter.kavin.rocks/*')
+config.set('content.javascript.enabled', True, '*://piped.kavin.rocks/*') # piped(youtube)
+config.set('content.images', True,             '*://piped.kavin.rocks/*') #
+config.set('content.cookies.accept', 'all', '*://piped.kavin.rocks/*')
+config.set('content.javascript.enabled', True, '*://*.taqe.com.br/*') # CIEE
+config.set('content.images', True,             '*://*.taqe.com.br/*') #
+config.set('content.cookies.accept', 'all', '*://*.taqe.com.br/*')
+config.set('content.javascript.enabled', True, '*://*.ciee.org.br/*') #
+config.set('content.images', True,             '*://*.ciee.org.br/*') #
+config.set('content.cookies.accept', 'all', '*://*.ciee.org.br/*')
+config.set('content.javascript.enabled', True, '*://*.bred.com.br/*') # Bred Estágios
+config.set('content.images', True,             '*://*.bred.com.br/*') #
+config.set('content.cookies.accept', 'all', '*://*.bred.com.br/*')
+
+# javascript and images whitelist
+config.set('content.javascript.enabled', True, '*://*.tabulaquadrada.com.br/*') # tabulaquadrada
+config.set('content.images', True,             '*://*.tabulaquadrada.com.br/*') #
+config.set('content.javascript.enabled', True, '*://*.comparajogos.com.br/*') # comparajogos
+config.set('content.images', True, '*://*.comparajogos.com.br/*')             #
+config.set('content.javascript.enabled', True, '*://*.duckduckgo.com/*') # duckduckgo
+config.set('content.images', True, '*://*.duckduckgo.com/*')             #
+config.set('content.javascript.enabled', True, '*://bibliogram.art/*') # bibliogram(instagram)
+config.set('content.images', True,             '*://bibliogram.art/*') #
+config.set('content.javascript.enabled', True, '*://wikiless.org/*') # wikiless(wikipedia)
+config.set('content.images', True,             '*://wikiless.org/*') #
+config.set('content.javascript.enabled', True, '*://scribe.rip/*') # scribe(medium)
+config.set('content.images', True,             '*://scribe.rip/*') #
+
+# javascript whitelist
 config.set('content.javascript.enabled', True, '*://fitlb.com/*')            # others
-config.set('content.javascript.enabled', True, '*://stackoverflow.com/*')    #
 config.set('content.javascript.enabled', True, '*://*.ycombinator.com/*')    #
 config.set('content.javascript.enabled', True, '*://*.stackexchange.com/*')  #
 config.set('content.javascript.enabled', True, '*://*.learn-anything.xyz/*') #
 config.set('content.javascript.enabled', True, '*://*.itsfoss.com/*')        #
-config.set('content.javascript.enabled', True, '*://*.makeuseof.com/*')      #
+config.set('content.javascript.enabled', True, '*://lingva.ml/*') # lingva(google translator)
+
+import qutebrowser.api.interceptor
+
+def rewrite(request: qutebrowser.api.interceptor.Request):
+    if 'medium.com' in request.request_url.host():
+        request.request_url.setHost('scribe.rip')
+        try: request.redirect(request.request_url)
+        except: pass
+    elif 'youtube.com' in request.request_url.host():
+        request.request_url.setHost('piped.kavin.rocks')
+        try: request.redirect(request.request_url)
+        except: pass
+    elif 'reddit.com' in request.request_url.host():
+        request.request_url.setHost('libreddit.kavin.rocks')
+        try: request.redirect(request.request_url)
+        except: pass
+    elif 'twitter.com' in request.request_url.host():
+        request.request_url.setHost('nitter.kavin.rocks')
+        try: request.redirect(request.request_url)
+        except: pass
+    elif 'instagram.com' in request.request_url.host():
+        request.request_url.setHost('bibliogram.art')
+        try: request.redirect(request.request_url)
+        except: pass
+    elif 'wikipedia.org' in request.request_url.host():
+        request.request_url.setHost('wikiless.org')
+        try: request.redirect(request.request_url
+        except: pass
+
+qutebrowser.api.interceptor.register(rewrite)

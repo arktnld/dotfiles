@@ -93,4 +93,4 @@
   pushInsteadOf = "g:"
 
 [credential]
-	helper = cache
+	helper = store

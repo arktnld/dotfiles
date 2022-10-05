@@ -29,6 +29,8 @@ export GNUPGHOME="$HOME/.config/gnupg"
 # wget
 export WGETRC="$HOME/.config/wget/wgetrc"
 
+# mednafen
+export MEDNAFEN_HOME="$HOME/.config/mednafen"
 # golang
 export GOPATH="$HOME/.local/share/go"
 export GOROOT="/usr/lib/go"
@@ -98,13 +100,14 @@ export LESS_TERMCAP_us="$(printf '%b' '[1;32m')"
 export LESS_TERMCAP_ue="$(printf '%b' '[0m')"
 export LESSOPEN="| /usr/bin/highlight -O ansi %s 2>/dev/null"
 
+export WINEPREFIX="$HOME/.local/share/wineprefixes/32"
+
 # export PASSWORD_STORE_DIR="${XDG_DATA_HOME:-$HOME/.local/share/password-store"
 # export TMUX_TMPDIR="$XDG_RUNTIME_DIR"
 # export ALSA_CONFIG_PATH="$XDG_CONFIG_HOME/alsa/asoundrc"
 # export XINITRC="$HOME/.config/x11/xinitrc"
 # export XAUTHORITY="$XDG_RUNTIME_DIR/Xauthority" # This line will break some DMs.
 # export NOTMUCH_CONFIG="$HOME/.config/notmuch-config"
-# export WINEPREFIX="${XDG_DATA_HOME:-$HOME/.local/share/wineprefixes/32"
 # export PULSE_COOKIE="$HOME/.config/pulse/cookie"
 # export ANSIBLE_CONFIG="$HOME/.config/ansible/ansible.cfg"
 # export ANDROID_SDK_HOME="$HOME/.config/android"

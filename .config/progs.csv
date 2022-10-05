@@ -23,6 +23,8 @@
 ,adobe-source-code-pro-fonts,Monospaced font family for user interface and coding environments.
 ,ttf-dejavu,font family based on the bitstream vera fonts.
 ,ttf-liberation,font family which aims at metric compatibility.
+,ttf-inconsolata,
+,ttf-ms-fonts,
 ,noto-fonts,Google Noto TTF fonts.
 ,noto-fonts-extra,Google Noto TTF fonts additional variants.
 ,noto-fonts-emoji,Google Noto emoji fonts.

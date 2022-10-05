@@ -5,7 +5,7 @@ alias mv='mv --interactive --verbose' # Move nodes with interactive mode and ext
 alias ln='ln --interactive --verbose' # Link nodes with interactive mode and extra verbosity.
 alias cp='cp --interactive --verbose' # Copy nodes with interactive mode and extra verbosity.
 alias mkdir='mkdir --parents --verbose' # Make missing parent directories when creating folders.
-alias du='du --max-depth=1 --si' # Display size of files and folders under current directory.
+alias du='du --max-depth=1 --si . 2>/dev/null | sort -h' # Display size of files and folders under current directory.
 alias ag='ag --hidden' # Include hidden folders and files on search results.
 alias grep='grep --ignore-case --color=auto --exclude-dir=".git" --exclude-dir="node_modules"' # Grep with colors and ignore common directories.
 alias ip='ip -color' # Use `ip` utility always with colors.
@@ -20,6 +20,7 @@ alias pbpaste='xclip -selection clipboard -out' # Paste text on clipboard.
 alias d='wget $(xclip -selection clipboard -out)' # Download using link on clipboard.
 alias pi='ping 1.1.1.1' # Tired of ping in google?
 alias cht='cht.sh' # The only cheat sheet you need
+alias rdd='tuir'
 
 # Archive
 alias ae='patool extract' # Unpack one or more archives.
@@ -38,3 +39,6 @@ alias up='paru --sync --refresh --sysupgrade'
 alias pkglist='paru -Ql' # List all files in a package.
 alias pkgowns='paru -Qo' # Shows the package that owns a command.
 alias pkginfo='paru -Si' # Info about a package.
+
+# Others
+alias omori='wine ~/Documents/Omori/OMORI.exe --6bdb2e585882fbd48826ef9cffd4c511'
