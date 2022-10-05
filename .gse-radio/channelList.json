@@ -72,12 +72,6 @@
 	"favourite": true,
 	"encoding": false
 },	{
-	"id": "fa005b4f-49fc-4a6d-b0a6-7c2c372831c4",
-	"name": "Soul Disco",
-	"address": "http://91.121.104.123:8000/stream/1/",
-	"favourite": true,
-	"encoding": false
-},	{
 	"id": "38422526-74ef-4b69-b1af-c2578f253055",
 	"name": "Reggae",
 	"address": "http://star.jointil.net/proxy/jrn_reggae?mp=/stream/",
@@ -90,21 +84,15 @@
 	"favourite": true,
 	"encoding": false
 },	{
-	"id": "3aea9477-dcf1-4e0b-88a7-1e9e04db2321",
-	"name": "Bossa Jazz",
-	"address": "https://centova5.transmissaodigital.com:20104/;",
-	"favourite": true,
-	"encoding": false
-},	{
-	"id": "2514fbda-a553-489b-a7cf-cb7324313f4a",
-	"name": "flashback",
-	"address": "https://antenaone.crossradio.com.br/stream/1",
-	"favourite": true,
-	"encoding": false
-},	{
 	"id": "164286a9-3655-4fea-b138-d5f2c65140be",
 	"name": "===INSTRUMENTAL===",
 	"address": "test",
+	"favourite": true,
+	"encoding": false
+},	{
+	"id": "6c9449ad-9113-48e2-b0a2-d2bc2333992f",
+	"name": "DubStep",
+	"address": "http://ice3.somafm.com/dubstep-128-mp3\n",
 	"favourite": true,
 	"encoding": false
 },	{
@@ -117,24 +105,6 @@
 	"id": "dceb95d8-32e4-4c84-b8e7-655aacb12c62",
 	"name": "VideoGame",
 	"address": "http://stream.rpgamers.net:8000/rpgn",
-	"favourite": true,
-	"encoding": false
-},	{
-	"id": "772e8cab-1fdf-4a42-85b9-e6e6f469f3e3",
-	"name": "Jazz",
-	"address": "http://34.83.21.216/ppm-jazz24mp3-ibc1",
-	"favourite": true,
-	"encoding": false
-},	{
-	"id": "6c9449ad-9113-48e2-b0a2-d2bc2333992f",
-	"name": "DubStep",
-	"address": "http://ice3.somafm.com/dubstep-128-mp3\n",
-	"favourite": true,
-	"encoding": false
-},	{
-	"id": "c9ea9c6a-da53-4c00-b513-e4d585a7e85f",
-	"name": "Classic",
-	"address": "http://media-ice.musicradio.com/ClassicFMMP3",
 	"favourite": true,
 	"encoding": false
 }
