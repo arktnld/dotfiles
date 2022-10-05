@@ -1,0 +1,98 @@
+#!/bin/bash
+
+##
+# Func
+##
+
+# Print help and List of Consoles
+help () {
+cat << EOF
+  O commando Play executa jogos de forma
+  fácil e simples.
+
+  Para usar a busca avançada de jogos:
+  play [console]
+
+  Para buscar um jogo específico:
+  play [console] [nome do jogo]
+
+  Lista de consoles disponível:
+
+EOF
+	ls ~/Documents/Roms | nl
+
+	exit 1
+}
+
+# Exit if an error occur
+err () {
+	printf "%s\n\n" "ERROR: $1 \"$2\" NÂO EXISTE, tente novamente."
+	exit 1
+}
+
+# Get search results
+getsearch () {
+	# build search for ag
+	for w in $search; do
+		i+="(?=.*\b$w\b)"
+	done
+
+	matchlist=$(ls $romsdir | ag --nocolor "^$i.*$")
+	echo "$matchlist"
+}
+
+getfzf() {
+	# echo "Busca avançada de jogos do $console:"
+	# selgame="$(ls "$romsdir" | fzf)"
+	selgame=$(command ls "$romsdir" | smenu -d -t 10 -M -W $'\n' -n1000 -m "Busca avançada de jogos do $console:")
+	rungame "$selgame"
+}
+
+rungame() {
+	game="$romsdir/$1"
+	mednafen -force_module "$console" "$game" \
+		&> /dev/null 2>&1 & disown
+}
+
+getgame() {
+	echo -e "\n$1" | nl
+	printf "\n%s" "Escolha uma opção. Digite 0 para sair [0-$(echo "$1" | wc -l)]: "
+	read -r sel
+	limit=$(echo "$1" | wc -l)
+	limitc=$(($(echo "$1" | wc -l)+1))
+	while [ "$sel" == "" ] || [ -n "${sel##[0-9]*}" ] ||  [ "$sel" -le "-1" ] ||  [ "$sel" -ge $limitc ] ; do
+		printf "\n%s" "Por favor, selecione um número [0-$limit]: "
+		read -r sel
+	done
+
+	[ $sel == 0 ] && echo -e "Nenhuma opção selecionada, saindo...\n" && exit 1
+	selgame=$(echo "$1" | sed -n "$sel"'p')
+
+	rungame "$selgame"
+}
+
+console=$1
+romsdir="$HOME/Documents/Roms/$1"; shift
+search=$*
+
+##
+# Logic
+##
+
+# if no orgs are given, print help and exit.
+[ -z "$console" ] && help
+
+# exit if console folder don't exits.
+[ ! -d "$romsdir" ] && err Pasta "$console"
+
+# get search matches, length and exit if search is zero
+matches="$(getsearch)"
+[ "$matches" == "" ] && err Jogo "$search"
+[ -z "$search" ] && lenmatches=0 || lenmatches=$(echo "$matches"  | wc -l)
+
+case $lenmatches in
+	0) getfzf ;;
+	1) rungame "$matches" ;;
+	*) getgame "$matches"
+esac
+
