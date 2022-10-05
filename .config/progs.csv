@@ -51,7 +51,6 @@
 ,tilix,a tiling terminal emulator for Linux using GTK+3.
 ,sxiv,simple X Image Viewer.
 ,rofi,A window switcher application launcher and dmenu replacement.
-,qutebrowser,A keyboard-driven vim-like browser based on PyQt5.
 ,simplescreenrecorder,A feature-rich screen recorder that supports X11 and OpenGL.
 #Conding Programs
 ,prettier,code formatter for JS JSON CSS YAML and much more.
