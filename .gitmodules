@@ -11,6 +11,9 @@
 [submodule ".config/nvim/pack/bundle/start/polyglot"]
 	path = .config/nvim/pack/bundle/start/polyglot
 	url = https://github.com/sheerun/vim-polyglot
+[submodule ".config/nvim/pack/bundle/start/graphql"]
+	path = .config/nvim/pack/bundle/start/graphql
+	url = https://github.com/jparise/vim-graphql
 
 [submodule ".config/nvim/pack/bundle/opt/colorizer"]
 	path = .config/nvim/pack/bundle/opt/colorizer
