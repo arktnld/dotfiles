@@ -19,14 +19,13 @@
 	merge = refs/heads/master
 [credential]
 	helper = store
+[user]
+  name = arktnld
+  email = arktnld@gmail.com
+  signingkey = 334A0F0ED3746EC3
 
 ; [include]
 ;   path = ./aliases.gitconfig
-
-; [user]
-;   name = arktnld
-;   email = arktnld@gmail.com
-;   signingkey = 334A0F0ED3746EC3
 
 ; [pull]
 ;   rebase = true
