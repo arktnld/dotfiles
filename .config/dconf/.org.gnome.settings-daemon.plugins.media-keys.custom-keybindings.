@@ -10,7 +10,7 @@ name='nnn'
 
 [custom3]
 binding='<Super>y'
-command='tdrop -h 70% -w 70% -x 250 -y 150 -ma -n mpv mpv'
+command='tdrop -h 70% -w 70% -x 250 -y 150 -ma -s dropdown -n mpv mpv'
 name='mpv'
 
 [custom4]

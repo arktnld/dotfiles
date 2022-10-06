@@ -70,6 +70,8 @@
 ,gst-plugins-bad,Multimedia graph framework.
 ,gdm,Display manager and login screen.
 ,gnome-backgrounds,Background images and data for GNOME.
+A,xbanish,
+A,startup-settings-git,
 A,adwaita-dark,
 A,gnome-shell-extension-tray-icons-reloaded-git,Shows legacy tray icons on top.
 A,gnome-shell-extension-vitals-git,Displays system vitals in a GNOME Shell top bar pop-down.
