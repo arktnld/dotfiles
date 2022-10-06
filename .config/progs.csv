@@ -52,12 +52,14 @@
 ,sxiv,simple X Image Viewer.
 ,rofi,A window switcher application launcher and dmenu replacement.
 ,simplescreenrecorder,A feature-rich screen recorder that supports X11 and OpenGL.
+,keepmenu-git,
 #Conding Programs
 ,prettier,code formatter for JS JSON CSS YAML and much more.
 ,eslint,code checker for JavaScript.
 ,pyright,Python source code checker.
 ,vim-language-server,Lint tool for Vim script Language.
 ,bash-language-server,shell script analysis tool.
+,github-cli,
 #Minimal Gnome Installation
 ,gnome-shell,Next generation desktop shell.
 ,nautilus,Default Gnome file manager.
