@@ -3,6 +3,8 @@
 --
 
  local custom_lsp_attach = function(client)
+     client.server_capabilities.documentFormattingProvider = false
+     client.server_capabilities.documentRangeFormattingProvider = false
 
      if client.resolved_capabilities.document_highlight then
          vim.cmd('autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()')
