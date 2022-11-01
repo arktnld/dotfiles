@@ -3,6 +3,9 @@
 # Prompt symbol
 COMMON_PROMPT_SYMBOL=""
 
+# tilix vte
+VTE_PWD_THING="$(__vte_osc7)"
+
 # Colors
 COMMON_COLORS_HOST_ME=green
 COMMON_COLORS_HOST_AWS_VAULT=yellow
@@ -23,9 +26,9 @@ COMMON_COLORS_BG_JOBS=yellow
 # Host
 common_host() {
   if [[ -n $SSH_CONNECTION ]]; then
-    me="%n@%m"
+    local me="%n@%m"
   elif [[ $LOGNAME != $USER ]]; then
-    me="%n"
+    local me="%n"
   fi
   if [[ -n $me ]]; then
     echo "%{$fg[$COMMON_COLORS_HOST_ME]%}$me%{$reset_color%}:"
@@ -37,7 +40,7 @@ common_host() {
 
 # Prompt symbol
 common_return_status() {
-  echo -n "%(?.%F{$COMMON_COLORS_RETURN_STATUS_TRUE}.%F{$COMMON_COLORS_RETURN_STATUS_FALSE})$COMMON_PROMPT_SYMBOL%f "
+  echo -n "%(?.%F{$COMMON_COLORS_RETURN_STATUS_TRUE}.%F{$COMMON_COLORS_RETURN_STATUS_FALSE})$VTE_PWD_THING$COMMON_PROMPT_SYMBOL%f "
 }
 
 # Git status

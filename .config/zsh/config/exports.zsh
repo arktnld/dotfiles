@@ -118,3 +118,7 @@ export WINEPREFIX="$HOME/.local/share/wineprefixes/32"
 #
 export NODE_PATH=$NODE_PATH:$(npm root -g)
 # export _JAVA_OPTIONS="-Dswing.defaultlaf=com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
+
+if [ $TILIX_ID ] || [ $VTE_VERSION ]; then
+    source /etc/profile.d/vte.sh
+fi

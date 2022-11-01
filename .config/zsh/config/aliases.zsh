@@ -39,6 +39,3 @@ alias up='paru --sync --refresh --sysupgrade'
 alias pkglist='paru -Ql' # List all files in a package.
 alias pkgowns='paru -Qo' # Shows the package that owns a command.
 alias pkginfo='paru -Si' # Info about a package.
-
-# Others
-alias omori='wine ~/Documents/Omori/OMORI.exe --6bdb2e585882fbd48826ef9cffd4c511'
