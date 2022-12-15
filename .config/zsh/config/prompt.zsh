@@ -4,7 +4,7 @@
 COMMON_PROMPT_SYMBOL=""
 
 # tilix vte
-VTE_PWD_THING="$(__vte_osc7)"
+# VTE_PWD_THING="$(__vte_osc7)"
 
 # Colors
 COMMON_COLORS_HOST_ME=green

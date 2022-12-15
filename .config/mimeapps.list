@@ -1,5 +1,5 @@
 [Added Associations]
-x-scheme-handler/tg=userapp-Telegram Desktop-KLMA30.desktop;userapp-Kotatogram Desktop-VY6080.desktop;userapp-Telegram Desktop-TDP8H1.desktop;userapp-Telegram Desktop-IHO4S1.desktop;
+x-scheme-handler/tg=userapp-Telegram Desktop-KLMA30.desktop;userapp-Kotatogram Desktop-VY6080.desktop;userapp-Telegram Desktop-TDP8H1.desktop;userapp-Telegram Desktop-IHO4S1.desktop;userapp-Telegram Desktop-MR0BW1.desktop;
 application/pdf=org.pwmt.zathura-pdf-mupdf.desktop;
 image/bmp=org.gnome.eog.desktop;sxiv.desktop;
 image/gif=org.gnome.eog.desktop;sxiv.desktop;
@@ -55,7 +55,7 @@ x-scheme-handler/sms=org.gnome.Shell.Extensions.GSConnect.desktop;
 x-scheme-handler/tel=org.gnome.Shell.Extensions.GSConnect.desktop;
 
 [Default Applications]
-x-scheme-handler/tg=userapp-Telegram Desktop-IHO4S1.desktop
+x-scheme-handler/tg=userapp-Telegram Desktop-MR0BW1.desktop
 x-scheme-handler/etcher=balena-etcher-electron.desktop
 image/jpg=sxiv.desktop
 image/x-gray=org.gnome.eog.desktop
@@ -133,9 +133,9 @@ video/mpeg=mpv.desktop
 video/ogg=mpv.desktop
 video/x-flv=mpv.desktop
 video/quicktime=mpv.desktop
-text/html=microsoft-edge.desktop
-x-scheme-handler/http=microsoft-edge.desktop
-x-scheme-handler/https=microsoft-edge.desktop
+text/html=google-chrome.desktop
+x-scheme-handler/http=google-chrome.desktop
+x-scheme-handler/https=google-chrome.desktop
 x-scheme-handler/about=google-chrome.desktop
 x-scheme-handler/unknown=google-chrome.desktop
 x-scheme-handler/mailto=viagee.desktop
@@ -165,3 +165,4 @@ x-scheme-handler/spice=org.remmina.Remmina.desktop
 x-scheme-handler/vnc=org.remmina.Remmina.desktop
 x-scheme-handler/remmina=org.remmina.Remmina.desktop
 application/x-remmina=org.remmina.Remmina.desktop
+x-scheme-handler/postman=Postman.desktop

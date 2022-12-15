@@ -32,7 +32,7 @@
      -- require('completion').on_attach()
  end
 
- local servers = {'gopls', 'pyright', 'bashls', 'vimls', 'jsonls', 'sqlls'}
+ local servers = {'gopls', 'pyright', 'bashls', 'vimls', 'jsonls', 'sqlls', 'phpactor'}
  for _, lsp in pairs(servers) do
    require'lspconfig'[lsp].setup {
      on_attach = custom_lsp_attach

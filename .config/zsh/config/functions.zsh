@@ -1,5 +1,20 @@
 # Functions
 
+function venv() {
+    local folder=${PWD##*/}
+    local activation="$folder/bin/activate"
+
+    if test -f "$activation"; then
+        source "$activation" 2> /dev/null
+    else
+        echo "Creating venv in '$folder'..."
+        python -mvenv $folder
+        echo "Created"
+
+        source "$activation" 2> /dev/null
+    fi
+}
+
 rec() {
     simplescreenrecorder --start-recording --start-hidden --settingsfile="$HOME/.config/ssr/settings.conf"
 }
