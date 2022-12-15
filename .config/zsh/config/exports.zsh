@@ -2,6 +2,7 @@
 
 path=(
   ~/.local/bin
+  ~/.local/share/gem/ruby/3.0.0/bin
   $path
 )
 
