@@ -26,8 +26,18 @@
   email = arktnld@gmail.com
   signingkey = 334A0F0ED3746EC3
 
-; [include]
-;   path = ./aliases.gitconfig
+[diff]
+  algorithm = histogram
+  tool = nvimdiff
+  renames = copies
+  submodule = log
+
+[difftool "nvimdiff"]
+  cmd = nvim -d $LOCAL $REMOTE
+  trustexitcode = true
+
+[include]
+  path = ./aliases.gitconfig
 
 ; [pull]
 ;   rebase = true
@@ -35,16 +45,6 @@
 ; [push]
 ;   default = nothing
   ; followtags = true
-
-; [diff]
-;   algorithm = histogram
-;   tool = nvimdiff
-;   renames = copies
-;   submodule = log
-
-; [difftool "nvimdiff"]
-;   cmd = nvim -d $LOCAL $REMOTE
-;   trustexitcode = true
 
 ; [merge]
 ;   tool = nvimmerge
