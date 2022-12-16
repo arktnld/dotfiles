@@ -1,50 +1,58 @@
 [init]
-  defaultBranch = master
+    defaultBranch = master
+
 [core]
-  repositoryformatversion = 0
-  filemode = true
-  bare = false
-   logallrefupdates = true
-  editor = $EDITOR
-  pager = less
-  whitespace = space-before-tab,-indent-with-non-tab,trailing-space
+    repositoryformatversion = 0
+    filemode = true
+    bare = false
+    logallrefupdates = true
+    editor = $EDITOR
+    pager = less
+    whitespace = space-before-tab,-indent-with-non-tab,trailing-space
+
 [remote "upstream"]
-	url = https://github.com/arktnld/dotfiles.git
-	fetch = +refs/heads/*:refs/remotes/upstream/*
+    url = https://github.com/arktnld/dotfiles.git
+    fetch = +refs/heads/*:refs/remotes/upstream/*
+
+[branch "main"]
+    remote = origin
+    merge = refs/heads/master
+
+[user]
+    name = arktnld
+    email = arktnld@gmail.com
+    signingkey = 334A0F0ED3746EC3
+
+[diff]
+    algorithm = histogram
+    tool = nvimdiff
+    renames = copies
+    submodule = log
+
+[difftool "nvimdiff"]
+    cmd = nvim -d $LOCAL $REMOTE
+    trustexitcode = true
+
+[include]
+    path = ./aliases.gitconfig
+
+[status]
+    short = true
+    branch = true
+
+[credential]
+    helper = store
 
 ; [remote "origin"]
 ; 	url = https://github.com/arktnld/dotfiles.git
 ; 	fetch = +refs/heads/*:refs/remotes/origin/*
-
-[branch "main"]
-	remote = origin
-	merge = refs/heads/master
-[credential]
-	helper = store
-[user]
-  name = arktnld
-  email = arktnld@gmail.com
-  signingkey = 334A0F0ED3746EC3
-
-[diff]
-  algorithm = histogram
-  tool = nvimdiff
-  renames = copies
-  submodule = log
-
-[difftool "nvimdiff"]
-  cmd = nvim -d $LOCAL $REMOTE
-  trustexitcode = true
-
-[include]
-  path = ./aliases.gitconfig
 
 ; [pull]
 ;   rebase = true
 
 ; [push]
 ;   default = nothing
-  ; followtags = true
+; followtags = true
 
 ; [merge]
 ;   tool = nvimmerge
@@ -54,10 +62,6 @@
 ; [mergetool "nvimmerge"]
 ;   cmd = nvim -d $LOCAL $BASE $REMOTE $MERGED -c '$wincmd w' -c 'wincmd J'
 ;   trustexitcode = true
-
-; [status]
-;   short = true
-;   branch = true
 
 ; [apply]
 ;   whitespace = error
