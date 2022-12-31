@@ -342,7 +342,7 @@ exclude="$listex"
 echo init script
 echo get page
 getpage "$file" "$webpg"
-ech get urls
+echo get urls
 geturls "$include" "$exclude"
 [ -s "$urlbg" ] || exit 1
 diffurls

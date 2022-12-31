@@ -1,5 +1,5 @@
 [Added Associations]
-x-scheme-handler/tg=userapp-Telegram Desktop-KLMA30.desktop;userapp-Kotatogram Desktop-VY6080.desktop;userapp-Telegram Desktop-TDP8H1.desktop;userapp-Telegram Desktop-IHO4S1.desktop;userapp-Telegram Desktop-MR0BW1.desktop;
+x-scheme-handler/tg=userapp-Telegram Desktop-KLMA30.desktop;userapp-Kotatogram Desktop-VY6080.desktop;userapp-Telegram Desktop-TDP8H1.desktop;userapp-Telegram Desktop-IHO4S1.desktop;userapp-Telegram Desktop-MR0BW1.desktop;org.telegram.desktop.desktop;
 application/pdf=org.pwmt.zathura-pdf-mupdf.desktop;
 image/bmp=org.gnome.eog.desktop;sxiv.desktop;
 image/gif=org.gnome.eog.desktop;sxiv.desktop;
@@ -55,7 +55,7 @@ x-scheme-handler/sms=org.gnome.Shell.Extensions.GSConnect.desktop;
 x-scheme-handler/tel=org.gnome.Shell.Extensions.GSConnect.desktop;
 
 [Default Applications]
-x-scheme-handler/tg=userapp-Telegram Desktop-MR0BW1.desktop
+x-scheme-handler/tg=org.telegram.desktop.desktop
 x-scheme-handler/etcher=balena-etcher-electron.desktop
 image/jpg=sxiv.desktop
 image/x-gray=org.gnome.eog.desktop

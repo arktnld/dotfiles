@@ -56,6 +56,7 @@ cnoremap <expr> <S-Tab> getcmdtype() ==# '/' \|\| getcmdtype() ==# '?' ? '<Enter
 " Shortcuts for quiting.
 nnoremap <silent> <Leader>q :quit!<Enter>
 nnoremap <silent> <Leader>Q :quitall<Enter>
+vnoremap <silent> <Leader>d :call box#Draw()<CR>
 
 " Insert extra new line
 nnoremap <Leader>o o<Esc>k
