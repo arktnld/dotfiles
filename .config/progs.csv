@@ -89,4 +89,4 @@ A,tdrop-git,A WM-Independent dropdown window and terminal creator.
 A,keepmenu,Dmenu/Rofi frontend for Keepass databases.
 A,paclast,list installed pacman packages in chronological order.
 A,ltex-ls-bin,LSP language server for LanguageTool.
-
+A,indicator-keylock,Indicate capslock activated

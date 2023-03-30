@@ -117,7 +117,7 @@ export WINEPREFIX="$HOME/.local/share/wineprefixes/32"
 # export CARGO_HOME="$HOME/.local/share/cargo"
 # export GTK2_RC_FILES="$HOME/.config/gtk-2.0/gtkrc-2.0"
 #
-export NODE_PATH=$NODE_PATH:$(npm root -g)
+# export NODE_PATH=$NODE_PATH:$(npm root -g)
 # export _JAVA_OPTIONS="-Dswing.defaultlaf=com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
 
 if [ $TILIX_ID ] || [ $VTE_VERSION ]; then
