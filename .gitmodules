@@ -1,9 +1,6 @@
 [submodule "/home/arktnld/.config/zsh/plugins/autosuggestions"]
 	path = /home/arktnld/.config/zsh/plugins/autosuggestions
 	url = https://github.com/zsh-users/zsh-autosuggestions
-[submodule ".config/nvim/pack/bundle/start/lspconfig"]
-	path = .config/nvim/pack/bundle/start/lspconfig
-	url = https://github.com/neovim/nvim-lspconfig
 [submodule ".config/nvim/pack/bundle/start/spellptbr"]
 	path = .config/nvim/pack/bundle/start/spellptbr
 	url = https://github.com/mateusbraga/vim-spell-pt-br
