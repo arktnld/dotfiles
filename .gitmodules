@@ -1,7 +1,6 @@
 [submodule "/home/arktnld/.config/zsh/plugins/autosuggestions"]
 	path = /home/arktnld/.config/zsh/plugins/autosuggestions
 	url = https://github.com/zsh-users/zsh-autosuggestions
-
 [submodule ".config/nvim/pack/bundle/start/lspconfig"]
 	path = .config/nvim/pack/bundle/start/lspconfig
 	url = https://github.com/neovim/nvim-lspconfig
@@ -14,7 +13,6 @@
 [submodule ".config/nvim/pack/bundle/start/graphql"]
 	path = .config/nvim/pack/bundle/start/graphql
 	url = https://github.com/jparise/vim-graphql
-
 [submodule ".config/nvim/pack/bundle/opt/colorizer"]
 	path = .config/nvim/pack/bundle/opt/colorizer
 	url = https://github.com/norcalli/nvim-colorizer.lua
