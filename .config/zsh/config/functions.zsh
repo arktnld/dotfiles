@@ -1,14 +1,19 @@
 # Functions
+function venv-activate() {
+    local folder=${PWD##*/}
+    local activation="venv-$folder/bin/activate"
+    source "$activation" 2> /dev/null
+}
 
 function venv() {
-    # local folder=${PWD##*/}
-    local activation="venv/bin/activate"
+    local folder=${PWD##*/}
+    local activation="venv-$folder/bin/activate"
 
     if test -f "$activation"; then
         source "$activation" 2> /dev/null
     else
         echo "Creating venv..."
-        python -mvenv venv
+        python -mvenv "venv-$folder"
         echo "Created"
 
         source "$activation" 2> /dev/null

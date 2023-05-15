@@ -34,6 +34,13 @@
 ,cronie,Daemon that runs specified programs at scheduled times and related tools.
 ,zsh-completions,Additional completion definitions for Zsh.
 ,lostfiles,Find orphaned files not owned by any Arch packages.
+,ytfzf,
+,p7zip,
+,udiskie,
+,sc-im,
+,gnumeric, to convert in others types
+,docker,
+A,nodejs-somafm,
 #Graphics Drivers
 ,lib32-mesa,An open-source implementation of the OpenGL specification.
 ,lib32-sdl2,A library for portable low-level access to a video framebuffer.
@@ -54,6 +61,10 @@
 ,rofi,A window switcher application launcher and dmenu replacement.
 ,simplescreenrecorder,A feature-rich screen recorder that supports X11 and OpenGL.
 ,keepmenu-git,
+,pavucontrol,
+,flameshot,
+,insomnia,
+A,volnoti-brightness-git,
 #Conding Programs
 ,prettier,code formatter for JS JSON CSS YAML and much more.
 ,eslint,code checker for JavaScript.

@@ -1,7 +1,7 @@
 # https://github.com/jackharrisonsherlock/common
 
 # Prompt symbol
-COMMON_PROMPT_SYMBOL="▶"
+COMMON_PROMPT_SYMBOL=" 〉"
 
 # tilix vte
 # VTE_PWD_THING="$(__vte_osc7)"
