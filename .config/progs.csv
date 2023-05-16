@@ -40,6 +40,7 @@
 ,sc-im,
 ,gnumeric, to convert in others types
 ,docker,
+,freerdp,
 A,nodejs-somafm,
 #Graphics Drivers
 ,lib32-mesa,An open-source implementation of the OpenGL specification.
@@ -64,6 +65,7 @@ A,nodejs-somafm,
 ,pavucontrol,
 ,flameshot,
 ,insomnia,
+,dbeaver,
 A,volnoti-brightness-git,
 #Conding Programs
 ,prettier,code formatter for JS JSON CSS YAML and much more.
@@ -72,6 +74,7 @@ A,volnoti-brightness-git,
 ,vim-language-server,Lint tool for Vim script Language.
 ,bash-language-server,shell script analysis tool.
 ,github-cli,
+,aws-cli-v2,
 #Minimal Gnome Installation
 ,gnome-shell,Next generation desktop shell.
 ,nautilus,Default Gnome file manager.

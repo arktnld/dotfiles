@@ -1,0 +1,43 @@
+# Load keyboard key binds for bspwm.
+sxhkd &
+
+# Reload previews desktop wallpaper.
+xwallpaper --center ~/.config/wall.png &
+
+# Launch top and bottom polybar statusbars.
+#~/.config/polybar/launch.sh
+polybar &
+
+# Activate cursor mouse on keyboard and swap caps and esc.
+#ksetxkbmap -option caps:swapescape -option keypad:pointerkeys
+setxkbmap -model abnt -layout us -variant intl &
+
+# For transparence and other effects.
+picom --config ~/.config/picom/picom.conf &
+
+# Volume notification
+volnoti &
+
+# Usbstick automount.
+udiskie &
+
+# Disable touchpad from thinkpad x240
+synclient TouchpadOff=1
+
+# Reload previews pywal theme, exclude terminal.
+#wal -s -R
+
+# Set mouse keys speed.
+#xkbset ma 60 10 10 20 10
+
+#xset -b & #For annoying beeping sounds
+
+# Activate lock screen in 10min.
+#xautolock -time 10 -locker "slock" &
+
+# Hide mouse.
+#unclutter -idle 1 -jitter 2 -root &
+
+#fail2ban-server &
+
+# vim:ft=sh
