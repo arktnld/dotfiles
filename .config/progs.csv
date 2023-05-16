@@ -41,6 +41,8 @@
 ,gnumeric, to convert in others types
 ,docker,
 ,freerdp,
+,paru,
+,alsa-utils,
 A,nodejs-somafm,
 #Graphics Drivers
 ,lib32-mesa,An open-source implementation of the OpenGL specification.
@@ -75,23 +77,9 @@ A,volnoti-brightness-git,
 ,bash-language-server,shell script analysis tool.
 ,github-cli,
 ,aws-cli-v2,
-#Minimal Gnome Installation
-,gnome-shell,Next generation desktop shell.
-,nautilus,Default Gnome file manager.
-,gnome-terminal,Gnome terminal emulator.
-,gnome-tweak-tool,Graphical interface for advanced GNOME 3 settings.
-,gnome-control-center,GNOME's main interface to configure various aspects of the desktop.
-,xdg-user-dirs,Manage user directories like ~/Desktop and ~/Music.
-,gst-plugins-good,Multimedia graph framework.
-,gst-plugins-ugly,Multimedia graph framework.
-,gst-plugins-bad,Multimedia graph framework.
-,gdm,Display manager and login screen.
-,gnome-backgrounds,Background images and data for GNOME.
+,xwallpaper,
+,paclast,
 A,xbanish,
-A,startup-settings-git,
-A,adwaita-dark,
-A,gnome-shell-extension-tray-icons-reloaded-git,Shows legacy tray icons on top.
-A,gnome-shell-extension-vitals-git,Displays system vitals in a GNOME Shell top bar pop-down.
 #Arch User Repository
 A,chrome-gnome-shell,Native connector for integration with extensions.gnome.org.
 A,patool,Portable command line archive file manager.

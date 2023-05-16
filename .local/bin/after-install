@@ -36,37 +36,37 @@ configfiles() {
     [ -f /etc/sudoers.pacnew ] && cp /etc/sudoers.pacnew /etc/sudoers # Just in case
     newperms "%wheel ALL=(ALL) NOPASSWD: ALL" # Allow user to run sudo without password. Since AUR programs must be installed
     sed -i "s/^#ParallelDownloads/ParallelDownloads/;s/^#Color$/Color/;s/^#ILoveCandy/ILoveCandy/" /etc/pacman.conf
-    echo -e "Section \"InputClass\"\n\tIdentifier \"system-keyboard\"\n\tMatchIsKeyboard \"on\"\n\tOption \"XkbLayout\" \"br\"\nEndSection" >> /etc/X11/xorg.conf.d/00-keyboard.conf
+    # echo -e "Section \"InputClass\"\n\tIdentifier \"system-keyboard\"\n\tMatchIsKeyboard \"on\"\n\tOption \"XkbLayout\" \"br\"\nEndSection" >> /etc/X11/xorg.conf.d/00-keyboard.conf
     reflector -c Brazil --save /etc/pacman.d/mirrorlist # Create a mirrorlist file with the best mirrors from a given country.
-    ln -s /usr/share/fontconfig/conf.avail/10-scale-bitmap-fonts.conf /etc/fonts/conf.d # Fix emoji scale
+    # ln -s /usr/share/fontconfig/conf.avail/10-scale-bitmap-fonts.conf /etc/fonts/conf.d # Fix emoji scale
 }
 
-adduserandpass() { \
-	# Adds user `$name` with password $pass1.
-	echo "Adding user \"$name\"..."
-	useradd -m -g wheel -s /bin/zsh "$name" >/dev/null 2>&1 ||
-	usermod -a -G wheel "$name" && mkdir -p /home/"$name" && chown "$name":wheel /home/"$name"
-	echo "$name:$pass" | chpasswd
-	unset pass ;}
+# adduserandpass() { \
+# 	# Adds user `$name` with password $pass1.
+# 	echo "Adding user \"$name\"..."
+# 	useradd -m -g wheel -s /bin/zsh "$name" >/dev/null 2>&1 ||
+# 	usermod -a -G wheel "$name" && mkdir -p /home/"$name" && chown "$name":wheel /home/"$name"
+# 	echo "$name:$pass" | chpasswd
+# 	unset pass ;}
 
 installpkg(){ pacman --noconfirm --needed -S "$1" >/dev/null 2>&1 ; }
 newperms() { echo "$*" >> /etc/sudoers ; } # Set special sudoers settings for install (or after).
 
-chaoticrepoinstall() { #
-    echo "Enable Chaotic-AUR Repository..."
-    pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com >/dev/null 2>&1
-    echo "Installing Chaotic Primary Key..."
-    pacman-key --lsign-key 3056513887B78AEB >/dev/null 2>&1
-    echo "Installing Chaotic keyring and mirrorlist..."
-    wget 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' >/dev/null 2>&1
-    wget 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst' >/dev/null 2>&1
-    pacman --noconfirm -U chaotic-keyring.pkg.tar.zst chaotic-mirrorlist.pkg.tar.zst >/dev/null 2>&1
-    rm chaotic-keyring.pkg.tar.zst chaotic-mirrorlist.pkg.tar.zst >/dev/null 2>&1
-    echo "Append Chaotic to /etc/pacman.conf..."
-    echo -e "\n[chaotic-aur]\nInclude = /etc/pacman.d/chaotic-mirrorlist" >> /etc/pacman.conf
-    echo "Updating mirrorlist..."
-    pacman -Sy >/dev/null 2>&1
-}
+# chaoticrepoinstall() { #
+#     echo "Enable Chaotic-AUR Repository..."
+#     pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com >/dev/null 2>&1
+#     echo "Installing Chaotic Primary Key..."
+#     pacman-key --lsign-key 3056513887B78AEB >/dev/null 2>&1
+#     echo "Installing Chaotic keyring and mirrorlist..."
+#     wget 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' >/dev/null 2>&1
+#     wget 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst' >/dev/null 2>&1
+#     pacman --noconfirm -U chaotic-keyring.pkg.tar.zst chaotic-mirrorlist.pkg.tar.zst >/dev/null 2>&1
+#     rm chaotic-keyring.pkg.tar.zst chaotic-mirrorlist.pkg.tar.zst >/dev/null 2>&1
+#     echo "Append Chaotic to /etc/pacman.conf..."
+#     echo -e "\n[chaotic-aur]\nInclude = /etc/pacman.d/chaotic-mirrorlist" >> /etc/pacman.conf
+#     echo "Updating mirrorlist..."
+#     pacman -Sy >/dev/null 2>&1
+# }
 
 maininstall() { # Installs all needed programs from main repo.
 	echo "$1, $2 "
@@ -102,15 +102,24 @@ putgitrepo() { # Downloads a gitrepo $1 and places the files in $2 only overwrit
 	sudo -u "$name" cp -rfT "$dir" "$2"
 }
 
+# paruinstall() {
+#     git clone https://aur.archlinux.org/paru-bin.git
+#     cd paru-bin
+#     su -l arktnld -c "makepkg -si"
+#     cd ..
+#     rm -r paru-bin
+# }
+
 ### THE ACTUAL SCRIPT ###
 
-initialsetup
-configfiles
-adduserandpass
-chaoticrepoinstall
+# initialsetup
+# configfiles
+# adduserandpass
+# chaoticrepoinstall
+# paruinstall
 installationloop # The command that does all the install using the progs.csv file.
 systemctlenable cronie ly
-putgitrepo "$dotfilesrepo" "/home/$name" "$repobranch" # Install the dotfiles in the user's home directory
+# putgitrepo "$dotfilesrepo" "/home/$name" "$repobranch" # Install the dotfiles in the user's home directory
 
 ### INSTALL COMPLETE ###
 

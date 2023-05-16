@@ -7,7 +7,6 @@ foreach file (
   functions.zsh
   aliases.zsh
   mappings.zsh
-  aws.zsh
 
 ) {
   source $ZDOTDIR/config/$file
