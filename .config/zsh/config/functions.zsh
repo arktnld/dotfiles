@@ -5,6 +5,7 @@ function venv-activate() {
     source "$activation" 2> /dev/null
 }
 
+
 function venv() {
     local folder=${PWD##*/}
     local activation="venv-$folder/bin/activate"
@@ -204,15 +205,52 @@ github() { # see ditfiles on github
     pamac search --files "$1"
 }
 
-@-gnome-reset() {
-    dconf reset -f /org/gnome/
+@-chromium-app() {
+
+local website="$1"
+local website=${website/http:\/\//https:\/\/}
+
+if [[ ! $website == https://* ]]; then
+    website="https://$website"
+fi
+local name=${website#https://}
+
+local info="[Desktop Entry]
+Version=1.0
+Type=Application
+Name=$name
+Exec=chromium --app=$website
+Icon=/path/to/icon.png
+Terminal=false
+Categories=Network;WebBrowser;
+"
+echo $info > ~/.local/share/applications/"$name".desktop
 }
 
-@-packages-last-installed() {
-    # needs paclast package.
-    paclast | tac | tail -n20
+@-send-email-payment() {
+# Email Configuration
+local sender="arktnld@gmail.com"
+# local recipient="gentegestao@agenciadedados.com.br"
+recipient="clebersongs@gmail.com"
+local subject="Cleberson Pagamento "$(date -u "+%b %y")
+local body=""
 
+# File Attachment
+local att1=$(realpath "$1")
+local att2=$(realpath "$2")
+
+# Command to send email using NeoMutt
+echo -e "Subject: $subject\n \n\n$body" | neomutt -s "$subject" -e "set from=$sender" -a "$att1" -a "$att2" -- "$recipient"
 }
+
+# @-gnome-reset() {
+#     dconf reset -f /org/gnome/
+# }
+
+# @-packages-last-installed() {
+#     # needs paclast package.
+#     paclast | tac | tail -n20
+# }
 
 # @-show-music-notes() {
 # 	ffplay -hide_banner -f lavfi \

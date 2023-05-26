@@ -37,7 +37,7 @@ configfiles() {
     newperms "%wheel ALL=(ALL) NOPASSWD: ALL" # Allow user to run sudo without password. Since AUR programs must be installed
     sed -i "s/^#ParallelDownloads/ParallelDownloads/;s/^#Color$/Color/;s/^#ILoveCandy/ILoveCandy/" /etc/pacman.conf
     # echo -e "Section \"InputClass\"\n\tIdentifier \"system-keyboard\"\n\tMatchIsKeyboard \"on\"\n\tOption \"XkbLayout\" \"br\"\nEndSection" >> /etc/X11/xorg.conf.d/00-keyboard.conf
-    reflector -c Brazil --save /etc/pacman.d/mirrorlist # Create a mirrorlist file with the best mirrors from a given country.
+    reflector --save /etc/pacman.d/mirrorlist # Create a mirrorlist file with the best mirrors from a given country.
     # ln -s /usr/share/fontconfig/conf.avail/10-scale-bitmap-fonts.conf /etc/fonts/conf.d # Fix emoji scale
 }
 

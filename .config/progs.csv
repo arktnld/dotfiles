@@ -10,7 +10,7 @@
 ,wget,network utility to retrieve files from the Web.
 ,aria2,Download utility that supports HTTP FTP and Torrent.
 ,xclip,allows for coping ahd pasting from the commandline.
-,youtube-dl,can download any YouTube video when given the link.
+,yt-dlp,can download any YouTube video when given the link.
 ,mlocate,merging locate/updatedb implementation.
 ,sdcv,StarDict Console Version.
 ,w3m,text-based Web browser as well as pager.
@@ -35,6 +35,7 @@
 ,zsh-completions,Additional completion definitions for Zsh.
 ,lostfiles,Find orphaned files not owned by any Arch packages.
 ,ytfzf,
+,playerctl,
 ,p7zip,
 ,udiskie,
 ,sc-im,
@@ -43,7 +44,20 @@
 ,freerdp,
 ,paru,
 ,alsa-utils,
+,xorg-xrandr,
+,ttf-roboto-mono-nerd,
+,xdg-user-dirs,
+,xf86-input-synaptics,
+,curl-impersonate-bin,
+,scrcpy,
+,python-adblock,
+,ungoogled-chromium,
+,brightnessclt,
 A,nodejs-somafm,
+#Audio Drivers
+,pipewire,
+,pipewire-alsa,
+,pipewire-pulse,
 #Graphics Drivers
 ,lib32-mesa,An open-source implementation of the OpenGL specification.
 ,lib32-sdl2,A library for portable low-level access to a video framebuffer.
@@ -68,6 +82,7 @@ A,nodejs-somafm,
 ,flameshot,
 ,insomnia,
 ,dbeaver,
+,httptoolkit-bin,
 A,volnoti-brightness-git,
 #Conding Programs
 ,prettier,code formatter for JS JSON CSS YAML and much more.

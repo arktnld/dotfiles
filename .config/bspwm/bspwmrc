@@ -20,10 +20,10 @@ if xrandr | grep -w "$extern connected"; then
     xrandr --addmode $extern 1680x1050_60.00
     xrandr --output $extern --mode 1680x1050_60.00
     xrandr --output $intern  --rotate normal --output $extern --primary --rotate normal --above $extern --pos 0x0
-    bspc monitor $extern -d 1 2
-    bspc monitor $intern -d 3 4
+    bspc monitor $extern -d 1 2 3 4 5
+    bspc monitor $intern -d 6 7 8 9 0
 else
-    bspc monitor $intern -d 1 2 3 4
+    bspc monitor $intern -d 1 2 3 4 5 6
 fi
 
 bspc config border_width         2

@@ -2,7 +2,7 @@
 sxhkd &
 
 # Reload previews desktop wallpaper.
-# xwallpaper --center ~/.config/wall.png &
+xwallpaper --center ~/.config/wall.png &
 
 # Launch top and bottom polybar statusbars.
 #~/.config/polybar/launch.sh
@@ -16,13 +16,16 @@ setxkbmap -model abnt -layout us -variant intl &
 picom --config ~/.config/picom/picom.conf &
 
 # Volume notification
-# volnoti &
+volnoti &
 
 # Usbstick automount.
-# udiskie &
+udiskie &
+
+# Notification server
+dunst &
 
 # Disable touchpad from thinkpad x240
-# synclient TouchpadOff=1
+synclient TouchpadOff=1
 
 # Reload previews pywal theme, exclude terminal.
 #wal -s -R

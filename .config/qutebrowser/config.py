@@ -53,7 +53,7 @@ c.colors.webpage.darkmode.policy.page = 'always'
 c.colors.webpage.bg = '#111111'
 
 # adblock
-c.content.blocking.method = "adblock"
+c.content.blocking.method = "both"
 c.content.blocking.hosts.block_subdomains = True
 c.content.blocking.whitelist = []
 c.content.blocking.adblock.lists = [
@@ -249,7 +249,7 @@ def rewrite(request: qutebrowser.api.interceptor.Request):
         except: pass
     elif 'wikipedia.org' in request.request_url.host():
         request.request_url.setHost('wikiless.org')
-        try: request.redirect(request.request_url
+        try: request.redirect(request.request_url)
         except: pass
 
 qutebrowser.api.interceptor.register(rewrite)

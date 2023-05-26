@@ -160,8 +160,23 @@ function show_menu()
     return
 end
 
+-- Function to check if a command is executable
+function isExecutable(command)
+    local f = io.popen("which " .. command)
+    local path = f:read("*a")
+    f:close()
+    return string.len(path) > 0
+end
+
+-- Check if youtube-dl or yt-dlp is in PATH
+if isExecutable("youtube-dl") then
+    yt_tool = "youtube-dl"
+elseif isExecutable("yt-dlp") then
+    yt_tool = "yt-dlp"
+end
+
 local ytdl = {
-    path = "youtube-dl",
+    path = yt_tool,
     searched = false,
     blacklisted = {}
 }
