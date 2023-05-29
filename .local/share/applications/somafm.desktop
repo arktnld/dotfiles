@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=somafm
+GenericName=radio
+Comment=radio
+Exec=sh -c "somafm play random"
+Icon=mpv
+Terminal=false
+Type=Application
+Categories=Utility;RemoteAccess;
+StartupNotify=false

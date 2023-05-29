@@ -243,13 +243,17 @@ local att2=$(realpath "$2")
 echo -e "Subject: $subject\n \n\n$body" | neomutt -s "$subject" -e "set from=$sender" -a "$att1" -a "$att2" -- "$recipient"
 }
 
+@-packages-last-installed() {
+    # needs paclast package.
+    paclast | tac | tail -n20
+}
+
+@-apps-using-internet() {
+    lsof -P -i -n | cut -f 1 -d " " | uniq | tail -n +2
+}
+
 # @-gnome-reset() {
 #     dconf reset -f /org/gnome/
-# }
-
-# @-packages-last-installed() {
-#     # needs paclast package.
-#     paclast | tac | tail -n20
 # }
 
 # @-show-music-notes() {
