@@ -10,7 +10,11 @@ polybar &
 
 # Activate cursor mouse on keyboard and swap caps and esc.
 #ksetxkbmap -option caps:swapescape -option keypad:pointerkeys
-setxkbmap -model abnt -layout us -variant intl &
+# setxkbmap -model abnt -layout us -variant intl &
+setxkbmap -model abnt -layout br &
+
+# make key "/?" of x220 work
+# xmodmap -e "keycode 105 = slash question" &
 
 # For transparence and other effects.
 picom --config ~/.config/picom/picom.conf &
@@ -31,7 +35,7 @@ synclient TouchpadOff=1
 #wal -s -R
 
 # Set mouse keys speed.
-#xkbset ma 60 10 10 20 10
+# xkbset ma 60 10 10 20 10
 
 #xset -b & #For annoying beeping sounds
 

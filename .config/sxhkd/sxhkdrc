@@ -6,20 +6,20 @@
 super + Return
 	tilix
 
-super + Return
-	tilix --class=quake --quake
+super + d
+    tilix --class=quake --profile=quake --group=quake --quake --name=quake
 
 # super + ctrl + Return
 # 	~/.local/bin/st-dark
 
 # program launcher
 super + @space
-	rofi -fullscreen -modi drun -show drun -show-icons
+	rofi -fullscreen -modi drun -show drun -show-icons -theme ~/.config/rofi/Plain.rasi
 
 # make sxhkd reload its configuration files:
 super + Escape
 	pkill -USR1 -x sxhkd
-XF86AudioPlay
+
 #
 # bspwm hotkeys
 #
@@ -65,8 +65,8 @@ super + {_,shift + }{h,j,k,l}
 	bspc node -{f,s} {west,south,north,east}
 
 # focus the node for the given path jump
-super + {p,b,comma,period}
-	bspc node -f @{parent,brother,first,second}
+# super + {p,b,comma,period}
+# 	bspc node -f @{parent,brother,first,second}
 
 # focus the next/previous node in the current desktop
 super + {_,shift + }c
@@ -125,10 +125,12 @@ super + alt + shift {h,j,k,l}
 
 ######### MY PERSONAL KEYBINDS ###########
 
-# super + p
-	# ~/.local/bin/pomo
+super + p
+    ~/.local/bin/somafm.sh
+
 super + shift + m
     qutebrowser
+
 # super + shift + n
 #     thunar
 
@@ -168,7 +170,7 @@ XF86MonBrightnessDown
     volnoti-show -s /usr/share/pixmaps/volnoti/display-brightness-symbolic.svg $(brightnessctl set 50- | grep -Po "[0-9]+(?=%)" | tail -1)
 
 # Media player controls
-super + p
+XF86AudioPlay
 	playerctl play-pause;
 XF86AudioStop
 	playerctl stop; pkill mpv;

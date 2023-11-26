@@ -1,24 +1,18 @@
-[submodule "/home/arktnld/.config/zsh/plugins/autosuggestions"]
-	path = /home/arktnld/.config/zsh/plugins/autosuggestions
-	url = https://github.com/zsh-users/zsh-autosuggestions
 [submodule ".config/nvim/pack/bundle/start/spellptbr"]
 	path = .config/nvim/pack/bundle/start/spellptbr
 	url = https://github.com/mateusbraga/vim-spell-pt-br
 [submodule ".config/nvim/pack/bundle/start/polyglot"]
 	path = .config/nvim/pack/bundle/start/polyglot
 	url = https://github.com/sheerun/vim-polyglot
-[submodule ".config/nvim/pack/bundle/start/graphql"]
-	path = .config/nvim/pack/bundle/start/graphql
-	url = https://github.com/jparise/vim-graphql
 [submodule ".config/nvim/pack/bundle/opt/colorizer"]
 	path = .config/nvim/pack/bundle/opt/colorizer
 	url = https://github.com/norcalli/nvim-colorizer.lua
 [submodule ".config/nvim/pack/bundle/opt/run"]
 	path = .config/nvim/pack/bundle/opt/run
 	url = https://github.com/leafOfTree/vim-run
-[submodule ".config/nvim/pack/bundle/opt/markdown-preview.nvim"]
-	path = .config/nvim/pack/bundle/opt/markdown-preview.nvim
-	url = https://github.com/iamcco/markdown-preview.nvim
 [submodule ".config/nvim/pack/bundle/start/lspconfig"]
 	path = .config/nvim/pack/bundle/start/lspconfig
 	url = https://github.com/neovim/nvim-lspconfig
+[submodule ".config/nvim/pack/bundle/start/codeium"]
+	path = .config/nvim/pack/bundle/start/codeium
+	url = https://github.com/Exafunction/codeium.vim

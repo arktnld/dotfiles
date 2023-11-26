@@ -252,6 +252,10 @@ echo -e "Subject: $subject\n \n\n$body" | neomutt -s "$subject" -e "set from=$se
     lsof -P -i -n | cut -f 1 -d " " | uniq | tail -n +2
 }
 
+@-new-programs-to-remember() {
+    newprograms
+}
+
 # @-gnome-reset() {
 #     dconf reset -f /org/gnome/
 # }
