@@ -53,32 +53,32 @@ c.colors.webpage.darkmode.policy.page = 'always'
 c.colors.webpage.bg = '#111111'
 
 # adblock
-c.content.blocking.method = "both"
-c.content.blocking.hosts.block_subdomains = True
-c.content.blocking.whitelist = []
-c.content.blocking.adblock.lists = [
-    "https://easylist.to/easylist/easylist.txt",
-    "https://easylist.to/easylist/easyprivacy.txt",
-    "https://raw.githubusercontent.com/ABPindo/indonesianadblockrules/master/subscriptions/abpindo.txt",
-    "https://raw.githubusercontent.com/hoshsadiq/adblock-nocoin-list/master/nocoin.txt",
-    "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/annoyances.txt",
-    "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/badlists.txt",
-    "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/badware.txt",
-    "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters-2020.txt",
-    "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters-2021.txt",
-    "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.txt",
-    "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/legacy.txt",
-    "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/privacy.txt",
-    "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/resource-abuse.txt",
-    "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/unbreak.txt",
-    "https://raw.githubusercontent.com/brave/adblock-lists//master/brave-lists/brave-firstparty-cname.txt",
-    "https://raw.githubusercontent.com/brave/adblock-lists//master/brave-lists/brave-firstparty.txt",
-    "https://raw.githubusercontent.com/brave/adblock-lists//master/brave-lists/brave-social.txt",
-]
-c.content.blocking.hosts.lists = [
-    'https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts',
-    "https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=1&mimetype=plaintext"
-]
+# c.content.blocking.method = "both"
+# c.content.blocking.hosts.block_subdomains = True
+# c.content.blocking.whitelist = []
+# c.content.blocking.adblock.lists = [
+#     "https://easylist.to/easylist/easylist.txt",
+#     "https://easylist.to/easylist/easyprivacy.txt",
+#     "https://raw.githubusercontent.com/ABPindo/indonesianadblockrules/master/subscriptions/abpindo.txt",
+#     "https://raw.githubusercontent.com/hoshsadiq/adblock-nocoin-list/master/nocoin.txt",
+#     "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/annoyances.txt",
+#     "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/badlists.txt",
+#     "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/badware.txt",
+#     "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters-2020.txt",
+#     "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters-2021.txt",
+#     "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.txt",
+#     "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/legacy.txt",
+#     "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/privacy.txt",
+#     "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/resource-abuse.txt",
+#     "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/unbreak.txt",
+#     "https://raw.githubusercontent.com/brave/adblock-lists//master/brave-lists/brave-firstparty-cname.txt",
+#     "https://raw.githubusercontent.com/brave/adblock-lists//master/brave-lists/brave-firstparty.txt",
+#     "https://raw.githubusercontent.com/brave/adblock-lists//master/brave-lists/brave-social.txt",
+# ]
+# c.content.blocking.hosts.lists = [
+#     'https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts',
+#     "https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=1&mimetype=plaintext"
+# ]
 
 # text editor
 c.editor.command = ['tilix', '--new-process', '-e', 'nvim', '-c', 'normal {line}G{column0}l', '{file}']

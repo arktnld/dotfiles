@@ -1,0 +1,175 @@
+#!/bin/bash
+
+
+update_system() {
+    echo "Updating system..."
+    sudo pacman -Syu
+}
+
+refresh_keyring() {
+    echo "Refreshing Arch Keyring..."
+    pacman --noconfirm -S archlinux-keyring >/dev/null 2>&1
+}
+
+# Function to check if a command is available
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Function to check if the Chaotic AUR repository is configured
+check_chaotic_repo() {
+    grep -q '^Include = /etc/pacman.d/chaotic-mirrorlist' /etc/pacman.conf
+}
+
+# Function to add the Chaotic AUR repository to pacman.conf
+add_chaotic_repo() {
+    echo "Configuring Chaotic AUR repository..."
+    echo -e "\n[chaotic-aur]\nInclude = /etc/pacman.d/chaotic-mirrorlist" | sudo tee -a /etc/pacman.conf > /dev/null
+}
+
+# Function to install Chaotic AUR keyring and mirrorlist
+install_chaotic_keyring() {
+    echo "Installing Chaotic AUR keyring and mirrorlist..."
+    sudo pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com
+    sudo pacman-key --lsign-key 3056513887B78AEB
+    sudo pacman -U 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
+}
+
+# Check if CSV file exists
+
+check_csv_file() {
+    csv_file="$1"
+    if [ ! -f "$csv_file" ]; then
+        echo "Error: CSV file not found at $csv_file"
+        exit 1
+    fi
+}
+
+# Function to install paru using makepkg
+install_paru() {
+    echo "Installing paru AUR helper..."
+    git clone https://aur.archlinux.org/paru.git /tmp/paru
+    cd /tmp/paru || exit 1
+    makepkg -si --noconfirm
+    cd - || exit 1
+    rm -rf /tmp/paru
+}
+
+check_paru() {
+    if ! command_exists paru; then
+        install_paru
+    else
+        echo "paru is already installed."
+    fi
+}
+
+# Check if paru is installed
+check_git() {
+    if ! command_exists git; then
+        echo "Git is not installed. Installing..."
+        sudo pacman -S --needed --noconfirm git
+    fi
+}
+
+check_chaotic() {
+    if ! check_chaotic_repo; then
+        add_chaotic_repo
+        install_chaotic_keyring
+    else
+        echo "Chaotic AUR repository is already configured."
+    fi
+}
+
+# Function to handle Pacman installation
+install_pacman() {
+    local name=$1
+    # echo "$name"
+    sudo pacman -S --needed --noconfirm "$name" || echo "1"
+}
+
+# Function to handle AUR installation
+install_aur() {
+    local name=$1
+    # echo "$name AUR"
+    paru -S --needed --noconfirm "$name" || echo "1"
+}
+
+# Function to print errors
+print_errors() {
+    local errors=("$@")
+    echo
+    if [ ${#errors[@]} -gt 0 ]; then
+        echo "Programs not isntalled:"
+        for error in "${errors[@]}"; do
+            echo "$error"
+        done
+    fi
+}
+
+parse_options() {
+    while getopts ":pa" opt; do
+        case $opt in
+            p)
+                install_aur=false ;;
+            a)
+                install_pacman=false ;;
+            \?)
+                echo "Invalid option: -$OPTARG" >&2
+                exit 1 ;;
+        esac
+    done
+}
+
+install_programs() {
+    local csv_file=$1
+    errors=()
+    while IFS=, read -r tag name purpose; do
+        case $tag in
+            \#*)
+                continue ;; # Skip comment
+            "A")
+                if [ "$install_aur" = true ]; then
+                    error=$(install_aur "$name")
+                    if [ "$error" = "1" ]; then
+                        errors+=("$name")
+                    fi
+                fi
+                ;;
+            *)
+                if [ "$install_pacman" = true ]; then
+                    error=$(install_pacman "$name")
+                    if [ "$error" = "1" ]; then
+                        errors+=("$name")
+                    fi
+                fi
+                ;;
+        esac
+    done < "$csv_file"
+
+    print_errors "${errors[@]}"
+}
+
+endofscript() {
+    echo
+    echo "'install_progs' script finished. All done! Congrats!"
+    read -p "Press any key to continue..."
+    echo
+}
+
+## ACTUAL INSTALLATION ##
+
+install_pacman=true
+install_aur=true
+
+parse_options "$@"
+
+csv_file="$HOME/.config/progs.csv"
+
+update_system
+refresh_keyring
+check_csv_file "$csv_file"
+check_paru
+check_git
+install_programs "$csv_file"
+endofscript
+

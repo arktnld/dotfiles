@@ -1,0 +1,68 @@
+#!/bin/sh
+#
+#
+synctime() {
+    echo "Synchronizing system time to ensure secure installation..."
+    ntpdate 0.br.pool.ntp.org >/dev/null 2>&1
+    echo
+}
+
+defaultshell() {
+    shell=$1
+    name=$2
+    if [ ! $SHELL = "/usr/bin/$shell" ]; then
+        echo "Changing default shell to $1..."
+        chsh -s "/usr/bin/$shell" "$name" >/dev/null 2>&1
+    else
+        echo "$shell for '$name' already the default shell."
+    fi
+    echo
+}
+
+
+sudoersperm() {
+    perm=$1
+    confchange "# $perm" "$perm" /etc/sudoers
+    echo
+}
+
+pacmanoption() {
+    options="$@"
+
+    for option in $options; do
+        confchange "#$option" "$option" /etc/pacman.conf
+    done
+    echo
+}
+
+confchange() {
+    comp=$1
+    option=$2
+    file=$3
+    if  sudo cat "$file" | grep -q "$comp";  then
+        echo "Adding $option to $file..."
+        sudo sed -i "s/$comp/$option/" "$file"
+    else
+        echo "$option already in $file"
+    fi
+}
+
+systemctlenable() {
+    for x in "$@"; do
+        echo "Enabling $x service."
+        systemctl enable "$x"
+    done
+}
+
+endofscript() {
+    echo "'make_configs' script finished. All done! Congrats!"
+    echo "Press enter to exit..."; read -r
+}
+
+
+## THE ACTUAL SCRIPT ###
+synctime
+defaultshell "zsh" "arktnld"
+sudoersperm "%wheel ALL=(ALL:ALL) NOPASSWD: ALL"
+pacmanoption "ParallelDownloads" "Color"
+endofscript

@@ -256,6 +256,10 @@ echo -e "Subject: $subject\n \n\n$body" | neomutt -s "$subject" -e "set from=$se
     newprograms
 }
 
+hide_on_open() {
+    tdrop -a auto_hide; "$@" && tdrop -a auto_show
+}
+
 # @-gnome-reset() {
 #     dconf reset -f /org/gnome/
 # }

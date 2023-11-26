@@ -50,6 +50,7 @@ bspc rule -a feh				state=floating follow=on
 bspc rule -a URxvt				state=floating follow=on
 
 bspc rule -a quake              state=floating
+bspc rule -a pyradio            state=floating
 
 #Focus on pointer
 bspc config focus_follows_pointer true

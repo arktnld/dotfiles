@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Function to list programs
+list_programs() {
+  grep '^# Program: ' "$0" | sed 's/^# Program: //'
+}
+
+# Main script logic
+if [ $# -eq 0 ]; then
+  # If no arguments are provided, list the programs
+  list_programs
+else
+  # If arguments are provided, add them to the program list
+  echo "# Program: $@" >> "$0"
+  echo "Programs added to the list."
+fi
+# Program: ytfzf
+# Program: glow
+# Program: sc-im
+# Program: httptoolkit
+# Program: ums
+# Program: radarr
+# Program: notflix

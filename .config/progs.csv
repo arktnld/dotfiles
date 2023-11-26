@@ -1,4 +1,4 @@
-#TAG ,NAME IN REPO ,PURPOSE
+#TAG ,NAME IN REPO,PURPOSE
 #BASIC PROGRAMS
 ,exa,ls replacement.
 ,fzf,fuzzy finder tool.
@@ -25,17 +25,17 @@
 ,playerctl,Control media players via D-Bus from the command line.
 ,p7zip,Command-line version of the 7-Zip file archiver.
 ,udiskie,Simple daemon for automating removable storage.
-,sc-im,Text-based spreadsheet program for the terminal.
+,pyradio,Pytho TUI radio player.
+,arktnld,
+A,sc-im,Text-based spreadsheet program for the terminal.
 ,docker,Platform for developing, shipping, and running containers.
 ,freerdp,Open-source implementation of the Remote Desktop Protocol.
 ,paru,AUR helper tool for Arch Linux with dependency resolution.
 ,alsa-utils,Utilities for configuring Advanced Linux Sound Architecture.
 ,ttf-roboto-mono-nerd,Font package with Roboto Mono Nerd Font.
 ,xdg-user-dirs,Tool for setting up and managing standard user directories.
-,curl-impersonate-bin,Binary utility extending curl with user agent impersonation.
 ,scrcpy,Screen mirroring and remote control for Android devices.
 ,python-adblock,Python library for handling and parsing AdBlock filter lists.
-
 # FONTS FAMILIES
 ,adobe-source-code-pro-fonts,Monospaced font family for user interface and coding environments.
 ,ttf-dejavu,font family based on the bitstream vera fonts.
@@ -45,14 +45,12 @@
 ,noto-fonts,Google Noto TTF fonts.
 ,noto-fonts-extra,Google Noto TTF fonts additional variants.
 ,noto-fonts-emoji,Google Noto emoji fonts.
-,fontconfig-emoji.git,
-,paclast,Tool to display information about the last installed Arch Linux package.
-
+A,fontconfig-emoji-git,
+A,paclast,Tool to display information about the last installed Arch Linux package.
 #AUDIO DRIVERS
 ,pipewire,Media server architecture for handling audio and video.
 ,pipewire-alsa,PipeWire plugin for ALSA (Advanced Linux Sound Architecture).
 ,pipewire-pulse,PipeWire plugin for PulseAudio sound server.
-
 #GRAPHICS DRIVERS
 ,lib32-mesa,An open-source implementation of the OpenGL specification.
 ,lib32-sdl2,A library for portable low-level access to a video framebuffer.
@@ -64,7 +62,6 @@
 ,xorg-xinit,Xorg X initialisation program.
 ,xorg-xrandr,Command-line utility for configuring display settings.
 ,xf86-input-synaptics,Driver for X.Org Server providing touchpad support.
-
 #GRAPHICAL PROGRAMS
 ,mpv, cross-platform media player.
 ,telegram-desktop,telegram desktop client.
@@ -75,20 +72,18 @@
 ,sxiv,simple X Image Viewer.
 ,rofi,A window switcher application launcher and dmenu replacement.
 ,simplescreenrecorder,A feature-rich screen recorder that supports X11 and OpenGL.
-,keepmenu-git,Keepmenu is a tool for managing and accessing your Keepass passwords.
 ,pavucontrol,Graphical user interface for controlling PulseAudio sound server.
 ,flameshot,Powerful and customizable screenshot tool for Linux.
 ,insomnia,Feature-rich REST client for testing and debugging APIs.
 ,dbeaver,Universal database tool for developers and database administrators.
-,httptoolkit-bin,Cross-platform tool for debugging, testing, and mocking HTTP(S).
+A,httptoolkit-bin,Cross-platform tool for debugging, testing, and mocking HTTP(S).
 ,ungoogled-chromium,Privacy-focused variant of the Chromium web browser.
-,brightnessclt,Command-line utility for adjusting screen brightness.
+,brightnessctl,Command-line utility for adjusting screen brightness.
 ,xwallpaper,Command-line utility for setting wallpapers in X11.
 ,bspwm,Tiling window manager for X11.
 ,sxhkd,Simple X hotkey daemon for bspwm.
 ,picom,Fork of the Compton compositor with additional features.
 ,dunst,Customizable and lightweight notification daemon for X11.
-
 #CONDING PROGRAMS
 ,prettier,code formatter for JS JSON CSS YAML and much more.
 ,eslint,code checker for JavaScript.
@@ -97,19 +92,15 @@
 ,bash-language-server,shell script analysis tool.
 ,github-cli,Command-line interface for interacting with GitHub repositories.
 ,aws-cli-v2,Command-line interface for Amazon Web Services (AWS).
-
 #AUR PACKAGES
-A,nodejs-somafm,Node.js client for streaming SomaFM internet radio.
 A,xbanish,Tool to hide the mouse cursor when not in use.
-A,chrome-gnome-shell,Native connector for integration with extensions.gnome.org.
 A,patool,Portable command line archive file manager.
 A,googler,Google from the command-line.
 A,cht.sh-git,The only cheat sheet you need (command line client for cheat.sh site).
-A,nerd-fonts-noto-sans-mono,Standard variants of Noto Sans Mono patched with Nerd Fonts.
+A,nerd-fonts-noto-sans-mono-extended,Standard variants of Noto Sans Mono patched with Nerd Fonts.
 A,mpv-mpris,MPRIS (Media Player Remote Interface Spec) plugin for mpv.
 A,tdrop-git,A WM-Independent dropdown window and terminal creator.
 A,keepmenu,Dmenu/Rofi frontend for Keepass databases.
 A,paclast,list installed pacman packages in chronological order.
-A,ltex-ls-bin,LSP language server for LanguageTool.
 A,indicator-keylock,Indicate capslock activated
 A,volnoti-brightness-git,
