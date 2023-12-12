@@ -133,11 +133,12 @@ install_programs() {
                     if [ "$error" = "1" ]; then
                         errors+=("$name")
                     fi
+                    echo
                 fi
                 ;;
             *)
                 if [ "$install_pacman" = true ]; then
-                    error=$(install_pacman "$name")
+                    # error=$(install_pacman "$name")
                     if [ "$error" = "1" ]; then
                         errors+=("$name")
                     fi

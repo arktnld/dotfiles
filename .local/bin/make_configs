@@ -54,6 +54,38 @@ systemctlenable() {
     done
 }
 
+updateuserdirs() {
+    echo "Creating default user dirs"
+    adg-user-dirs-update --force
+}
+
+thinkpadx220config() {
+    local config_file="/etc/X11/xorg.conf.d/99-input.conf"
+    local trackpoint_id="TPPS/2 IBM TrackPoint"
+
+    # Check if the file already exists
+    if [[ -f "$config_file" ]]; then
+        echo "File $config_file already exists."
+        return 1
+    fi
+
+    # Create the file and add the configuration lines
+    sudo tee "$config_file" > /dev/null <<EOF
+Section "InputClass"
+    Identifier "Trackpoint"
+    MatchProduct "$trackpoint_id"
+    Driver "libinput"
+    Option "Accel Speed" "0.2"
+    Option "Accel Profile" "flat"
+EndSection
+EOF
+
+    echo "Configuration file $config_file created successfully."
+    sudo localectl set-x11-keymap br thinkpad
+    echo "update layout of keyboard"
+
+}
+
 endofscript() {
     echo "'make_configs' script finished. All done! Congrats!"
     echo "Press enter to exit..."; read -r
@@ -65,4 +97,6 @@ synctime
 defaultshell "zsh" "arktnld"
 sudoersperm "%wheel ALL=(ALL:ALL) NOPASSWD: ALL"
 pacmanoption "ParallelDownloads" "Color"
+updateuserdirs
+thinkpadx220config
 endofscript

@@ -26,7 +26,6 @@
 ,p7zip,Command-line version of the 7-Zip file archiver.
 ,udiskie,Simple daemon for automating removable storage.
 ,pyradio,Pytho TUI radio player.
-,arktnld,
 A,sc-im,Text-based spreadsheet program for the terminal.
 ,docker,Platform for developing, shipping, and running containers.
 ,freerdp,Open-source implementation of the Remote Desktop Protocol.
@@ -36,6 +35,7 @@ A,sc-im,Text-based spreadsheet program for the terminal.
 ,xdg-user-dirs,Tool for setting up and managing standard user directories.
 ,scrcpy,Screen mirroring and remote control for Android devices.
 ,python-adblock,Python library for handling and parsing AdBlock filter lists.
+,xdg-user-dirs,
 # FONTS FAMILIES
 ,adobe-source-code-pro-fonts,Monospaced font family for user interface and coding environments.
 ,ttf-dejavu,font family based on the bitstream vera fonts.
@@ -84,6 +84,7 @@ A,httptoolkit-bin,Cross-platform tool for debugging, testing, and mocking HTTP(S
 ,sxhkd,Simple X hotkey daemon for bspwm.
 ,picom,Fork of the Compton compositor with additional features.
 ,dunst,Customizable and lightweight notification daemon for X11.
+,polybar,
 #CONDING PROGRAMS
 ,prettier,code formatter for JS JSON CSS YAML and much more.
 ,eslint,code checker for JavaScript.

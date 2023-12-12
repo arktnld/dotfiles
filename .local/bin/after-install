@@ -9,5 +9,5 @@ echo
 
 echo "starting the process of updating your dotfiles."
 read -p "Press any key to continue..."
-# ~/.local/bin/install_progs
-# ~/.local/bin/make_configs
+~/.local/bin/install_progs
+~/.local/bin/make_configs

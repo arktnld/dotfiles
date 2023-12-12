@@ -11,7 +11,7 @@ polybar &
 # Activate cursor mouse on keyboard and swap caps and esc.
 #ksetxkbmap -option caps:swapescape -option keypad:pointerkeys
 # setxkbmap -model abnt -layout us -variant intl &
-setxkbmap -model abnt -layout br &
+# setxkbmap -model thinkpad -layout br &
 
 # make key "/?" of x220 work
 # xmodmap -e "keycode 105 = slash question" &
