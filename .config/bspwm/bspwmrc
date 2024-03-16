@@ -12,21 +12,19 @@
 #       ░                                                ░
 
 # bspc monitor -d term web files video
-#intern=eDP-1
-#extern=DP-2
-#
-#if xrandr | grep -w "$extern connected"; then
-#    xrandr --newmode "1680x1050_60.00"  147.14  1680 1784 1968 2256  1050 1051 1054 1087  -HSync +Vsync
-#    xrandr --addmode $extern 1680x1050_60.00
-#    xrandr --output $extern --mode 1680x1050_60.00
-#    xrandr --output $intern  --rotate normal --output $extern --primary --rotate normal --above $extern --pos 0x0
-#    bspc monitor $extern -d 1 2 3 4 5
-#    bspc monitor $intern -d 6 7 8 9 0
-#else
-#    bspc monitor $intern -d 1 2 3 4 5 6
-#fi
+extern=DisplayPort-0
+intern=HDMI-A-0
 
-bspc monitor $intern -d 1 2 3 4 5 6
+if xrandr | grep -w "$extern connected"; then
+    xrandr --newmode "1680x1050_60.00"  147.14  1680 1784 1968 2256  1050 1051 1054 1087  -HSync +Vsync
+    xrandr --addmode $extern 1680x1050_60.00
+    xrandr --output $extern --mode 1680x1050_60.00
+    xrandr --output $intern  --rotate normal --output $extern --primary --rotate normal --left-of $extern --pos 0x0
+    bspc monitor $extern -d 1 2 3 4 5
+    bspc monitor $intern -d 6 7 8 9 0
+else
+    bspc monitor $intern -d 1 2 3 4 5 6
+fi
 
 bspc config border_width         2
 bspc config window_gap          25

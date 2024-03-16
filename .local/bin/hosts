@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# Pasta onde estão os arquivos .hosts
+pasta="$HOME/.config/hosts"
+BLOCK_HOSTS=()
+UNBLOCK_HOSTS=()
+
+# Função para adicionar os endereços IP ao arquivo hosts
+block_hosts() {
+    echo "Bloqueando hosts..."
+    for entry in "${BLOCK_HOSTS[@]}"; do
+        echo "Adicionando $entry ao arquivo hosts..."
+        echo "$entry" | sudo tee -a /etc/hosts > /dev/null
+    done
+    echo "Hosts bloqueados com sucesso!"
+}
+
+# Função para remover os endereços IP do arquivo hosts
+unblock_hosts() {
+    echo "Desbloqueando hosts..."
+    for entry in "${UNBLOCK_HOSTS[@]}"; do
+        echo "Removendo $entry do arquivo hosts..."
+        sudo sed -i "/$(echo "$entry" | cut -f2)/d" /etc/hosts
+    done
+    echo "Hosts desbloqueados com sucesso!"
+}
+
+
+# Verifica se a primeira linha de cada arquivo .hosts existe no arquivo /etc/hosts
+for arquivo in "$pasta"/*.hosts; do
+    nome_arquivo=$(basename "$arquivo" .hosts)
+    primeira_linha=$(head -n 1 "$arquivo")
+    if ! grep -qFx "$primeira_linha" /etc/hosts; then
+        while IFS= read -r line; do
+            # Remover a hashtag e adicionar à lista BLOCKED_HOSTS
+            BLOCK_HOSTS+=("$line")
+        done < <(cat "$arquivo")
+    else
+        while IFS= read -r line; do
+            # Remover a hashtag e adicionar à lista BLOCKED_HOSTS
+            UNBLOCK_HOSTS+=("$line")
+        done < <(cat "$arquivo")
+    fi
+done
+
+# echo "Hosts bloqueados: ${BLOCK_HOSTS[*]}"
+# echo "Hosts desbloqueados: ${UNBLOCK_HOSTS[*]}"
+
+# Verifica o horário atual e decide se os hosts devem ser bloqueados ou não
+current_hour=$(date +%H)
+echo "Horário atual: $current_hour"
+
+if [[ $current_hour -ge 8 && $current_hour -lt 12 || $current_hour -ge 14 && $current_hour -lt 18 ]]; then
+    block_hosts
+else
+    unblock_hosts
+fi

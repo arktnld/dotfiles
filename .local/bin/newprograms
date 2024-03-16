@@ -5,19 +5,30 @@ list_programs() {
   grep '^# Program: ' "$0" | sed 's/^# Program: //'
 }
 
+# Function to delete a program
+delete_program() {
+  program_name="$1"
+  sed -i "/^# Program: $program_name\$/d" "$0"
+  echo "Program '$program_name' deleted from the list."
+}
+
 # Main script logic
 if [ $# -eq 0 ]; then
   # If no arguments are provided, list the programs
   list_programs
+elif [ "$1" = "-d" ]; then
+  # If the first argument is '-d', delete the specified program
+  delete_program "$2"
 else
-  # If arguments are provided, add them to the program list
+  # If arguments are provided and not '-d', add them to the program list
   echo "# Program: $@" >> "$0"
   echo "Programs added to the list."
 fi
-# Program: ytfzf
+
 # Program: glow
 # Program: sc-im
 # Program: httptoolkit
-# Program: ums
 # Program: radarr
-# Program: notflix
+# Program: bruno
+# Program: tgpt
+# Program: hackernews

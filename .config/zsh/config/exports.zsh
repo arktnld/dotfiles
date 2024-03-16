@@ -9,7 +9,7 @@ path=(
 # Basic
 export EDITOR="nvim"
 export TERMINAL="tilix"
-export BROWSER="chromium"
+export BROWSER="surf"
 export FILE='nautilus'
 export PAGER='less'
 export LANG='en_US.UTF-8'

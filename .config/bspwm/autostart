@@ -47,4 +47,6 @@ synclient TouchpadOff=1
 
 #fail2ban-server &
 
+tilix
+
 # vim:ft=sh

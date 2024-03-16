@@ -18,17 +18,13 @@ c.hints.mode = 'number'
 c.scrolling.bar = 'never'
 c.tabs.position = 'left'
 c.spellcheck.languages = ['en-US', 'pt-BR']
-c.downloads.location.directory = os.path.expanduser("~/Downloads")
+# c.downloads.location.directory = os.path.expanduser("~/Downloads")
 c.window.hide_decoration = False
 c.url.start_pages = [
     "https://calendar.google.com/",
-    "https://tinyurl.com/arktnld2",
-    "http://bred.com.br/estagiosApp/index.html",
-    "https://ciee-app.taqe.com.br/#!/taqe/tabs/missions",
-    "https://pp.ciee.org.br/dashboard-candidato/meus-processos",
-    "https://pp.ciee.org.br/vitrine",
-    "https://www.coursera.org/learn/fundamentos-do-gerenciamento-de-projetos/home/",
-    "~/.config/qutebrowser/templates/empty.html" ]
+    "https://hackerweb.app/",
+    "~/.config/qutebrowser/templates/empty.html"
+    ]
 
 # other options
 c.content.canvas_reading = False
@@ -47,8 +43,8 @@ c.content.webgl = False
 
 # darkmode settings
 # c.colors.webpage.darkmode.enabled = True
-c.colors.webpage.darkmode.grayscale.images = 0.5
-c.colors.webpage.darkmode.policy.images = 'always'
+# c.colors.webpage.darkmode.grayscale.images = 0.5
+# c.colors.webpage.darkmode.policy.images = 'always'
 c.colors.webpage.darkmode.policy.page = 'always'
 c.colors.webpage.bg = '#111111'
 
@@ -119,8 +115,10 @@ c.url.searchengines['g'] = 'https://www.google.com/search?q={}'
 c.url.searchengines['b'] = 'https://www.bing.com/search?q={}'
 c.url.searchengines['c'] = 'https://www.comparajogos.com.br/todos?q={}'
 c.url.searchengines['l'] = 'https://www.ludopedia.com.br/search_jogo?search={}'
-c.url.searchengines['o'] = 'https://df.olx.com.br/?q={}'
-c.url.searchengines['v'] = 'https://piped.kavin.rocks/results?search_query={}'
+c.url.searchengines['o'] = 'https://df.olx.com.br/estado-df?q={}'
+#c.url.searchengines['v'] = 'https://piped.kavin.rocks/results?search_query={}'
+c.url.searchengines['y'] = 'http://localhost:8080/youtube.com/results?search_query={}'
+# c.url.searchengines['m'] = 'https://beatbump.io/search/{}?filter=all'
 c.url.searchengines['gh'] = 'https://github.com/search?q={}'
 c.url.searchengines['ghc'] = 'https://github.com/search?q={}&type=Code'
 c.url.searchengines['si'] = 'https://www.sinonimos.com.br/{}'
@@ -162,12 +160,6 @@ config.set('content.cookies.accept', 'all', '*://*.google.com/*')    #
 config.set('content.javascript.enabled', True, '*://*.github.com/*') # github
 config.set('content.images', True, '*://*.github.com/*')             #
 config.set('content.cookies.accept', 'all', '*://*.github.com/*')    #
-config.set('content.javascript.enabled', True, '*://*.unip.br/*') # unip
-config.set('content.images', True, '*://*.unip.br/*')             #
-config.set('content.cookies.accept', 'all', '*://*.unip.br/*')    #
-config.set('content.javascript.enabled', True, '*://*.catho.com.br/*') # catho
-config.set('content.images', True, '*://*.catho.com.br/*')             #
-config.set('content.cookies.accept', 'all', '*://*.catho.com.br/*')    #
 config.set('content.javascript.enabled', True, '*://*.ludopedia.com.br/*') # Ludopedia
 config.set('content.images', True, '*://*.ludopedia.com.br/*')             #
 config.set('content.cookies.accept', 'all',    '*://*.ludopedia.com.br/*') #
@@ -183,38 +175,28 @@ config.set('content.cookies.accept', 'all',    '*://*.amazon.com.br/*') #
 config.set('content.javascript.enabled', True, '*://stackoverflow.com/*')    # Stackoverflow
 config.set('content.images', True, '*://stackoverflow.com/*')
 config.set('content.cookies.accept', 'all', '*://stackoverflow.com/*')
-config.set('content.javascript.enabled', True, '*://libreddit.kavin.rocks/*') # libreddit(reddit)
-config.set('content.images', True,             '*://libreddit.kavin.rocks/*') #
-config.set('content.cookies.accept', 'all', '*://libreddit.kavin.rocks/*')
-config.set('content.javascript.enabled', True, '*://nitter.kavin.rocks/*') # nitter(twitter)
+config.set('content.javascript.enabled', True, '*://reddit.invak.id/*') # libreddit (reddit)
+config.set('content.images', True,             '*://reddit.invak.id/*') #
+config.set('content.cookies.accept', 'all', '*://reddit.invak.id/*')
+config.set('content.javascript.enabled', True, '*://nitter.kavin.rocks/*') # nitter (twitter)
 config.set('content.images', True,             '*://nitter.kavin.rocks/*') #
 config.set('content.cookies.accept', 'all', '*://nitter.kavin.rocks/*')
-config.set('content.javascript.enabled', True, '*://piped.kavin.rocks/*') # piped(youtube)
+config.set('content.javascript.enabled', True, '*://piped.kavin.rocks/*') # piped (youtube)
 config.set('content.images', True,             '*://piped.kavin.rocks/*') #
 config.set('content.cookies.accept', 'all', '*://piped.kavin.rocks/*')
-config.set('content.javascript.enabled', True, '*://*.taqe.com.br/*') # CIEE
-config.set('content.images', True,             '*://*.taqe.com.br/*') #
-config.set('content.cookies.accept', 'all', '*://*.taqe.com.br/*')
-config.set('content.javascript.enabled', True, '*://*.ciee.org.br/*') #
-config.set('content.images', True,             '*://*.ciee.org.br/*') #
-config.set('content.cookies.accept', 'all', '*://*.ciee.org.br/*')
-config.set('content.javascript.enabled', True, '*://*.bred.com.br/*') # Bred Estágios
-config.set('content.images', True,             '*://*.bred.com.br/*') #
-config.set('content.cookies.accept', 'all', '*://*.bred.com.br/*')
+config.set('content.javascript.enabled', True, 'https://hackerweb.app/*') # hackernews
+config.set('content.images', True,             'https://hackerweb.app/*') #
+config.set('content.cookies.accept', 'all',    'https://hackerweb.app/*')
 
 # javascript and images whitelist
-config.set('content.javascript.enabled', True, '*://*.tabulaquadrada.com.br/*') # tabulaquadrada
-config.set('content.images', True,             '*://*.tabulaquadrada.com.br/*') #
 config.set('content.javascript.enabled', True, '*://*.comparajogos.com.br/*') # comparajogos
 config.set('content.images', True, '*://*.comparajogos.com.br/*')             #
 config.set('content.javascript.enabled', True, '*://*.duckduckgo.com/*') # duckduckgo
 config.set('content.images', True, '*://*.duckduckgo.com/*')             #
-config.set('content.javascript.enabled', True, '*://bibliogram.art/*') # bibliogram(instagram)
-config.set('content.images', True,             '*://bibliogram.art/*') #
-config.set('content.javascript.enabled', True, '*://wikiless.org/*') # wikiless(wikipedia)
-config.set('content.images', True,             '*://wikiless.org/*') #
-config.set('content.javascript.enabled', True, '*://scribe.rip/*') # scribe(medium)
+config.set('content.javascript.enabled', True, '*://scribe.rip/*') # scribe (medium)
 config.set('content.images', True,             '*://scribe.rip/*') #
+config.set('content.javascript.enabled', True, '*://www.pdfdrive.com/*') # pdfdrive'
+config.set('content.images', True,             '*://www.pdfdrive.com/*') #
 
 # javascript whitelist
 config.set('content.javascript.enabled', True, '*://fitlb.com/*')            # others
@@ -231,24 +213,20 @@ def rewrite(request: qutebrowser.api.interceptor.Request):
         request.request_url.setHost('scribe.rip')
         try: request.redirect(request.request_url)
         except: pass
-    elif 'youtube.com' in request.request_url.host():
-        request.request_url.setHost('piped.kavin.rocks')
-        try: request.redirect(request.request_url)
-        except: pass
+    #elif 'youtube.com' in request.request_url.host():
+    #    request.request_url.setHost('localhost:8080/https://www.youtube.com')
+    #    try: request.redirect(request.request_url)
+    #    except: pass
     elif 'reddit.com' in request.request_url.host():
-        request.request_url.setHost('libreddit.kavin.rocks')
+        request.request_url.setHost('reddit.invak.id')
         try: request.redirect(request.request_url)
         except: pass
     elif 'twitter.com' in request.request_url.host():
         request.request_url.setHost('nitter.kavin.rocks')
         try: request.redirect(request.request_url)
         except: pass
-    elif 'instagram.com' in request.request_url.host():
-        request.request_url.setHost('bibliogram.art')
-        try: request.redirect(request.request_url)
-        except: pass
-    elif 'wikipedia.org' in request.request_url.host():
-        request.request_url.setHost('wikiless.org')
+    elif 'translate.google.com' in request.request_url.host():
+        request.request_url.setHost('lingva.thedaviddelta.com')
         try: request.redirect(request.request_url)
         except: pass
 

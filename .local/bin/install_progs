@@ -166,10 +166,10 @@ parse_options "$@"
 
 csv_file="$HOME/.config/progs.csv"
 
-update_system
-refresh_keyring
-check_csv_file "$csv_file"
-check_paru
+#update_system
+#refresh_keyring
+#check_csv_file "$csv_file"
+#check_paru
 check_git
 install_programs "$csv_file"
 endofscript

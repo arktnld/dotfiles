@@ -21,6 +21,7 @@ alias d='wget $(xclip -selection clipboard -out)' # Download using link on clipb
 alias pi='ping 1.1.1.1' # Tired of ping in google?
 alias cht='cht.sh' # The only cheat sheet you need
 alias rdd='tuir'
+alias hackernews="nvim +':HackerNews'"
 
 # Archive
 alias ae='patool extract' # Unpack one or more archives.

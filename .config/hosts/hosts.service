@@ -1,0 +1,12 @@
+[Unit]
+Description=Hosts adblock
+
+[Service]
+Type=simple
+ExecStart=/home/arktnld/.local/bin/hosts
+Restart=always
+RestartSec=1800
+User=arktnld
+
+[Install]
+WantedBy=default.target

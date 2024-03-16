@@ -1,5 +1,6 @@
 #TAG ,NAME IN REPO,PURPOSE
 #BASIC PROGRAMS
+,cmake,CMake is a cross-platform open-source make system.
 ,exa,ls replacement.
 ,fzf,fuzzy finder tool.
 ,neovim,atidier vim with some useful features.
@@ -26,8 +27,7 @@
 ,p7zip,Command-line version of the 7-Zip file archiver.
 ,udiskie,Simple daemon for automating removable storage.
 ,pyradio,Pytho TUI radio player.
-A,sc-im,Text-based spreadsheet program for the terminal.
-,docker,Platform for developing, shipping, and running containers.
+,docker,Platform for developing shipping and running containers.
 ,freerdp,Open-source implementation of the Remote Desktop Protocol.
 ,paru,AUR helper tool for Arch Linux with dependency resolution.
 ,alsa-utils,Utilities for configuring Advanced Linux Sound Architecture.
@@ -45,8 +45,6 @@ A,sc-im,Text-based spreadsheet program for the terminal.
 ,noto-fonts,Google Noto TTF fonts.
 ,noto-fonts-extra,Google Noto TTF fonts additional variants.
 ,noto-fonts-emoji,Google Noto emoji fonts.
-A,fontconfig-emoji-git,
-A,paclast,Tool to display information about the last installed Arch Linux package.
 #AUDIO DRIVERS
 ,pipewire,Media server architecture for handling audio and video.
 ,pipewire-alsa,PipeWire plugin for ALSA (Advanced Linux Sound Architecture).
@@ -76,7 +74,6 @@ A,paclast,Tool to display information about the last installed Arch Linux packag
 ,flameshot,Powerful and customizable screenshot tool for Linux.
 ,insomnia,Feature-rich REST client for testing and debugging APIs.
 ,dbeaver,Universal database tool for developers and database administrators.
-A,httptoolkit-bin,Cross-platform tool for debugging, testing, and mocking HTTP(S).
 ,ungoogled-chromium,Privacy-focused variant of the Chromium web browser.
 ,brightnessctl,Command-line utility for adjusting screen brightness.
 ,xwallpaper,Command-line utility for setting wallpapers in X11.
@@ -93,15 +90,3 @@ A,httptoolkit-bin,Cross-platform tool for debugging, testing, and mocking HTTP(S
 ,bash-language-server,shell script analysis tool.
 ,github-cli,Command-line interface for interacting with GitHub repositories.
 ,aws-cli-v2,Command-line interface for Amazon Web Services (AWS).
-#AUR PACKAGES
-A,xbanish,Tool to hide the mouse cursor when not in use.
-A,patool,Portable command line archive file manager.
-A,googler,Google from the command-line.
-A,cht.sh-git,The only cheat sheet you need (command line client for cheat.sh site).
-A,nerd-fonts-noto-sans-mono-extended,Standard variants of Noto Sans Mono patched with Nerd Fonts.
-A,mpv-mpris,MPRIS (Media Player Remote Interface Spec) plugin for mpv.
-A,tdrop-git,A WM-Independent dropdown window and terminal creator.
-A,keepmenu,Dmenu/Rofi frontend for Keepass databases.
-A,paclast,list installed pacman packages in chronological order.
-A,indicator-keylock,Indicate capslock activated
-A,volnoti-brightness-git,
