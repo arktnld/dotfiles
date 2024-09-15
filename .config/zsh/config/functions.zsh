@@ -1,4 +1,19 @@
 # Functions
+function docker-purge() {
+    local container=$(docker ps -a -q)
+    local images=$(docker images -q)
+
+    if [ -n "$container" ]; then
+        docker rm -f "$container"
+    fi
+
+    if [ -n "$images" ]; then
+        docker rmi -f "$images"
+    fi
+
+    docker system prune -f
+}
+
 function venv-activate() {
     local folder=${PWD##*/}
     local activation="venv-$folder/bin/activate"

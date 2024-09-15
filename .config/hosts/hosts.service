@@ -5,8 +5,8 @@ Description=Hosts adblock
 Type=simple
 ExecStart=/home/arktnld/.local/bin/hosts
 Restart=always
-RestartSec=1800
-User=arktnld
+RestartSec=60
+User=root
 
 [Install]
 WantedBy=default.target

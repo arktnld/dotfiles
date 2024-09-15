@@ -47,6 +47,9 @@ bspc rule -a mpv				state=floating follow=on
 bspc rule -a feh				state=floating follow=on
 bspc rule -a URxvt				state=floating follow=on
 
+bspc rule -a retroarch			state=fullscreen follow=on focus=on
+bspc rule -a es-de     			state=fullscreen follow=on
+
 bspc rule -a quake              state=floating
 bspc rule -a pyradio            state=floating
 

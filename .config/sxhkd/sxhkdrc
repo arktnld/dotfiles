@@ -161,12 +161,12 @@ XF86AudioLowerVolume
 # BRIGHTNESS
 
 # Brightness goes up
-XF86MonBrightnessUp
-    volnoti-show -s /usr/share/pixmaps/volnoti/display-brightness-symbolic.svg $(brightnessctl set +50 | grep -Po "[0-9]+(?=%)" | tail -1)
+# XF86MonBrightnessUp
+#     volnoti-show -s /usr/share/pixmaps/volnoti/display-brightness-symbolic.svg $(brightnessctl set +50 | grep -Po "[0-9]+(?=%)" | tail -1)
 
 # Brightness goes down
-XF86MonBrightnessDown
-    volnoti-show -s /usr/share/pixmaps/volnoti/display-brightness-symbolic.svg $(brightnessctl set 50- | grep -Po "[0-9]+(?=%)" | tail -1)
+# XF86MonBrightnessDown
+#     volnoti-show -s /usr/share/pixmaps/volnoti/display-brightness-symbolic.svg $(brightnessctl set 50- | grep -Po "[0-9]+(?=%)" | tail -1)
 
 # Media player controls
 XF86AudioPlay

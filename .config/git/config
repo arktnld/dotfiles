@@ -18,8 +18,8 @@
     merge = refs/heads/master
 
 [user]
-    name = arktnld
-    email = arktnld@gmail.com
+	name = Cleberson
+	email = cleberson.gomes@agenciadedados.com.br
 
 [diff]
     algorithm = histogram
@@ -104,3 +104,5 @@
 ; [url "git@github.com:"]
 ;   insteadOf = "g:"
 ;   pushInsteadOf = "g:"
+[push]
+	default = upstream

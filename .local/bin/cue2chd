@@ -1,0 +1,10 @@
+#!/bin/sh
+
+find . -type f -name "*.cue" | while read -r cue_file; do
+    # Extract the base name without the extension
+    base_name=$(basename "$cue_file" .cue)
+    # Define the output .chd file name
+    chd_file="${base_name}.chd"
+    # Convert the .cue and associated .bin files to .chd
+    chdman createcd -i "$cue_file" -o "$chd_file"
+done

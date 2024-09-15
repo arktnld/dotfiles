@@ -8,6 +8,8 @@ xwallpaper --center ~/.config/wall.png &
 #~/.config/polybar/launch.sh
 polybar &
 
+flameshot &
+
 # Activate cursor mouse on keyboard and swap caps and esc.
 #ksetxkbmap -option caps:swapescape -option keypad:pointerkeys
 # setxkbmap -model abnt -layout us -variant intl &
@@ -31,6 +33,9 @@ dunst &
 # Disable touchpad from thinkpad x240
 synclient TouchpadOff=1
 
+# widget for network manager
+nm-applet
+
 # Reload previews pywal theme, exclude terminal.
 #wal -s -R
 
@@ -47,6 +52,6 @@ synclient TouchpadOff=1
 
 #fail2ban-server &
 
-tilix
+# tilix
 
 # vim:ft=sh
