@@ -1,18 +1,12 @@
 #!/bin/bash
+LOAD=$(cat /proc/loadavg | awk '{print $1}')
+CORES=$(nproc)
+LOAD_PERCENT=$(echo "scale=0; $LOAD * 100 / $CORES" | bc)
 
-# Obtém o número de núcleos do processador
-num_cores=$(grep -c '^processor' /proc/cpuinfo)
-
-# Calcula a carga média do sistema
-load_avg=$(awk -v cores="$num_cores" '{printf "%.2f", $1/cores * 100}' < /proc/loadavg | cut -d. -f1)
-
-# Verifica o nível de carga e define a cor correspondente
-if (( $load_avg > 75 )); then
-  color="#FF0000"  # Vermelho
-elif (( $load_avg > 50 )); then
-  color="#FFA500"  # Amarelo
+if [ $LOAD_PERCENT -gt 80 ]; then
+    echo "%{F#BF616A}󰓅 ${LOAD_PERCENT}%%{F-}"
+elif [ $LOAD_PERCENT -gt 50 ]; then
+    echo "%{F#EBCB8B}󰓅 ${LOAD_PERCENT}%%{F-}"
 else
-  color="#FFFFFF"  # Branco (padrão)
+    echo ""
 fi
-
-echo "%{F$color}󰾅 ${load_avg}%%{F-}"

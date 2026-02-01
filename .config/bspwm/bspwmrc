@@ -11,20 +11,13 @@
 #  ░            ░               ░           ░      ░     ░ ░
 #       ░                                                ░
 
-# bspc monitor -d term web files video
-extern=DisplayPort-0
-intern=HDMI-A-0
+intern=eDP-1
 
-if xrandr | grep -w "$extern connected"; then
-    xrandr --newmode "1680x1050_60.00"  147.14  1680 1784 1968 2256  1050 1051 1054 1087  -HSync +Vsync
-    xrandr --addmode $extern 1680x1050_60.00
-    xrandr --output $extern --mode 1680x1050_60.00
-    xrandr --output $intern  --rotate normal --output $extern --primary --rotate normal --left-of $extern --pos 0x0
-    bspc monitor $extern -d 1 2 3 4 5
-    bspc monitor $intern -d 6 7 8 9 0
-else
-    bspc monitor $intern -d 1 2 3 4 5 6
-fi
+# Configurar scaling mode e resolução
+xrandr --output $intern --set "scaling mode" "Full"
+# xrandr --output $intern --mode 1366x768 --scale 1.17x1.17 --primary
+
+bspc monitor $intern -d 1 2 3 4 5 6 7 8 9
 
 bspc config border_width         2
 bspc config window_gap          25

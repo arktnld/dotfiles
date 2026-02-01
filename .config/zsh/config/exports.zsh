@@ -123,3 +123,7 @@ export WINEPREFIX="$HOME/.local/share/wineprefixes/32"
 if [ $TILIX_ID ] || [ $VTE_VERSION ]; then
     source /etc/profile.d/vte.sh
 fi
+
+export LIBVA_DRIVER_NAME=iHD
+export RADV_PERFTEST=aco,gpl
+export AMD_VULKAN_ICD=RADV

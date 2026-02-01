@@ -4,10 +4,10 @@
 
 # terminal emulator
 super + Return
-	tilix
+	alacritty
 
-super + d
-    tilix --class=quake --profile=quake --group=quake --quake --name=quake
+# super + d
+#     tilix --class=quake --profile=quake --group=quake --quake --name=quake
 
 # super + ctrl + Return
 # 	~/.local/bin/st-dark
@@ -124,8 +124,8 @@ super + alt + shift {h,j,k,l}
 	bspc node -v {-20 0,0 20,0 -20,20 0}
 
 ######### MY PERSONAL KEYBINDS ###########
-super + m
-    tilix --class=pyradio --profile=pyradio --group=pyradio --quake --name=pyradio
+# super + m
+#     tilix --class=pyradio --profile=pyradio --group=pyradio --quake --name=pyradio
 
 super + b
     qutebrowser
@@ -177,3 +177,11 @@ XF86AudioNext
 	playerctl next;
 XF86AudioPrev
 	playerctl previous;
+
+
+# Brightness
+XF86MonBrightnessUp
+    brightnessctl set +5%
+
+XF86MonBrightnessDown
+    brightnessctl set 5%-

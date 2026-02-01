@@ -5,8 +5,8 @@ sxhkd &
 xwallpaper --center ~/.config/wall.png &
 
 # Launch top and bottom polybar statusbars.
-#~/.config/polybar/launch.sh
-polybar &
+~/.config/polybar/launch.sh
+# polybar &
 
 flameshot &
 
