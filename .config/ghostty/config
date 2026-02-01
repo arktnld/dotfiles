@@ -39,8 +39,9 @@ keybind = ctrl+shift+t=new_tab
 keybind = ctrl+shift+c=copy_to_clipboard
 keybind = ctrl+shift+v=paste_from_clipboard
 
-# Quick terminal (dropdown)
+# Quick terminal (dropdown) - funciona no Wayland
 quick-terminal-position = top
 quick-terminal-screen = main
 quick-terminal-animation-duration = 0
 keybind = global:super+d=toggle_quick_terminal
+
