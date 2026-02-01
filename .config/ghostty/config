@@ -4,15 +4,17 @@ font-size = 12
 
 # Font adjustments
 adjust-cell-height = 15%
-cursor-style-blink = false
 
 # Padding
-window-padding-x = 4
-window-padding-y = 4
+window-padding-x = 10
+window-padding-y = 10
 
 # Colors
-theme = Catppuccin Mocha
-background-opacity = 0.95
+theme = plain
+background-opacity = 0.85
+
+# Window
+window-decoration = false
 
 # Behavior
 mouse-hide-while-typing = true
