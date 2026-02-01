@@ -1,0 +1,20 @@
+configuration {
+	modes: "drun,run";
+	font: "Noto Sans 11";
+	icon-theme: "Papirus";
+	show-icons: true;
+	display-drun: "Apps";
+	display-run: "Run";
+	drun-display-format: "{name}";
+	sidebar-mode: false;
+	terminal: "ghostty";
+	hover-select: false;
+	click-to-exit: true;
+	matching: "normal";
+	timeout {
+		action: "kb-cancel";
+		delay: 0;
+	}
+}
+
+@theme "gruvbox-dark"
