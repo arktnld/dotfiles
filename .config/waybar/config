@@ -1,59 +1,71 @@
 {
     "layer": "top",
     "position": "top",
-    "height": 30,
-    "spacing": 4,
+    "height": 34,
+    "margin-top": 8,
+    "margin-left": 15,
+    "margin-right": 15,
 
     "modules-left": ["hyprland/workspaces"],
     "modules-center": ["clock"],
-    "modules-right": ["pulseaudio", "backlight", "network", "battery", "tray"],
+    "modules-right": ["custom/alerts", "backlight", "pulseaudio", "network", "battery", "tray"],
 
     "hyprland/workspaces": {
         "format": "{icon}",
         "format-icons": {
             "active": "●",
             "default": "○"
+        },
+        "persistent-workspaces": {
+            "*": 5
         }
     },
 
     "clock": {
-        "format": "{:%d/%m %H:%M}",
+        "format": "{:%a %b %d/%m %H:%M}",
         "tooltip-format": "<tt>{calendar}</tt>"
     },
 
     "battery": {
+        "interval": 60,
         "states": {
             "warning": 30,
             "critical": 15
         },
-        "format": "{icon} {capacity}%",
+        "format": "{icon}  {capacity}%",
         "format-charging": "󰂄 {capacity}%",
-        "format-plugged": "󰂄 {capacity}%",
         "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂"]
     },
 
     "network": {
-        "format-wifi": "󰖩 on",
-        "format-ethernet": "󰈀",
-        "format-disconnected": "󰖪 off",
-        "tooltip-format": "{essid} ({signalStrength}%)"
+        "format-wifi": "󰖩  On",
+        "format-ethernet": "󰈀  On",
+        "format-disconnected": "󰖪  Off",
+        "tooltip-format": "{essid} - {ipaddr}"
     },
 
     "pulseaudio": {
-        "format": "{icon} {volume}%",
-        "format-muted": "󰖁 muted",
+        "format": "{icon}  {volume}%",
+        "format-muted": "󰖁  Muted",
         "format-icons": {
             "default": ["󰕿", "󰖀", "󰕾"]
         },
         "on-click": "pavucontrol"
     },
 
+    "tray": {
+        "icon-size": 16,
+        "spacing": 8
+    },
+
     "backlight": {
-        "format": "{icon} {percent}%",
+        "format": "{icon}  {percent}%",
         "format-icons": ["󰃞", "󰃟", "󰃠"]
     },
 
-    "tray": {
-        "spacing": 10
+    "custom/alerts": {
+        "exec": "~/.config/waybar/scripts/alerts.sh",
+        "return-type": "json",
+        "interval": 3
     }
 }

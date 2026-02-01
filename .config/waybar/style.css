@@ -1,44 +1,64 @@
 * {
     font-family: "JetBrainsMono Nerd Font";
     font-size: 13px;
+    font-weight: 500;
 }
 
 window#waybar {
-    background-color: #282A2E;
-    color: #C5C8C6;
-    border-radius: 8px;
-    margin: 4px;
+    background-color: rgba(40, 42, 46, 0.75);
+    color: #ffffff;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#workspaces {
+    margin-left: 8px;
 }
 
 #workspaces button {
-    padding: 0 8px;
-    color: #4C566A;
+    padding: 0 6px;
+    color: rgba(255, 255, 255, 0.4);
     background: transparent;
     border: none;
+    border-radius: 10px;
+    margin: 4px 2px;
+    transition: all 0.2s ease;
 }
 
 #workspaces button.active {
-    color: #A3BE8C;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.15);
 }
 
 #workspaces button:hover {
-    background: #373B41;
-}
-
-#clock,
-#battery,
-#network,
-#pulseaudio,
-#backlight,
-#tray {
-    padding: 0 10px;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
 }
 
 #clock {
-    color: #81A1C1;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+#battery,
+#network,
+#pulseaudio,
+#backlight {
+    padding: 0 12px;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+#tray {
+    padding: 0 12px;
+    margin-right: 8px;
+    color: rgba(255, 255, 255, 0.85);
 }
 
 #battery {
+    color: #A3BE8C;
+}
+
+#battery.charging {
     color: #A3BE8C;
 }
 
@@ -50,26 +70,32 @@ window#waybar {
     color: #BF616A;
 }
 
-#network {
-    color: #A3BE8C;
-}
-
 #network.disconnected {
-    color: #4C566A;
-}
-
-#pulseaudio {
-    color: #A3BE8C;
+    color: #BF616A;
 }
 
 #pulseaudio.muted {
-    color: #4C566A;
+    color: rgba(255, 255, 255, 0.4);
 }
 
-#backlight {
-    color: #A3BE8C;
+tooltip {
+    background: rgba(30, 30, 30, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
 }
 
-#tray {
-    color: #C5C8C6;
+tooltip label {
+    color: #ffffff;
+}
+
+#custom-alerts {
+    padding: 0 12px;
+}
+
+#custom-alerts.warning {
+    color: #EBCB8B;
+}
+
+#custom-alerts.critical {
+    color: #BF616A;
 }

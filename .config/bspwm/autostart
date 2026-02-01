@@ -52,6 +52,4 @@ nm-applet
 
 #fail2ban-server &
 
-# tilix
-
 # vim:ft=sh
