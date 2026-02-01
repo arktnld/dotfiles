@@ -4,10 +4,10 @@
 
 # terminal emulator
 super + Return
-	alacritty
+	ghostty
 
 # super + d
-#     tilix --class=quake --profile=quake --group=quake --quake --name=quake
+#     dropdown terminal (ghostty quick-terminal só funciona com keybind global)
 
 # super + ctrl + Return
 # 	~/.local/bin/st-dark
