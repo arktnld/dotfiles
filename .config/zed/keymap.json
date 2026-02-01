@@ -1,0 +1,35 @@
+[
+  {
+    "bindings": {
+      "shift-tab": "menu::SelectPrevious",
+      "tab": "menu::SelectNext"
+    }
+  },
+  {
+    "context": "vim_mode == normal || ProjectPanel || EmptyPane",
+    "bindings": {
+      "space f": "project_panel::ToggleFocus"
+    }
+  },
+  {
+    "context": "VimControl && !menu || !Editor && !Terminal",
+    "bindings": {
+      "ctrl-h": "workspace::ActivatePaneLeft",
+      "ctrl-l": "workspace::ActivatePaneRight",
+      "ctrl-k": "workspace::ActivatePaneUp",
+      "ctrl-j": "workspace::ActivatePaneDown"
+    }
+  },
+  {
+    "context": "Workspace",
+    "bindings": {
+      "\\ w": "workspace::Save"
+    }
+  },
+  {
+    "context": "Editor",
+    "bindings": {
+      "\\ f": "editor::Format"
+    }
+  }
+]

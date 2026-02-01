@@ -3,12 +3,18 @@
   c = commit -am
   p = push origin master
   b = !git --no-pager branch --verbose --all
-  l = log --graph
+  l = log --graph --date=short --pretty=format:'%C(auto)%h %C(blue)%ad %C(cyan)(%ar)%C(auto)%d %s %C(241)<%aN>'
+  la = log --graph --branches --remotes --tags --date=short --pretty=format:'%C(auto)%h %C(blue)%ad %C(cyan)(%ar)%C(auto)%d %s %C(241)<%aN>'
   w = whatchanged
-  b = branch
-  f = fetch
+  f = fetch --all --prune
   r = revert
   bl = blame
   sm = submodule
+  sw = switch
   dt = difftool
-  cdel = commit --amend -m
+  d = diff
+  ds = diff --staged
+  amend = commit --amend
+  undo = reset --soft HEAD~1
+  prune-merged = !git branch --merged | grep -v '\\*' | xargs -n 1 git branch -d
+  fixup = !git log -n 50 --pretty=format:'%h %s' --no-merges | fzf | cut -c -7 | xargs -o git commit --fixup

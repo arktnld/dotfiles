@@ -1,0 +1,51 @@
+{
+  "vim_mode": true,
+  "vim": {
+    "use_system_clipboard": "on_yank",
+    "use_smartcase_find": true
+  },
+  "cursor_blink": false,
+  "ui_font_family": "JetBrainsMono Nerd Font",
+  "ui_font_size": 14,
+  "buffer_font_family": "JetBrainsMono Nerd Font",
+  "buffer_font_size": 14,
+  "buffer_line_height": {
+    "custom": 1.6
+  },
+  "theme": {
+    "mode": "dark",
+    "dark": "Catppuccin Mocha",
+    "light": "Catppuccin Latte"
+  },
+  "tabs": {
+    "show_close_button": "hidden",
+    "file_icons": true
+  },
+  "minimap": {
+    "show": "never"
+  },
+  "git": {
+    "git_gutter": "tracked_files"
+  },
+  "scrollbar": {
+    "git_diff": true
+  },
+  "project_panel": {
+    "git_status": true,
+    "folder_icons": true,
+    "file_icons": true,
+    "default_width": 250,
+    "dock": "left"
+  },
+  "terminal": {
+    "font_family": "JetBrainsMono Nerd Font",
+    "line_height": "comfortable",
+    "toolbar": {
+      "breadcrumbs": false
+    }
+  },
+  "telemetry": {
+    "metrics": false,
+    "diagnostics": false
+  }
+}
