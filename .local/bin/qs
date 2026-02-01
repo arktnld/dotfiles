@@ -1,0 +1,3711 @@
+#!/usr/bin/env python3
+"""
+QuickStudy (qs) - TUI para gerenciamento de estudos com flashcards e spaced repetition
+Requer: sudo pacman -S python-urwid
+"""
+
+import json
+import os
+from datetime import datetime, timedelta
+from pathlib import Path
+import sys
+import math
+
+try:
+    import urwid
+except ImportError:
+    print("urwid nao esta instalado. Instale com:")
+    print("sudo pacman -S python-urwid")
+    sys.exit(1)
+
+try:
+    import plotext as plt
+except ImportError:
+    print("plotext nao esta instalado. Instale com:")
+    print("pip install --user --break-system-packages plotext")
+    sys.exit(1)
+
+# ============================================================================
+# Constantes e Arquivos de Dados
+# ============================================================================
+
+DATA_FILE = Path.home() / ".local/share/quickstudy/data.json"
+CONFIG_FILE = Path.home() / ".local/share/quickstudy/config.json"
+
+# Emojis e cores para tipos de recursos
+RESOURCE_TYPES = {
+    "course": {"emoji": "📚", "label": "Curso"},
+    "doc": {"emoji": "📄", "label": "Documentacao"},
+    "tool": {"emoji": "🔧", "label": "Ferramenta"},
+    "article": {"emoji": "📰", "label": "Artigo"},
+    "video": {"emoji": "🎬", "label": "Video"},
+    "book": {"emoji": "📖", "label": "Livro"},
+}
+
+# Icones padrao para topicos
+TOPIC_ICONS = ["📘", "🐍", "🦀", "⚛️", "🌐", "🔧", "📊", "🎨", "🔒", "☁️", "📱", "🤖"]
+
+# Cores padrao para topicos
+TOPIC_COLORS = ["#3776ab", "#f05032", "#00d8ff", "#f7df1e", "#61dafb", "#4fc08d", "#ff6f61", "#9b59b6"]
+
+
+# ============================================================================
+# Algoritmo SM-2 (Spaced Repetition)
+# ============================================================================
+
+class SM2:
+    """Implementacao do algoritmo SM-2 simplificado"""
+
+    MIN_DIFFICULTY = 1.3
+    MAX_DIFFICULTY = 3.0
+    DEFAULT_DIFFICULTY = 2.5
+
+    @staticmethod
+    def calculate_next_review(quality, repetitions, interval, difficulty):
+        """
+        Calcula o proximo intervalo de revisao baseado na qualidade da resposta.
+
+        quality: 1 = Errei, 2 = Dificil, 3 = Facil
+        repetitions: numero de repeticoes bem-sucedidas
+        interval: intervalo atual em dias
+        difficulty: fator de dificuldade (EF no SM-2)
+
+        Retorna: (new_interval, new_repetitions, new_difficulty)
+        """
+        if quality == 1:  # Errei
+            # Reset: intervalo volta para 1 dia, repetitions zera
+            new_interval = 1
+            new_repetitions = 0
+            new_difficulty = max(SM2.MIN_DIFFICULTY, difficulty - 0.2)
+
+        elif quality == 2:  # Dificil
+            if repetitions == 0:
+                new_interval = 1
+            elif repetitions == 1:
+                new_interval = 3
+            else:
+                new_interval = max(1, int(interval * 1.2))
+            new_repetitions = repetitions + 1
+            new_difficulty = difficulty  # Mantem
+
+        else:  # quality == 3: Facil
+            if repetitions == 0:
+                new_interval = 1
+            elif repetitions == 1:
+                new_interval = 6
+            else:
+                new_interval = max(1, int(interval * difficulty))
+            new_repetitions = repetitions + 1
+            new_difficulty = min(SM2.MAX_DIFFICULTY, difficulty + 0.1)
+
+        return new_interval, new_repetitions, new_difficulty
+
+
+# ============================================================================
+# Funcoes de Graficos com Plotext
+# ============================================================================
+
+def draw_bar_chart(data, max_width=60):
+    """Desenha um grafico de barras usando plotext"""
+    if not data:
+        return "(Sem dados)"
+
+    plt.clear_figure()
+    plt.bar(list(data.keys()), list(data.values()))
+    plt.plotsize(max_width, 12)
+    output = plt.build()
+
+    return plt.uncolorize(output)
+
+
+def draw_timeline_chart(data_by_day, days=14):
+    """Desenha um grafico de timeline usando plotext"""
+    if not data_by_day:
+        return "(Sem dados)"
+
+    today = datetime.now().date()
+    dates = [(today - timedelta(days=i)) for i in range(days-1, -1, -1)]
+
+    date_labels = [d.strftime("%d/%m") for d in dates]
+    values = [data_by_day.get(d, 0) for d in dates]
+    x_indices = list(range(len(dates)))
+
+    plt.clear_figure()
+    plt.plot(x_indices, values, marker="braille")
+
+    step = max(1, len(dates) // 7)
+    x_ticks = x_indices[::step]
+    x_tick_labels = [date_labels[i] for i in x_ticks]
+    plt.xticks(x_ticks, x_tick_labels)
+
+    plt.plotsize(70, 12)
+    output = plt.build()
+
+    return plt.uncolorize(output)
+
+
+def draw_heatmap_calendar(sessions_by_day, year=None, month=None, selected_date=None):
+    """Desenha um calendario heatmap de atividade com cores nos numeros"""
+    if year is None or month is None:
+        today = datetime.now()
+        year = today.year
+        month = today.month
+
+    import calendar
+    cal = calendar.Calendar(firstweekday=0)  # Segunda = 0
+
+    # Nomes dos meses em portugues
+    month_names = {
+        1: "Janeiro", 2: "Fevereiro", 3: "Marco", 4: "Abril",
+        5: "Maio", 6: "Junho", 7: "Julho", 8: "Agosto",
+        9: "Setembro", 10: "Outubro", 11: "Novembro", 12: "Dezembro"
+    }
+
+    # Lista de linhas como markup urwid
+    markup_lines = []
+    markup_lines.append("")
+
+    # Titulo
+    title = f"{month_names[month]} {year}"
+    markup_lines.append(f"                {title}")
+    markup_lines.append("")
+
+    # Cabecalho e bordas
+    markup_lines.append("  ┌──────────────────────────────────────────────────┐")
+    markup_lines.append("  │  Seg    Ter    Qua    Qui    Sex    Sab    Dom   │")
+    markup_lines.append("  ├──────────────────────────────────────────────────┤")
+
+    # Obter dias do mes
+    weeks = cal.monthdayscalendar(year, month)
+    today = datetime.now().date()
+
+    for week in weeks:
+        # Cada linha eh uma lista de markup
+        line_markup = ["  │"]
+        for day in week:
+            if day == 0:
+                line_markup.append("       ")  # 7 espacos
+            else:
+                dt = datetime(year, month, day).date()
+                minutes = sessions_by_day.get(dt, 0)
+
+                # Determinar atributo de cor baseado na atividade
+                if selected_date and dt == selected_date:
+                    attr = 'cal_selected'
+                elif dt == today:
+                    attr = 'cal_today'
+                elif minutes == 0:
+                    attr = 'cal_none'
+                elif minutes < 30:
+                    attr = 'cal_low'
+                elif minutes < 60:
+                    attr = 'cal_med'
+                elif minutes < 120:
+                    attr = 'cal_high'
+                else:
+                    attr = 'cal_max'
+
+                # Formatar celula (7 chars cada) - numero com cor
+                day_str = f"{day:2d}"
+                if selected_date and dt == selected_date:
+                    line_markup.append(" [")
+                    line_markup.append((attr, day_str))
+                    line_markup.append("]  ")
+                elif dt == today:
+                    line_markup.append(" *")
+                    line_markup.append((attr, day_str))
+                    line_markup.append("*  ")
+                else:
+                    line_markup.append("  ")
+                    line_markup.append((attr, day_str))
+                    line_markup.append("   ")
+
+        line_markup.append(" │")
+        markup_lines.append(line_markup)
+
+    markup_lines.append("  └──────────────────────────────────────────────────┘")
+    markup_lines.append("")
+
+    # Legenda com cores - estilo GitHub
+    legend1 = [
+        "  ",
+        ('cal_selected', "[n]"), "=sel  ",
+        ('cal_today', "*n*"), "=hoje",
+    ]
+    markup_lines.append(legend1)
+
+    legend2 = [
+        "  ",
+        ('cal_none', "██"), "0  ",
+        ('cal_low', "██"), "<30m  ",
+        ('cal_med', "██"), "30-60m  ",
+        ('cal_high', "██"), "1-2h  ",
+        ('cal_max', "██"), ">2h",
+    ]
+    markup_lines.append(legend2)
+
+    # Estatisticas do mes
+    total_minutes = sum(v for d, v in sessions_by_day.items()
+                        if d.year == year and d.month == month)
+    active_days = len([d for d in sessions_by_day.keys()
+                       if d.year == year and d.month == month])
+
+    hours = total_minutes // 60
+    mins = total_minutes % 60
+    markup_lines.append(f"  Total: {hours}h {mins:02d}m em {active_days} dias ativos")
+
+    return markup_lines
+
+
+# ============================================================================
+# StudyState - Gerenciamento centralizado de dados
+# ============================================================================
+
+class StudyState:
+    """Gerencia o estado da aplicacao e operacoes com dados"""
+
+    def __init__(self):
+        self.topics = []
+        self.cards = []
+        self.notes = []
+        self.goals = []
+        self.sessions = []
+        self.resources = []
+        self.config = {}
+        self.dirty = False
+
+    def load_data(self):
+        """Carrega os dados do arquivo JSON"""
+        DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
+        if not DATA_FILE.exists():
+            self._init_empty()
+            return
+
+        try:
+            with open(DATA_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                self.topics = data.get('topics', [])
+                self.cards = data.get('cards', [])
+                self.notes = data.get('notes', [])
+                self.goals = data.get('goals', [])
+                self.sessions = data.get('sessions', [])
+                self.resources = data.get('resources', [])
+                self.config = data.get('config', {})
+        except json.JSONDecodeError:
+            backup_file = DATA_FILE.with_suffix('.json.corrupted')
+            DATA_FILE.rename(backup_file)
+            self._init_empty()
+
+    def _init_empty(self):
+        """Inicializa dados vazios"""
+        self.topics = []
+        self.cards = []
+        self.notes = []
+        self.goals = []
+        self.sessions = []
+        self.resources = []
+        self.config = {}
+
+    def save_data(self):
+        """Salva os dados no arquivo JSON"""
+        data = {
+            'topics': self.topics,
+            'cards': self.cards,
+            'notes': self.notes,
+            'goals': self.goals,
+            'sessions': self.sessions,
+            'resources': self.resources,
+            'config': self.config,
+        }
+        with open(DATA_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        self.dirty = False
+
+    # -------------------------------------------------------------------------
+    # CRUD Topics
+    # -------------------------------------------------------------------------
+
+    def get_next_topic_id(self):
+        if not self.topics:
+            return 1
+        return max(t['id'] for t in self.topics) + 1
+
+    def get_topic(self, topic_id):
+        return next((t for t in self.topics if t['id'] == topic_id), None)
+
+    def add_topic(self, name, icon=None, color=None):
+        topic = {
+            'id': self.get_next_topic_id(),
+            'name': name,
+            'icon': icon or TOPIC_ICONS[len(self.topics) % len(TOPIC_ICONS)],
+            'color': color or TOPIC_COLORS[len(self.topics) % len(TOPIC_COLORS)],
+            'created': datetime.now().isoformat(),
+        }
+        self.topics.append(topic)
+        self.dirty = True
+        return topic
+
+    def update_topic(self, topic_id, **updates):
+        topic = self.get_topic(topic_id)
+        if not topic:
+            return False
+        for key, value in updates.items():
+            if key not in ['id', 'created']:
+                topic[key] = value
+        self.dirty = True
+        return True
+
+    def delete_topic(self, topic_id):
+        topic = self.get_topic(topic_id)
+        if not topic:
+            return False
+        # Deletar cards, notas e recursos associados
+        self.cards = [c for c in self.cards if c['topic_id'] != topic_id]
+        self.notes = [n for n in self.notes if n['topic_id'] != topic_id]
+        self.resources = [r for r in self.resources if r['topic_id'] != topic_id]
+        self.topics.remove(topic)
+        self.dirty = True
+        return True
+
+    def get_topic_stats(self, topic_id):
+        """Retorna estatisticas de um topico"""
+        cards = [c for c in self.cards if c['topic_id'] == topic_id]
+        total = len(cards)
+        mastered = len([c for c in cards if c.get('repetitions', 0) >= 5])
+        due = len(self.get_cards_due(topic_id))
+        return {'total': total, 'mastered': mastered, 'due': due}
+
+    # -------------------------------------------------------------------------
+    # CRUD Cards
+    # -------------------------------------------------------------------------
+
+    def get_next_card_id(self):
+        if not self.cards:
+            return 1
+        return max(c['id'] for c in self.cards) + 1
+
+    def get_card(self, card_id):
+        return next((c for c in self.cards if c['id'] == card_id), None)
+
+    def add_card(self, topic_id, front, back, tags=None):
+        card = {
+            'id': self.get_next_card_id(),
+            'topic_id': topic_id,
+            'front': front,
+            'back': back,
+            'tags': tags or [],
+            'difficulty': SM2.DEFAULT_DIFFICULTY,
+            'interval': 0,
+            'repetitions': 0,
+            'next_review': datetime.now().isoformat(),
+            'created': datetime.now().isoformat(),
+            'last_reviewed': None,
+        }
+        self.cards.append(card)
+        self.dirty = True
+        return card
+
+    def update_card(self, card_id, **updates):
+        card = self.get_card(card_id)
+        if not card:
+            return False
+        for key, value in updates.items():
+            if key not in ['id', 'created']:
+                card[key] = value
+        self.dirty = True
+        return True
+
+    def delete_card(self, card_id):
+        card = self.get_card(card_id)
+        if not card:
+            return False
+        self.cards.remove(card)
+        self.dirty = True
+        return True
+
+    def get_cards_by_topic(self, topic_id):
+        return [c for c in self.cards if c['topic_id'] == topic_id]
+
+    def get_cards_due(self, topic_id=None):
+        """Retorna cards que precisam ser revisados (data de hoje ou anterior)"""
+        today = datetime.now().date()
+        cards = self.cards if topic_id is None else self.get_cards_by_topic(topic_id)
+        due = []
+        for card in cards:
+            # Ignorar cards dominados
+            if card.get('mastered', False):
+                continue
+            next_review_date = datetime.fromisoformat(card['next_review']).date()
+            if next_review_date <= today:
+                due.append(card)
+        # Ordenar por urgencia (mais atrasados primeiro)
+        due.sort(key=lambda c: c['next_review'])
+        return due
+
+    def master_card(self, card_id):
+        """Marca um card como dominado (remove da fila de revisao)"""
+        card = self.get_card(card_id)
+        if not card:
+            return False
+        card['mastered'] = True
+        card['mastered_at'] = datetime.now().isoformat()
+        self.dirty = True
+        return True
+
+    def unmaster_card(self, card_id):
+        """Remove o status de dominado de um card"""
+        card = self.get_card(card_id)
+        if not card:
+            return False
+        card['mastered'] = False
+        card.pop('mastered_at', None)
+        self.dirty = True
+        return True
+
+    def apply_sm2_review(self, card_id, quality):
+        """Aplica o algoritmo SM-2 apos uma revisao"""
+        card = self.get_card(card_id)
+        if not card:
+            return False
+
+        new_interval, new_repetitions, new_difficulty = SM2.calculate_next_review(
+            quality,
+            card.get('repetitions', 0),
+            card.get('interval', 0),
+            card.get('difficulty', SM2.DEFAULT_DIFFICULTY)
+        )
+
+        next_review = datetime.now() + timedelta(days=new_interval)
+
+        card['interval'] = new_interval
+        card['repetitions'] = new_repetitions
+        card['difficulty'] = new_difficulty
+        card['next_review'] = next_review.isoformat()
+        card['last_reviewed'] = datetime.now().isoformat()
+
+        self.dirty = True
+        return True
+
+    # -------------------------------------------------------------------------
+    # CRUD Notes
+    # -------------------------------------------------------------------------
+
+    def get_next_note_id(self):
+        if not self.notes:
+            return 1
+        return max(n['id'] for n in self.notes) + 1
+
+    def get_note(self, note_id):
+        return next((n for n in self.notes if n['id'] == note_id), None)
+
+    def add_note(self, topic_id, title, content="", tags=None):
+        note = {
+            'id': self.get_next_note_id(),
+            'topic_id': topic_id,
+            'title': title,
+            'content': content,
+            'tags': tags or [],
+            'created': datetime.now().isoformat(),
+            'updated': datetime.now().isoformat(),
+        }
+        self.notes.append(note)
+        self.dirty = True
+        return note
+
+    def update_note(self, note_id, **updates):
+        note = self.get_note(note_id)
+        if not note:
+            return False
+        for key, value in updates.items():
+            if key not in ['id', 'created']:
+                note[key] = value
+        note['updated'] = datetime.now().isoformat()
+        self.dirty = True
+        return True
+
+    def delete_note(self, note_id):
+        note = self.get_note(note_id)
+        if not note:
+            return False
+        self.notes.remove(note)
+        self.dirty = True
+        return True
+
+    def get_notes_by_topic(self, topic_id):
+        return [n for n in self.notes if n['topic_id'] == topic_id]
+
+    # -------------------------------------------------------------------------
+    # CRUD Goals
+    # -------------------------------------------------------------------------
+
+    def get_next_goal_id(self):
+        if not self.goals:
+            return 1
+        return max(g['id'] for g in self.goals) + 1
+
+    def get_goal(self, goal_id):
+        return next((g for g in self.goals if g['id'] == goal_id), None)
+
+    def add_goal(self, title, deadline=None, sub_goals=None):
+        goal = {
+            'id': self.get_next_goal_id(),
+            'title': title,
+            'deadline': deadline,
+            'progress': 0,
+            'sub_goals': sub_goals or [],
+            'created': datetime.now().isoformat(),
+            'completed_at': None,
+        }
+        self.goals.append(goal)
+        self.dirty = True
+        return goal
+
+    def update_goal(self, goal_id, **updates):
+        goal = self.get_goal(goal_id)
+        if not goal:
+            return False
+        for key, value in updates.items():
+            if key not in ['id', 'created']:
+                goal[key] = value
+        self.dirty = True
+        return True
+
+    def delete_goal(self, goal_id):
+        goal = self.get_goal(goal_id)
+        if not goal:
+            return False
+        self.goals.remove(goal)
+        self.dirty = True
+        return True
+
+    def add_sub_goal(self, goal_id, text):
+        goal = self.get_goal(goal_id)
+        if not goal:
+            return False
+        goal['sub_goals'].append({'text': text, 'done': False})
+        self._update_goal_progress(goal)
+        self.dirty = True
+        return True
+
+    def toggle_sub_goal(self, goal_id, sub_goal_index):
+        goal = self.get_goal(goal_id)
+        if not goal or sub_goal_index >= len(goal['sub_goals']):
+            return False
+        goal['sub_goals'][sub_goal_index]['done'] = not goal['sub_goals'][sub_goal_index]['done']
+        self._update_goal_progress(goal)
+        self.dirty = True
+        return True
+
+    def _update_goal_progress(self, goal):
+        """Atualiza o progresso da meta baseado nas sub-metas"""
+        if not goal['sub_goals']:
+            return
+        done = sum(1 for sg in goal['sub_goals'] if sg['done'])
+        goal['progress'] = int((done / len(goal['sub_goals'])) * 100)
+        if goal['progress'] == 100 and not goal['completed_at']:
+            goal['completed_at'] = datetime.now().isoformat()
+
+    # -------------------------------------------------------------------------
+    # CRUD Sessions
+    # -------------------------------------------------------------------------
+
+    def get_next_session_id(self):
+        if not self.sessions:
+            return 1
+        return max(s['id'] for s in self.sessions) + 1
+
+    def add_session(self, topic_id=None, duration_minutes=0, cards_reviewed=0, correct=0, incorrect=0):
+        session = {
+            'id': self.get_next_session_id(),
+            'topic_id': topic_id,
+            'started': datetime.now().isoformat(),
+            'ended': datetime.now().isoformat(),
+            'duration_minutes': duration_minutes,
+            'cards_reviewed': cards_reviewed,
+            'correct': correct,
+            'incorrect': incorrect,
+        }
+        self.sessions.append(session)
+        self.dirty = True
+        return session
+
+    def get_sessions_by_date(self, date):
+        """Retorna sessoes de uma data especifica"""
+        return [s for s in self.sessions
+                if datetime.fromisoformat(s['started']).date() == date]
+
+    def get_sessions_by_day(self):
+        """Retorna minutos estudados por dia"""
+        by_day = {}
+        for session in self.sessions:
+            date = datetime.fromisoformat(session['started']).date()
+            by_day[date] = by_day.get(date, 0) + session.get('duration_minutes', 0)
+        return by_day
+
+    def get_streak(self):
+        """Calcula o streak atual de dias estudados"""
+        if not self.sessions:
+            return 0
+
+        by_day = self.get_sessions_by_day()
+        today = datetime.now().date()
+        streak = 0
+        current_date = today
+
+        while current_date in by_day:
+            streak += 1
+            current_date -= timedelta(days=1)
+
+        return streak
+
+    # -------------------------------------------------------------------------
+    # CRUD Resources
+    # -------------------------------------------------------------------------
+
+    def get_next_resource_id(self):
+        if not self.resources:
+            return 1
+        return max(r['id'] for r in self.resources) + 1
+
+    def get_resource(self, resource_id):
+        return next((r for r in self.resources if r['id'] == resource_id), None)
+
+    def add_resource(self, topic_id, title, url="", resource_type="doc", rating=0, progress=0, notes=""):
+        resource = {
+            'id': self.get_next_resource_id(),
+            'topic_id': topic_id,
+            'title': title,
+            'url': url,
+            'type': resource_type,
+            'rating': rating,
+            'progress': progress,
+            'notes': notes,
+            'created': datetime.now().isoformat(),
+        }
+        self.resources.append(resource)
+        self.dirty = True
+        return resource
+
+    def update_resource(self, resource_id, **updates):
+        resource = self.get_resource(resource_id)
+        if not resource:
+            return False
+        for key, value in updates.items():
+            if key not in ['id', 'created']:
+                resource[key] = value
+        self.dirty = True
+        return True
+
+    def delete_resource(self, resource_id):
+        resource = self.get_resource(resource_id)
+        if not resource:
+            return False
+        self.resources.remove(resource)
+        self.dirty = True
+        return True
+
+    def get_resources_by_topic(self, topic_id):
+        return [r for r in self.resources if r['topic_id'] == topic_id]
+
+    # -------------------------------------------------------------------------
+    # Metricas
+    # -------------------------------------------------------------------------
+
+    def get_study_metrics(self, days=30):
+        """Retorna metricas de estudo"""
+        now = datetime.now()
+        cutoff = now - timedelta(days=days)
+
+        # Sessoes do periodo
+        recent_sessions = [
+            s for s in self.sessions
+            if datetime.fromisoformat(s['started']) >= cutoff
+        ]
+
+        total_minutes = sum(s.get('duration_minutes', 0) for s in recent_sessions)
+        total_cards = sum(s.get('cards_reviewed', 0) for s in recent_sessions)
+        total_correct = sum(s.get('correct', 0) for s in recent_sessions)
+        total_incorrect = sum(s.get('incorrect', 0) for s in recent_sessions)
+
+        accuracy = (total_correct / total_cards * 100) if total_cards > 0 else 0
+
+        return {
+            'total_minutes': total_minutes,
+            'total_cards': total_cards,
+            'total_correct': total_correct,
+            'total_incorrect': total_incorrect,
+            'accuracy': accuracy,
+            'sessions_count': len(recent_sessions),
+            'streak': self.get_streak(),
+        }
+
+
+# ============================================================================
+# Palette de cores para urwid
+# ============================================================================
+
+def create_palette():
+    """Cria a palette de cores"""
+    palette = [
+        # Headers e estrutura (verde)
+        ('header', 'white,bold', 'dark green', '', '#ffffff,bold', '#005f00'),
+        ('footer', 'dark gray', '', '', '#6c6c6c', ''),
+        ('focus', 'white,bold', '', '', '#ffffff,bold', '#005f00'),
+
+        # Rows
+        ('row', 'white', '', '', '#ffffff', ''),
+        ('row_focus', 'white,bold', 'dark green', '', '#ffffff,bold', '#005f00'),
+        ('row_done', 'dark gray', '', '', '#6c6c6c', ''),
+
+        # Botoes e dialogs
+        ('button', 'white', '', '', '#ffffff', ''),
+        ('button_focus', 'black,bold', 'white', '', '#000000,bold', '#ffffff'),
+        ('dialog_bg', 'white', 'black', '', '#e4e4e4', '#1c1c1c'),
+
+        # Mensagens
+        ('error', 'light red,bold', '', '', '#ff5f5f,bold', ''),
+        ('success', 'light green,bold', '', '', '#5fd787,bold', ''),
+        ('warning', 'yellow,bold', '', '', '#f3e430,bold', ''),
+
+        # Hierarquia de texto
+        ('title', 'light blue,bold', '', '', '#5fafff,bold', ''),
+        ('subtitle', 'light cyan,bold', '', '', '#5fd7ff,bold', ''),
+        ('text', 'white', '', '', '#ffffff', ''),
+        ('text_bold', 'white,bold', '', '', '#ffffff,bold', ''),
+        ('label', 'dark gray,bold', '', '', '#9e9e9e,bold', ''),
+        ('secondary', 'dark gray', '', '', '#6c6c6c', ''),
+        ('dimmed', 'dark gray', '', '', '#4e4e4e', ''),
+        ('divider', 'dark gray', '', '', '#3a3a3a', ''),
+
+        # Cards de revisao
+        ('card_front', 'white,bold', '', '', '#ffffff,bold', ''),
+        ('card_back', 'light green', '', '', '#5fd787', ''),
+        ('card_hint', 'dark gray', '', '', '#6c6c6c', ''),
+
+        # Progresso
+        ('progress_bar', 'white', 'dark blue', '', '#ffffff', '#005f87'),
+        ('progress_empty', 'dark gray', '', '', '#3a3a3a', ''),
+
+        # Qualidade de resposta
+        ('quality_1', 'light red,bold', '', '', '#ff5f5f,bold', ''),
+        ('quality_2', 'yellow,bold', '', '', '#f3e430,bold', ''),
+        ('quality_3', 'light green,bold', '', '', '#5fd787,bold', ''),
+
+        # Goals
+        ('goal_urgent', 'light red,bold', '', '', '#ff5f5f,bold', ''),
+        ('goal_warning', 'yellow,bold', '', '', '#f3e430,bold', ''),
+        ('goal_ok', 'light green,bold', '', '', '#5fd787,bold', ''),
+
+        # Calendar heatmap activity levels (cores distintas)
+        ('cal_none', 'dark gray', '', '', '#4e4e4e', ''),
+        ('cal_low', 'dark cyan', '', '', '#87d7af', ''),
+        ('cal_med', 'dark green', '', '', '#5faf5f', ''),
+        ('cal_high', 'light green', '', '', '#00af5f', ''),
+        ('cal_max', 'light green,bold', '', '', '#00ff87,bold', ''),
+        ('cal_today', 'yellow,bold', '', '', '#ffff00,bold', ''),
+        ('cal_selected', 'white,bold', 'dark blue', '', '#ffffff,bold', '#005faf'),
+    ]
+
+    return palette
+
+
+# ============================================================================
+# Widgets Customizados
+# ============================================================================
+
+class TopicRow(urwid.WidgetWrap):
+    """Widget que exibe um topico na lista"""
+
+    def __init__(self, topic, stats):
+        self.topic = topic
+        self.stats = stats
+
+        icon = topic.get('icon', '📘')
+        name = topic['name'][:20]
+        if len(topic['name']) > 20:
+            name += ".."
+        total = stats['total']
+        mastered = stats['mastered']
+        due = stats['due']
+
+        # Barra de progresso
+        progress = (mastered / total * 100) if total > 0 else 0
+        bar_len = 8
+        filled = int(progress / 100 * bar_len)
+        bar = '█' * filled + '░' * (bar_len - filled)
+
+        # Indicador de pendentes
+        due_str = f"!{due}" if due > 0 else ""
+
+        line = f" {icon} {name:<22} {total:>2}c [{bar}] {due_str:>3}"
+
+        text_widget = urwid.Text(line)
+        attr_map = urwid.AttrMap(text_widget, 'row', focus_map='row_focus')
+
+        super().__init__(attr_map)
+
+    def selectable(self):
+        return True
+
+    def keypress(self, size, key):
+        return key
+
+
+class FlashcardRow(urwid.WidgetWrap):
+    """Widget que exibe um flashcard na lista"""
+
+    def __init__(self, card):
+        self.card = card
+
+        front = card['front'][:50]
+        if len(card['front']) > 50:
+            front += '...'
+
+        difficulty = card.get('difficulty', 2.5)
+        repetitions = card.get('repetitions', 0)
+        next_review = datetime.fromisoformat(card['next_review'])
+        now = datetime.now()
+
+        # Status de revisao
+        if next_review <= now:
+            status = "PENDENTE"
+            status_attr = 'warning'
+        else:
+            days_until = (next_review - now).days
+            if days_until == 0:
+                status = "HOJE"
+            elif days_until == 1:
+                status = "AMANHA"
+            else:
+                status = f"{days_until}d"
+            status_attr = 'secondary'
+
+        # Nivel de dominio
+        if repetitions >= 5:
+            level = "Dominado"
+        elif repetitions >= 3:
+            level = "Aprendendo"
+        elif repetitions >= 1:
+            level = "Iniciante"
+        else:
+            level = "Novo"
+
+        line = f"  {front:<55} │ {level:<10} │ {status:<10}"
+
+        text_widget = urwid.Text(line)
+        attr_map = urwid.AttrMap(text_widget, 'row', focus_map='row_focus')
+
+        super().__init__(attr_map)
+
+    def selectable(self):
+        return True
+
+    def keypress(self, size, key):
+        return key
+
+
+class NoteRow(urwid.WidgetWrap):
+    """Widget que exibe uma nota na lista"""
+
+    def __init__(self, note):
+        self.note = note
+
+        title = note['title'][:40]
+        if len(note['title']) > 40:
+            title += '...'
+
+        updated = datetime.fromisoformat(note['updated'])
+        updated_str = updated.strftime("%d/%m/%Y")
+
+        tags = ', '.join(note.get('tags', [])[:3])
+        if len(note.get('tags', [])) > 3:
+            tags += '...'
+
+        line = f"  📝 {title:<45} │ {updated_str} │ {tags}"
+
+        text_widget = urwid.Text(line)
+        attr_map = urwid.AttrMap(text_widget, 'row', focus_map='row_focus')
+
+        super().__init__(attr_map)
+
+    def selectable(self):
+        return True
+
+    def keypress(self, size, key):
+        return key
+
+
+class ResourceRow(urwid.WidgetWrap):
+    """Widget que exibe um recurso na lista"""
+
+    def __init__(self, resource):
+        self.resource = resource
+
+        rtype = resource.get('type', 'doc')
+        type_info = RESOURCE_TYPES.get(rtype, RESOURCE_TYPES['doc'])
+
+        title = resource['title'][:35]
+        if len(resource['title']) > 35:
+            title += '...'
+
+        progress = resource.get('progress', 0)
+        rating = resource.get('rating', 0)
+        stars = '*' * rating + ' ' * (3 - rating)
+
+        line = f"  {type_info['emoji']} {title:<40} │ [{stars}] │ {progress:>3}%"
+
+        text_widget = urwid.Text(line)
+        attr_map = urwid.AttrMap(text_widget, 'row', focus_map='row_focus')
+
+        super().__init__(attr_map)
+
+    def selectable(self):
+        return True
+
+    def keypress(self, size, key):
+        return key
+
+
+class GoalRow(urwid.WidgetWrap):
+    """Widget que exibe uma meta na lista"""
+
+    def __init__(self, goal, expanded=False):
+        self.goal = goal
+        self.expanded = expanded
+
+        title = goal['title'][:35]
+        if len(goal['title']) > 35:
+            title += '...'
+
+        progress = goal.get('progress', 0)
+        bar_len = 10
+        filled = int(progress / 100 * bar_len)
+        bar = '[' + '=' * filled + ' ' * (bar_len - filled) + ']'
+
+        # Deadline e urgencia
+        deadline_str = ""
+        attr = 'row'
+        if goal.get('deadline'):
+            deadline = datetime.fromisoformat(goal['deadline']).date()
+            today = datetime.now().date()
+            days_left = (deadline - today).days
+            deadline_str = deadline.strftime("%d/%m/%Y")
+
+            if days_left < 0:
+                urgency = "ATRASADO"
+                attr = 'goal_urgent'
+            elif days_left < 7:
+                urgency = f"{days_left}d"
+                attr = 'goal_urgent'
+            elif days_left < 30:
+                urgency = f"{days_left}d"
+                attr = 'goal_warning'
+            else:
+                urgency = f"{days_left}d"
+                attr = 'goal_ok'
+        else:
+            urgency = ""
+
+        completed = goal.get('completed_at') is not None
+        if completed:
+            prefix = "✅"
+            attr = 'row_done'
+        else:
+            prefix = "🎯"
+
+        # Indicador de expansao e contagem de sub-metas
+        sub_count = len(goal.get('sub_goals', []))
+        sub_done = sum(1 for sg in goal.get('sub_goals', []) if sg.get('done'))
+        expand_icon = "▼" if expanded else "▶" if sub_count > 0 else " "
+        sub_info = f"({sub_done}/{sub_count})" if sub_count > 0 else ""
+
+        line = f"  {expand_icon} {prefix} {title:<35} │ {bar} {progress:>3}% │ {sub_info:<6} │ {deadline_str} {urgency}"
+
+        text_widget = urwid.Text(line)
+        attr_map = urwid.AttrMap(text_widget, attr, focus_map='row_focus')
+
+        super().__init__(attr_map)
+
+    def selectable(self):
+        return True
+
+    def keypress(self, size, key):
+        return key
+
+
+# ============================================================================
+# Dialogs
+# ============================================================================
+
+class ConfirmDialog(urwid.WidgetWrap):
+    """Dialog generico de confirmacao"""
+
+    def __init__(self, title, message, on_yes, on_no):
+        self.on_yes_callback = on_yes
+        self.on_no_callback = on_no
+
+        text = urwid.Text(message, align='center')
+
+        yes_btn = urwid.Button("Sim", on_press=self.on_yes)
+        no_btn = urwid.Button("Nao", on_press=self.on_no)
+
+        button_row = urwid.Columns([
+            urwid.AttrMap(yes_btn, 'button', focus_map='button_focus'),
+            urwid.AttrMap(no_btn, 'button', focus_map='button_focus'),
+        ], dividechars=2)
+
+        content = [
+            text,
+            urwid.Divider(),
+            button_row,
+        ]
+
+        listbox = urwid.ListBox(urwid.SimpleFocusListWalker(content))
+        box = urwid.LineBox(listbox, title=title)
+        dialog = urwid.AttrMap(box, 'dialog_bg')
+
+        super().__init__(dialog)
+
+    def on_yes(self, button):
+        self.on_yes_callback()
+
+    def on_no(self, button):
+        self.on_no_callback()
+
+    def keypress(self, size, key):
+        if key == 'esc':
+            self.on_no(None)
+            return None
+        return super().keypress(size, key)
+
+
+class MessageDialog(urwid.WidgetWrap):
+    """Dialog generico para mensagens"""
+
+    def __init__(self, title, message, on_ok, dialog_type='info'):
+        self.on_ok_callback = on_ok
+
+        icons = {
+            'error': '  ',
+            'success': '  ',
+            'info': ' i ',
+            'warning': ' ! '
+        }
+        icon = icons.get(dialog_type, 'i')
+
+        text = urwid.Text(f"{icon} {message}", align='center')
+
+        ok_btn = urwid.Button("OK", on_press=self.on_ok)
+
+        button_row = urwid.Columns([
+            urwid.AttrMap(ok_btn, 'button', focus_map='button_focus'),
+        ])
+
+        content = [
+            text,
+            urwid.Divider(),
+            button_row,
+        ]
+
+        listbox = urwid.ListBox(urwid.SimpleFocusListWalker(content))
+        box = urwid.LineBox(listbox, title=title)
+        dialog = urwid.AttrMap(box, 'dialog_bg')
+
+        super().__init__(dialog)
+
+    def on_ok(self, button):
+        self.on_ok_callback()
+
+    def keypress(self, size, key):
+        if key in ('esc', 'enter'):
+            self.on_ok(None)
+            return None
+        return super().keypress(size, key)
+
+
+class TopicDialog(urwid.WidgetWrap):
+    """Dialog para criar/editar topico"""
+
+    def __init__(self, app, topic=None, on_close=None):
+        self.app = app
+        self.topic = topic
+        self.on_close_callback = on_close
+
+        is_edit = topic is not None
+
+        # Campos
+        self.name_edit = urwid.Edit("Nome: ", edit_text=topic['name'] if topic else "")
+        self.icon_edit = urwid.Edit("Icone: ", edit_text=topic.get('icon', '') if topic else TOPIC_ICONS[0])
+
+        # Botoes
+        ok_btn = urwid.Button("Salvar" if is_edit else "Criar", on_press=self.on_ok)
+        cancel_btn = urwid.Button("Cancelar", on_press=self.on_cancel)
+
+        button_row = urwid.Columns([
+            urwid.AttrMap(ok_btn, 'button', focus_map='button_focus'),
+            urwid.AttrMap(cancel_btn, 'button', focus_map='button_focus'),
+        ], dividechars=2)
+
+        title = "Editar Topico" if is_edit else "Novo Topico"
+
+        content = [
+            urwid.Text(f"\n{title}\n", align='center'),
+            urwid.Divider(),
+            urwid.AttrMap(self.name_edit, None, focus_map='focus'),
+            urwid.AttrMap(self.icon_edit, None, focus_map='focus'),
+            urwid.Divider(),
+            urwid.Text(f"Icones disponiveis: {' '.join(TOPIC_ICONS)}", align='center'),
+            urwid.Divider(),
+            button_row,
+        ]
+
+        listbox = urwid.ListBox(urwid.SimpleFocusListWalker(content))
+        box = urwid.LineBox(listbox, title="Topico")
+        dialog = urwid.AttrMap(box, 'dialog_bg')
+
+        super().__init__(dialog)
+
+    def on_ok(self, button):
+        name = self.name_edit.get_edit_text().strip()
+        icon = self.icon_edit.get_edit_text().strip() or TOPIC_ICONS[0]
+
+        if not name:
+            return
+
+        if self.topic:
+            self.app.state.update_topic(self.topic['id'], name=name, icon=icon)
+        else:
+            self.app.state.add_topic(name, icon=icon)
+
+        self.app.state.save_data()
+        if self.on_close_callback:
+            self.on_close_callback()
+
+    def on_cancel(self, button):
+        if self.on_close_callback:
+            self.on_close_callback()
+
+    def keypress(self, size, key):
+        if key == 'esc':
+            self.on_cancel(None)
+            return None
+        return super().keypress(size, key)
+
+
+class CardDialog(urwid.WidgetWrap):
+    """Dialog para criar/editar flashcard"""
+
+    def __init__(self, app, topic_id, card=None, on_close=None):
+        self.app = app
+        self.topic_id = topic_id
+        self.card = card
+        self.on_close_callback = on_close
+
+        is_edit = card is not None
+
+        # Campos
+        self.front_edit = urwid.Edit("Frente:\n", edit_text=card['front'] if card else "", multiline=True)
+        self.back_edit = urwid.Edit("Verso:\n", edit_text=card['back'] if card else "", multiline=True)
+        self.tags_edit = urwid.Edit("Tags (separadas por virgula): ",
+                                     edit_text=', '.join(card.get('tags', [])) if card else "")
+
+        # Botoes
+        ok_btn = urwid.Button("Salvar" if is_edit else "Criar", on_press=self.on_ok)
+        cancel_btn = urwid.Button("Cancelar", on_press=self.on_cancel)
+
+        button_row = urwid.Columns([
+            urwid.AttrMap(ok_btn, 'button', focus_map='button_focus'),
+            urwid.AttrMap(cancel_btn, 'button', focus_map='button_focus'),
+        ], dividechars=2)
+
+        title = "Editar Card" if is_edit else "Novo Card"
+
+        content = [
+            urwid.Text(f"\n{title}\n", align='center'),
+            urwid.Divider(),
+            urwid.AttrMap(self.front_edit, None, focus_map='focus'),
+            urwid.Divider(),
+            urwid.AttrMap(self.back_edit, None, focus_map='focus'),
+            urwid.Divider(),
+            urwid.AttrMap(self.tags_edit, None, focus_map='focus'),
+            urwid.Divider(),
+            button_row,
+        ]
+
+        listbox = urwid.ListBox(urwid.SimpleFocusListWalker(content))
+        box = urwid.LineBox(listbox, title="Flashcard")
+        dialog = urwid.AttrMap(box, 'dialog_bg')
+
+        super().__init__(dialog)
+
+    def on_ok(self, button):
+        front = self.front_edit.get_edit_text().strip()
+        back = self.back_edit.get_edit_text().strip()
+        tags_str = self.tags_edit.get_edit_text().strip()
+        tags = [t.strip() for t in tags_str.split(',') if t.strip()] if tags_str else []
+
+        if not front or not back:
+            return
+
+        if self.card:
+            self.app.state.update_card(self.card['id'], front=front, back=back, tags=tags)
+        else:
+            self.app.state.add_card(self.topic_id, front, back, tags)
+
+        self.app.state.save_data()
+        if self.on_close_callback:
+            self.on_close_callback()
+
+    def on_cancel(self, button):
+        if self.on_close_callback:
+            self.on_close_callback()
+
+    def keypress(self, size, key):
+        if key == 'esc':
+            self.on_cancel(None)
+            return None
+        return super().keypress(size, key)
+
+
+class GoalDialog(urwid.WidgetWrap):
+    """Dialog para criar/editar meta"""
+
+    def __init__(self, app, goal=None, on_close=None):
+        self.app = app
+        self.goal = goal
+        self.on_close_callback = on_close
+
+        is_edit = goal is not None
+
+        # Campos
+        self.title_edit = urwid.Edit("Titulo: ", edit_text=goal['title'] if goal else "")
+
+        deadline_text = ""
+        if goal and goal.get('deadline'):
+            deadline_text = datetime.fromisoformat(goal['deadline']).strftime("%Y-%m-%d")
+        self.deadline_edit = urwid.Edit("Deadline (YYYY-MM-DD): ", edit_text=deadline_text)
+
+        # Botoes
+        ok_btn = urwid.Button("Salvar" if is_edit else "Criar", on_press=self.on_ok)
+        cancel_btn = urwid.Button("Cancelar", on_press=self.on_cancel)
+
+        button_row = urwid.Columns([
+            urwid.AttrMap(ok_btn, 'button', focus_map='button_focus'),
+            urwid.AttrMap(cancel_btn, 'button', focus_map='button_focus'),
+        ], dividechars=2)
+
+        title = "Editar Meta" if is_edit else "Nova Meta"
+
+        content = [
+            urwid.Text(f"\n{title}\n", align='center'),
+            urwid.Divider(),
+            urwid.AttrMap(self.title_edit, None, focus_map='focus'),
+            urwid.AttrMap(self.deadline_edit, None, focus_map='focus'),
+            urwid.Divider(),
+            button_row,
+        ]
+
+        listbox = urwid.ListBox(urwid.SimpleFocusListWalker(content))
+        box = urwid.LineBox(listbox, title="Meta")
+        dialog = urwid.AttrMap(box, 'dialog_bg')
+
+        super().__init__(dialog)
+
+    def on_ok(self, button):
+        title = self.title_edit.get_edit_text().strip()
+        deadline_str = self.deadline_edit.get_edit_text().strip()
+
+        if not title:
+            return
+
+        deadline = None
+        if deadline_str:
+            try:
+                deadline = datetime.strptime(deadline_str, "%Y-%m-%d").isoformat()
+            except ValueError:
+                return
+
+        if self.goal:
+            self.app.state.update_goal(self.goal['id'], title=title, deadline=deadline)
+        else:
+            self.app.state.add_goal(title, deadline=deadline)
+
+        self.app.state.save_data()
+        if self.on_close_callback:
+            self.on_close_callback()
+
+    def on_cancel(self, button):
+        if self.on_close_callback:
+            self.on_close_callback()
+
+    def keypress(self, size, key):
+        if key == 'esc':
+            self.on_cancel(None)
+            return None
+        return super().keypress(size, key)
+
+
+class ResourceDialog(urwid.WidgetWrap):
+    """Dialog para criar/editar recurso"""
+
+    def __init__(self, app, topic_id, resource=None, on_close=None):
+        self.app = app
+        self.topic_id = topic_id
+        self.resource = resource
+        self.on_close_callback = on_close
+
+        is_edit = resource is not None
+
+        # Campos
+        self.title_edit = urwid.Edit("Titulo: ", edit_text=resource['title'] if resource else "")
+        self.url_edit = urwid.Edit("URL: ", edit_text=resource.get('url', '') if resource else "")
+
+        # Tipo
+        type_options = list(RESOURCE_TYPES.keys())
+        current_type = resource.get('type', 'doc') if resource else 'doc'
+        self.type_group = []
+        self.type_buttons = {}
+        type_widgets = []
+        for t in type_options:
+            info = RESOURCE_TYPES[t]
+            rb = urwid.RadioButton(self.type_group, f"{info['emoji']} {info['label']}", state=(t == current_type))
+            self.type_buttons[t] = rb
+            type_widgets.append(urwid.AttrMap(rb, None, focus_map='focus'))
+
+        self.rating_edit = urwid.Edit("Rating (0-3): ", edit_text=str(resource.get('rating', 0)) if resource else "0")
+        self.progress_edit = urwid.Edit("Progresso (%): ", edit_text=str(resource.get('progress', 0)) if resource else "0")
+        self.notes_edit = urwid.Edit("Notas: ", edit_text=resource.get('notes', '') if resource else "")
+
+        # Botoes
+        ok_btn = urwid.Button("Salvar" if is_edit else "Criar", on_press=self.on_ok)
+        cancel_btn = urwid.Button("Cancelar", on_press=self.on_cancel)
+
+        button_row = urwid.Columns([
+            urwid.AttrMap(ok_btn, 'button', focus_map='button_focus'),
+            urwid.AttrMap(cancel_btn, 'button', focus_map='button_focus'),
+        ], dividechars=2)
+
+        title = "Editar Recurso" if is_edit else "Novo Recurso"
+
+        content = [
+            urwid.Text(f"\n{title}\n", align='center'),
+            urwid.Divider(),
+            urwid.AttrMap(self.title_edit, None, focus_map='focus'),
+            urwid.AttrMap(self.url_edit, None, focus_map='focus'),
+            urwid.Divider(),
+            urwid.Text("Tipo:"),
+            *type_widgets,
+            urwid.Divider(),
+            urwid.AttrMap(self.rating_edit, None, focus_map='focus'),
+            urwid.AttrMap(self.progress_edit, None, focus_map='focus'),
+            urwid.AttrMap(self.notes_edit, None, focus_map='focus'),
+            urwid.Divider(),
+            button_row,
+        ]
+
+        listbox = urwid.ListBox(urwid.SimpleFocusListWalker(content))
+        box = urwid.LineBox(listbox, title="Recurso")
+        dialog = urwid.AttrMap(box, 'dialog_bg')
+
+        super().__init__(dialog)
+
+    def on_ok(self, button):
+        title = self.title_edit.get_edit_text().strip()
+        url = self.url_edit.get_edit_text().strip()
+
+        if not title:
+            return
+
+        # Obter tipo selecionado
+        resource_type = 'doc'
+        for t, rb in self.type_buttons.items():
+            if rb.get_state():
+                resource_type = t
+                break
+
+        try:
+            rating = int(self.rating_edit.get_edit_text().strip() or "0")
+            rating = max(0, min(3, rating))
+        except ValueError:
+            rating = 0
+
+        try:
+            progress = int(self.progress_edit.get_edit_text().strip() or "0")
+            progress = max(0, min(100, progress))
+        except ValueError:
+            progress = 0
+
+        notes = self.notes_edit.get_edit_text().strip()
+
+        if self.resource:
+            self.app.state.update_resource(
+                self.resource['id'],
+                title=title, url=url, type=resource_type,
+                rating=rating, progress=progress, notes=notes
+            )
+        else:
+            self.app.state.add_resource(
+                self.topic_id, title, url=url, resource_type=resource_type,
+                rating=rating, progress=progress, notes=notes
+            )
+
+        self.app.state.save_data()
+        if self.on_close_callback:
+            self.on_close_callback()
+
+    def on_cancel(self, button):
+        if self.on_close_callback:
+            self.on_close_callback()
+
+    def keypress(self, size, key):
+        if key == 'esc':
+            self.on_cancel(None)
+            return None
+        return super().keypress(size, key)
+
+
+class TimerDialog(urwid.WidgetWrap):
+    """Dialog de timer de estudo"""
+
+    def __init__(self, app, topic_id=None, on_close=None):
+        self.app = app
+        self.topic_id = topic_id
+        self.on_close_callback = on_close
+        self.running = True  # Auto-inicia
+        self.paused = False
+        self.start_time = datetime.now()  # Inicia agora
+        self.elapsed = 0
+        self.paused_elapsed = 0
+        self.alarm_handle = None
+        self.session_saved = False
+
+        self.topic_name = "Geral"
+        if topic_id:
+            topic = self.app.state.get_topic(topic_id)
+            if topic:
+                self.topic_name = topic['name']
+
+        # Display
+        self.time_text = urwid.BigText("00:00", urwid.font.HalfBlock5x4Font())
+        self.time_padded = urwid.Padding(self.time_text, align='center', width='clip')
+        self.status_text = urwid.Text(('success', f"Estudando: {self.topic_name}"), align='center')
+
+        content = urwid.SimpleFocusListWalker([
+            urwid.Divider(),
+            self.time_padded,
+            urwid.Divider(),
+            self.status_text,
+            urwid.Divider(),
+            urwid.Divider(),
+            urwid.Text(('subtitle', " Comandos")),
+            urwid.Divider(),
+            urwid.Text("   [SPACE] Pausar / Continuar"),
+            urwid.Text("   [s] Salvar sessao e sair"),
+            urwid.Text("   [ESC] Cancelar (nao salva)"),
+            urwid.Divider(),
+        ])
+
+        listbox = urwid.ListBox(content)
+        box = urwid.LineBox(listbox, title=f"Timer - {self.topic_name}")
+        dialog = urwid.AttrMap(box, 'dialog_bg')
+
+        super().__init__(dialog)
+
+        # Flag para iniciar na primeira renderização
+        self._needs_start = True
+
+    def render(self, size, focus=False):
+        """Inicia o timer na primeira renderização"""
+        if self._needs_start and self.app.loop:
+            self._needs_start = False
+            self.app.loop.set_alarm_in(0.1, self._update_timer)
+        return super().render(size, focus)
+
+    def start_timer(self):
+        """Inicia o timer (chamado apos o loop estar pronto)"""
+        if self._needs_start and self.app.loop:
+            self._needs_start = False
+            self._update_timer()
+
+    def toggle_pause(self):
+        """Alterna entre pausado e rodando"""
+        if self.running:
+            # Pausar
+            self.running = False
+            self.paused = True
+            self.paused_elapsed = self.elapsed
+            if self.alarm_handle:
+                self.app.loop.remove_alarm(self.alarm_handle)
+                self.alarm_handle = None
+            self.status_text.set_text(('warning', "PAUSADO - [SPACE] para continuar"))
+        else:
+            # Continuar
+            self.paused = False
+            self.running = True
+            self.start_time = datetime.now()
+            self.status_text.set_text(('success', f"Estudando: {self.topic_name}"))
+            self._update_timer()
+
+    def save_session(self):
+        """Salva a sessao de estudo"""
+        if self.running:
+            self.running = False
+            if self.alarm_handle:
+                self.app.loop.remove_alarm(self.alarm_handle)
+                self.alarm_handle = None
+
+        duration = max(1, int(self.elapsed / 60))  # Minimo 1 minuto
+        if not self.session_saved:
+            session = self.app.state.add_session(
+                topic_id=self.topic_id,
+                duration_minutes=duration
+            )
+            if self.start_time:
+                session['started'] = self.start_time.isoformat()
+                session['ended'] = datetime.now().isoformat()
+            self.app.state.save_data()
+            self.session_saved = True
+
+            hours = int(self.elapsed // 3600)
+            minutes = int((self.elapsed % 3600) // 60)
+            self.status_text.set_text(('success', f"Salvo: {hours}h {minutes:02d}m"))
+
+            if self.app.loop:
+                self.app.loop.set_alarm_in(1.0, lambda l, d: self.on_close_callback() if self.on_close_callback else None)
+
+    def cancel(self):
+        """Cancela sem salvar"""
+        if self.alarm_handle and self.app.loop:
+            self.app.loop.remove_alarm(self.alarm_handle)
+        if self.on_close_callback:
+            self.on_close_callback()
+
+    def _update_timer(self, loop=None, user_data=None):
+        """Atualiza o display do timer"""
+        # Inicia o timer na primeira chamada se necessário
+        if self._needs_start:
+            self._needs_start = False
+
+        if not self.running:
+            return
+
+        current_elapsed = (datetime.now() - self.start_time).total_seconds()
+        self.elapsed = self.paused_elapsed + current_elapsed
+        minutes = int(self.elapsed // 60)
+        seconds = int(self.elapsed % 60)
+
+        # Atualiza o BigText
+        time_str = f"{minutes:02d}:{seconds:02d}"
+        new_time = urwid.BigText(time_str, urwid.font.HalfBlock5x4Font())
+        self.time_padded.original_widget = new_time
+
+        # Agendar proxima atualizacao
+        if self.app.loop:
+            self.alarm_handle = self.app.loop.set_alarm_in(1, self._update_timer)
+
+    def keypress(self, size, key):
+        # Inicia timer na primeira tecla se necessário
+        if self._needs_start:
+            self.start_timer()
+
+        if key in ('esc', 'q'):
+            self.cancel()
+            return None
+        elif key == ' ':
+            self.toggle_pause()
+            return None
+        elif key in ('s', 'enter'):
+            self.save_session()
+            return None
+        return key
+
+    def selectable(self):
+        return True
+
+
+# ============================================================================
+# Screens
+# ============================================================================
+
+class StudyDashboardScreen(urwid.WidgetWrap):
+    """Tela principal: dashboard de estudos"""
+
+    def __init__(self, app):
+        self.app = app
+
+        # Topic list walker (para navegação)
+        self.topic_walker = urwid.SimpleFocusListWalker([])
+        self.topic_listbox = urwid.ListBox(self.topic_walker)
+
+        # Build layout
+        self.body = self.build_layout()
+
+        # Footer
+        footer_text = urwid.Text(
+            " [q]Sair [n]Novo [Enter]Abrir [s]Estudar [r]Revisao [m]Metricas [g]Metas [l]Log [t]Timer ",
+            align='center'
+        )
+        self.footer = urwid.AttrMap(footer_text, 'footer')
+
+        # Header com streak
+        streak = self.app.state.get_streak()
+        streak_icon = "🔥" if streak >= 7 else "⚡" if streak >= 3 else ""
+        streak_str = f" {streak_icon}{streak}d " if streak > 0 else ""
+        header_text = urwid.Text(f"{streak_str} QUICKSTUDY {streak_str}", align='center')
+        self.header = urwid.AttrMap(header_text, 'header')
+
+        # Frame
+        frame = urwid.Frame(
+            header=self.header,
+            body=self.body,
+            footer=self.footer
+        )
+
+        super().__init__(frame)
+
+    def build_layout(self):
+        """Constrói o layout de painéis do dashboard"""
+        today = datetime.now().date()
+
+        # ═══════════════════════════════════════════════════════════════════
+        # PAINEL ESQUERDO: Stats + Metas
+        # ═══════════════════════════════════════════════════════════════════
+
+        # --- Stats de Hoje ---
+        today_sessions = self.app.state.get_sessions_by_date(today)
+        today_minutes = sum(s.get('duration_minutes', 0) for s in today_sessions)
+        today_cards = sum(s.get('cards_reviewed', 0) for s in today_sessions)
+        today_correct = sum(s.get('correct', 0) for s in today_sessions)
+        today_accuracy = (today_correct / today_cards * 100) if today_cards > 0 else 0
+
+        hours = today_minutes // 60
+        mins = today_minutes % 60
+        time_str = f"{hours}h{mins:02d}m" if hours > 0 else f"{mins}m"
+
+        # --- Stats da Semana ---
+        week_metrics = self.app.state.get_study_metrics(days=7)
+        streak = week_metrics['streak']
+        streak_icon = "🔥" if streak >= 7 else "⚡" if streak >= 3 else "·"
+        week_hours = week_metrics['total_minutes'] // 60
+        week_mins = week_metrics['total_minutes'] % 60
+
+        stats_content = [
+            urwid.Text(f" {streak_icon} Streak: {streak} dias"),
+            urwid.Divider('─'),
+            urwid.Text(f" Hoje:  {time_str} | {today_cards} cards"),
+            urwid.Text(f" Acerto: {today_accuracy:.0f}%"),
+            urwid.Divider('─'),
+            urwid.Text(f" Semana: {week_hours}h{week_mins:02d}m"),
+            urwid.Text(f" Cards:  {week_metrics['total_cards']}"),
+            urwid.Text(f" Precisao: {week_metrics['accuracy']:.0f}%"),
+        ]
+
+        stats_pile = urwid.Pile(stats_content)
+        stats_box = urwid.LineBox(stats_pile, title="Estatisticas")
+
+        # --- Metas Ativas ---
+        active_goals = [g for g in self.app.state.goals if not g.get('completed_at')]
+        goals_content = []
+
+        if active_goals:
+            for goal in active_goals[:4]:
+                title = goal['title'][:18]
+                if len(goal['title']) > 18:
+                    title += ".."
+
+                sub_goals = goal.get('sub_goals', [])
+                if sub_goals:
+                    done = sum(1 for sg in sub_goals if sg.get('done'))
+                    progress = int(done / len(sub_goals) * 100)
+                else:
+                    progress = goal.get('progress', 0)
+
+                bar_len = 8
+                filled = int(progress / 100 * bar_len)
+                bar = '█' * filled + '░' * (bar_len - filled)
+
+                goals_content.append(urwid.Text(f" {title}"))
+                goals_content.append(urwid.Text(f" [{bar}] {progress}%"))
+                if goal != active_goals[:4][-1]:
+                    goals_content.append(urwid.Divider())
+        else:
+            goals_content.append(urwid.Text(" Nenhuma meta"))
+
+        goals_pile = urwid.Pile(goals_content)
+        goals_box = urwid.LineBox(goals_pile, title="Metas")
+
+        # Painel esquerdo: Stats + Metas empilhados
+        left_panel = urwid.Pile([
+            ('pack', stats_box),
+            goals_box,
+        ])
+
+        # ═══════════════════════════════════════════════════════════════════
+        # PAINEL CENTRAL: Lista de Tópicos
+        # ═══════════════════════════════════════════════════════════════════
+
+        self.topic_walker.clear()
+
+        if not self.app.state.topics:
+            self.topic_walker.append(urwid.Text(" Nenhum topico."))
+            self.topic_walker.append(urwid.Text(" Pressione [n]"))
+        else:
+            for topic in self.app.state.topics:
+                stats = self.app.state.get_topic_stats(topic['id'])
+                row = TopicRow(topic, stats)
+                self.topic_walker.append(row)
+
+        topics_box = urwid.LineBox(self.topic_listbox, title="Topicos")
+
+        # ═══════════════════════════════════════════════════════════════════
+        # PAINEL DIREITO: Cards Pendentes
+        # ═══════════════════════════════════════════════════════════════════
+
+        due_cards = self.app.state.get_cards_due()
+        pending_content = []
+
+        if due_cards:
+            sorted_cards = sorted(due_cards, key=lambda c: c.get('next_review', ''))[:8]
+
+            for card in sorted_cards:
+                topic = self.app.state.get_topic(card['topic_id'])
+                icon = topic.get('icon', '📘') if topic else '📘'
+                front = card['front'][:20]
+                if len(card['front']) > 20:
+                    front += ".."
+
+                next_review = datetime.fromisoformat(card['next_review']).date()
+                days = (today - next_review).days
+                if days > 0:
+                    tag = f"-{days}d"
+                else:
+                    tag = "hoje"
+
+                pending_content.append(urwid.Text(f" {icon} {front}"))
+                pending_content.append(urwid.Text(f"    {tag}", align='right'))
+
+            if len(due_cards) > 8:
+                pending_content.append(urwid.Divider())
+                pending_content.append(urwid.Text(f" +{len(due_cards)-8} mais"))
+        else:
+            pending_content.append(urwid.Text(" Nenhum card"))
+            pending_content.append(urwid.Text(" pendente!"))
+
+        pending_pile = urwid.Pile(pending_content)
+        pending_filler = urwid.Filler(pending_pile, valign='top')
+        pending_box = urwid.LineBox(pending_filler, title=f"Pendentes ({len(due_cards)})")
+
+        # ═══════════════════════════════════════════════════════════════════
+        # LAYOUT FINAL: 3 colunas
+        # ═══════════════════════════════════════════════════════════════════
+
+        columns = urwid.Columns([
+            ('weight', 25, left_panel),
+            ('weight', 50, topics_box),
+            ('weight', 25, pending_box),
+        ], dividechars=0)
+
+        return columns
+
+    def refresh_content(self):
+        """Reconstrói o layout completo"""
+        self.body = self.build_layout()
+        self._w.body = self.body
+
+    def get_selected_topic(self):
+        """Retorna o topico selecionado na lista"""
+        focus_widget = self.topic_listbox.focus
+        if isinstance(focus_widget, TopicRow):
+            return focus_widget.topic
+        return None
+
+    def keypress(self, size, key):
+        # Vim-style navigation
+        if key == 'j':
+            key = 'down'
+        elif key == 'k':
+            key = 'up'
+
+        # Deixa ListBox processar navegacao
+        key = super().keypress(size, key)
+
+        if key == 'n':
+            # Novo topico
+            def on_close():
+                self.app.close_overlay()
+                self.refresh_content()
+
+            dialog = TopicDialog(self.app, on_close=on_close)
+            self.app.show_overlay(dialog, width=('relative', 60), height=('relative', 50))
+            return None
+
+        elif key == 'enter':
+            # Abrir topico
+            topic = self.get_selected_topic()
+            if topic:
+                screen = TopicScreen(self.app, topic['id'])
+                self.app.push_screen(screen)
+            return None
+
+        elif key == 's':
+            # Iniciar estudo do topico selecionado
+            topic = self.get_selected_topic()
+            if topic:
+                due_cards = self.app.state.get_cards_due(topic['id'])
+                if due_cards:
+                    screen = ReviewScreen(self.app, topic['id'])
+                    self.app.push_screen(screen)
+                else:
+                    dialog = MessageDialog(
+                        "Sem Cards",
+                        "Nenhum card pendente para revisar neste topico.",
+                        on_ok=lambda: self.app.close_overlay(),
+                        dialog_type='info'
+                    )
+                    self.app.show_overlay(dialog, width=('relative', 50), height=('relative', 30))
+            return None
+
+        elif key == 'r':
+            # Revisao rapida (todos os cards pendentes)
+            due_cards = self.app.state.get_cards_due()
+            if due_cards:
+                screen = ReviewScreen(self.app, topic_id=None)
+                self.app.push_screen(screen)
+            else:
+                dialog = MessageDialog(
+                    "Sem Cards",
+                    "Nenhum card pendente para revisar.",
+                    on_ok=lambda: self.app.close_overlay(),
+                    dialog_type='info'
+                )
+                self.app.show_overlay(dialog, width=('relative', 50), height=('relative', 30))
+            return None
+
+        elif key == 'm':
+            # Metricas
+            screen = StudyMetricsScreen(self.app)
+            self.app.push_screen(screen)
+            return None
+
+        elif key == 'g':
+            # Metas
+            screen = GoalsScreen(self.app)
+            self.app.push_screen(screen)
+            return None
+
+        elif key == 'l':
+            # Log de sessoes
+            screen = SessionLogScreen(self.app)
+            self.app.push_screen(screen)
+            return None
+
+        elif key == 't':
+            # Timer
+            topic = self.get_selected_topic()
+            topic_id = topic['id'] if topic else None
+
+            def on_close():
+                self.app.close_overlay()
+                self.refresh_content()
+
+            dialog = TimerDialog(self.app, topic_id=topic_id, on_close=on_close)
+            self.app.show_overlay(dialog, width=('relative', 50), height=('relative', 55))
+            return None
+
+        elif key == 'd':
+            # Deletar topico
+            topic = self.get_selected_topic()
+            if topic:
+                def on_yes():
+                    self.app.state.delete_topic(topic['id'])
+                    self.app.state.save_data()
+                    self.app.close_overlay()
+                    self.refresh_content()
+
+                def on_no():
+                    self.app.close_overlay()
+
+                dialog = ConfirmDialog(
+                    "Confirmar Exclusao",
+                    f"Deletar topico '{topic['name']}'?\n\nTodos os cards, notas e recursos serao removidos.",
+                    on_yes=on_yes,
+                    on_no=on_no
+                )
+                self.app.show_overlay(dialog, width=('relative', 60), height=('relative', 35))
+            return None
+
+        elif key == 'T':
+            # Voltar para qt
+            import subprocess
+            self.app.quit()
+            subprocess.run(['qt'])
+            return None
+
+        return key
+
+
+class TopicScreen(urwid.WidgetWrap):
+    """Tela de detalhes de um topico - Layout com paineis"""
+
+    def __init__(self, app, topic_id):
+        self.app = app
+        self.topic_id = topic_id
+        self.topic = app.state.get_topic(topic_id)
+        self.current_tab = 0  # 0=Cards, 1=Notas, 2=Recursos
+
+        # Content list walker (para navegacao)
+        self.list_walker = urwid.SimpleFocusListWalker([])
+        self.listbox = urwid.ListBox(self.list_walker)
+
+        # Build layout
+        self.body = self.build_layout()
+
+        # Footer
+        self.update_footer()
+
+        # Header
+        self.update_header()
+
+        # Frame
+        self.frame = urwid.Frame(
+            header=self.header,
+            body=self.body,
+            footer=self.footer
+        )
+
+        super().__init__(self.frame)
+
+    def update_header(self):
+        topic = self.app.state.get_topic(self.topic_id)
+        stats = self.app.state.get_topic_stats(self.topic_id)
+
+        tabs = ["Cards", "Notas", "Recursos"]
+        tab_str = "  ".join(
+            f"[{t}]" if i == self.current_tab else f" {t} "
+            for i, t in enumerate(tabs)
+        )
+
+        header_text = urwid.Text(
+            f" {topic['icon']} {topic['name']}  |  {stats['total']} cards  |  {stats['due']} pendentes  |  {tab_str} ",
+            align='center'
+        )
+        self.header = urwid.AttrMap(header_text, 'header')
+
+    def update_footer(self):
+        if self.current_tab == 0:
+            footer_text = " [ESC]Voltar [a]Adicionar [e]Editar [d]Deletar [s]Estudar [Tab]Abas "
+        elif self.current_tab == 1:
+            footer_text = " [ESC]Voltar [a]Adicionar [e]Editar [d]Deletar [Enter]Ver [Tab]Abas "
+        else:
+            footer_text = " [ESC]Voltar [a]Adicionar [e]Editar [d]Deletar [Tab]Abas "
+
+        self.footer = urwid.AttrMap(urwid.Text(footer_text, align='center'), 'footer')
+
+    def build_layout(self):
+        """Constroi o layout de paineis do topico"""
+        topic = self.app.state.get_topic(self.topic_id)
+        stats = self.app.state.get_topic_stats(self.topic_id)
+
+        # ═══════════════════════════════════════════════════════════════════
+        # PAINEL ESQUERDO: Stats do Topico
+        # ═══════════════════════════════════════════════════════════════════
+
+        cards = self.app.state.get_cards_by_topic(self.topic_id)
+        notes = self.app.state.get_notes_by_topic(self.topic_id)
+        resources = self.app.state.get_resources_by_topic(self.topic_id)
+
+        # Calcular dominados
+        mastered = len([c for c in cards if c.get('repetitions', 0) >= 5])
+        learning = len([c for c in cards if 1 <= c.get('repetitions', 0) < 5])
+        new_cards = len([c for c in cards if c.get('repetitions', 0) == 0])
+
+        # Progresso geral
+        total = len(cards)
+        progress = (mastered / total * 100) if total > 0 else 0
+        bar_len = 12
+        filled = int(progress / 100 * bar_len)
+        bar = '█' * filled + '░' * (bar_len - filled)
+
+        # Ultima sessao
+        topic_sessions = [s for s in self.app.state.sessions if s.get('topic_id') == self.topic_id]
+        if topic_sessions:
+            last_session = max(topic_sessions, key=lambda s: s['started'])
+            last_date = datetime.fromisoformat(last_session['started']).strftime("%d/%m")
+        else:
+            last_date = "Nunca"
+
+        stats_content = [
+            urwid.Text(f" {topic.get('icon', '')} {topic['name'][:15]}"),
+            urwid.Divider('─'),
+            urwid.Text(f" Total:      {total} cards"),
+            urwid.Text(f" Dominados:  {mastered}"),
+            urwid.Text(f" Aprendendo: {learning}"),
+            urwid.Text(f" Novos:      {new_cards}"),
+            urwid.Divider('─'),
+            urwid.Text(f" [{bar}]"),
+            urwid.Text(f" Progresso: {progress:.0f}%"),
+            urwid.Divider('─'),
+            urwid.Text(f" Pendentes: {stats['due']}"),
+            urwid.Text(f" Ultima vez: {last_date}"),
+            urwid.Divider('─'),
+            urwid.Text(f" Notas: {len(notes)}"),
+            urwid.Text(f" Recursos: {len(resources)}"),
+        ]
+
+        stats_pile = urwid.Pile(stats_content)
+        stats_filler = urwid.Filler(stats_pile, valign='top')
+        stats_box = urwid.LineBox(stats_filler, title="Estatisticas")
+
+        # ═══════════════════════════════════════════════════════════════════
+        # PAINEL CENTRAL: Lista de Conteudo
+        # ═══════════════════════════════════════════════════════════════════
+
+        self.list_walker.clear()
+
+        if self.current_tab == 0:
+            # Cards
+            if not cards:
+                self.list_walker.append(urwid.Text(" Nenhum card."))
+                self.list_walker.append(urwid.Text(" Pressione [a]"))
+            else:
+                for card in cards:
+                    row = FlashcardRow(card)
+                    self.list_walker.append(row)
+
+        elif self.current_tab == 1:
+            # Notas
+            if not notes:
+                self.list_walker.append(urwid.Text(" Nenhuma nota."))
+                self.list_walker.append(urwid.Text(" Pressione [a]"))
+            else:
+                for note in notes:
+                    row = NoteRow(note)
+                    self.list_walker.append(row)
+
+        else:
+            # Recursos
+            if not resources:
+                self.list_walker.append(urwid.Text(" Nenhum recurso."))
+                self.list_walker.append(urwid.Text(" Pressione [a]"))
+            else:
+                for resource in resources:
+                    row = ResourceRow(resource)
+                    self.list_walker.append(row)
+
+        tab_titles = ["Cards", "Notas", "Recursos"]
+        content_box = urwid.LineBox(self.listbox, title=tab_titles[self.current_tab])
+
+        # ═══════════════════════════════════════════════════════════════════
+        # LAYOUT FINAL: 2 colunas
+        # ═══════════════════════════════════════════════════════════════════
+
+        columns = urwid.Columns([
+            ('weight', 25, stats_box),
+            ('weight', 75, content_box),
+        ], dividechars=0)
+
+        return columns
+
+    def refresh_content(self):
+        """Reconstroi o layout completo"""
+        self.body = self.build_layout()
+        self.frame.body = self.body
+
+    def get_selected_item(self):
+        """Retorna o item selecionado na lista"""
+        focus_widget = self.listbox.focus
+        if isinstance(focus_widget, FlashcardRow):
+            return focus_widget.card
+        elif isinstance(focus_widget, NoteRow):
+            return focus_widget.note
+        elif isinstance(focus_widget, ResourceRow):
+            return focus_widget.resource
+        return None
+
+    def keypress(self, size, key):
+        if key == 'j':
+            key = 'down'
+        elif key == 'k':
+            key = 'up'
+
+        key = super().keypress(size, key)
+
+        if key == 'esc':
+            self.app.pop_screen()
+            return None
+
+        elif key == 'tab':
+            # Alternar abas
+            self.current_tab = (self.current_tab + 1) % 3
+            self.update_header()
+            self.update_footer()
+            self.refresh_content()
+            self.frame.header = self.header
+            self.frame.footer = self.footer
+            return None
+
+        elif key == 'a':
+            # Adicionar item
+            def on_close():
+                self.app.close_overlay()
+                self.update_header()
+                self.refresh_content()
+
+            if self.current_tab == 0:
+                dialog = CardDialog(self.app, self.topic_id, on_close=on_close)
+                self.app.show_overlay(dialog, width=('relative', 70), height=('relative', 70))
+            elif self.current_tab == 1:
+                # Criar nota diretamente e abrir editor
+                note = self.app.state.add_note(self.topic_id, "Nova Nota")
+                self.app.state.save_data()
+                screen = NoteEditScreen(self.app, note['id'])
+                self.app.push_screen(screen)
+            else:
+                dialog = ResourceDialog(self.app, self.topic_id, on_close=on_close)
+                self.app.show_overlay(dialog, width=('relative', 70), height=('relative', 80))
+            return None
+
+        elif key == 'e':
+            # Editar item
+            item = self.get_selected_item()
+            if not item:
+                return None
+
+            def on_close():
+                self.app.close_overlay()
+                self.update_header()
+                self.refresh_content()
+
+            if self.current_tab == 0:
+                dialog = CardDialog(self.app, self.topic_id, card=item, on_close=on_close)
+                self.app.show_overlay(dialog, width=('relative', 70), height=('relative', 70))
+            elif self.current_tab == 1:
+                screen = NoteEditScreen(self.app, item['id'])
+                self.app.push_screen(screen)
+            else:
+                dialog = ResourceDialog(self.app, self.topic_id, resource=item, on_close=on_close)
+                self.app.show_overlay(dialog, width=('relative', 70), height=('relative', 80))
+            return None
+
+        elif key == 'd':
+            # Deletar item
+            item = self.get_selected_item()
+            if not item:
+                return None
+
+            def on_yes():
+                if self.current_tab == 0:
+                    self.app.state.delete_card(item['id'])
+                elif self.current_tab == 1:
+                    self.app.state.delete_note(item['id'])
+                else:
+                    self.app.state.delete_resource(item['id'])
+                self.app.state.save_data()
+                self.app.close_overlay()
+                self.update_header()
+                self.refresh_content()
+
+            def on_no():
+                self.app.close_overlay()
+
+            item_type = ["card", "nota", "recurso"][self.current_tab]
+            dialog = ConfirmDialog(
+                "Confirmar Exclusao",
+                f"Deletar este {item_type}?",
+                on_yes=on_yes,
+                on_no=on_no
+            )
+            self.app.show_overlay(dialog, width=('relative', 50), height=('relative', 30))
+            return None
+
+        elif key == 's' and self.current_tab == 0:
+            # Estudar cards do topico
+            due_cards = self.app.state.get_cards_due(self.topic_id)
+            if due_cards:
+                screen = ReviewScreen(self.app, self.topic_id)
+                self.app.push_screen(screen)
+            else:
+                dialog = MessageDialog(
+                    "Sem Cards",
+                    "Nenhum card pendente para revisar.",
+                    on_ok=lambda: self.app.close_overlay(),
+                    dialog_type='info'
+                )
+                self.app.show_overlay(dialog, width=('relative', 50), height=('relative', 30))
+            return None
+
+        elif key == 'enter' and self.current_tab == 1:
+            # Ver nota
+            item = self.get_selected_item()
+            if item:
+                screen = NoteViewScreen(self.app, item['id'])
+                self.app.push_screen(screen)
+            return None
+
+        return key
+
+
+class ReviewScreen(urwid.WidgetWrap):
+    """Tela de revisao de flashcards - Layout com paineis"""
+
+    def __init__(self, app, topic_id=None):
+        self.app = app
+        self.topic_id = topic_id
+        self.cards = app.state.get_cards_due(topic_id)
+        self.current_index = 0
+        self.showing_answer = False
+        self.session_start = datetime.now()
+        self.correct = 0
+        self.incorrect = 0
+
+        # Build
+        self.build_ui()
+
+    def build_ui(self):
+        if not self.cards or self.current_index >= len(self.cards):
+            # Sem cards ou acabaram - mostrar resumo
+            self._end_session()
+            self._show_summary()
+            return
+
+        card = self.cards[self.current_index]
+        topic = self.app.state.get_topic(card['topic_id'])
+        topic_name = topic['name'] if topic else "Desconhecido"
+        topic_icon = topic.get('icon', '') if topic else ''
+
+        # ═══════════════════════════════════════════════════════════════════
+        # HEADER
+        # ═══════════════════════════════════════════════════════════════════
+
+        progress_pct = (self.current_index + 1) / len(self.cards)
+        bar_len = 30
+        filled = int(progress_pct * bar_len)
+        bar = '█' * filled + '░' * (bar_len - filled)
+
+        header_text = urwid.Text(
+            f" REVISAO  |  {topic_icon} {topic_name} ",
+            align='center'
+        )
+        header = urwid.AttrMap(header_text, 'header')
+
+        # ═══════════════════════════════════════════════════════════════════
+        # PAINEL SUPERIOR: Progresso e Stats da Sessao
+        # ═══════════════════════════════════════════════════════════════════
+
+        elapsed = int((datetime.now() - self.session_start).total_seconds())
+        elapsed_str = f"{elapsed // 60}:{elapsed % 60:02d}"
+        total_reviewed = self.correct + self.incorrect
+        accuracy = (self.correct / total_reviewed * 100) if total_reviewed > 0 else 0
+
+        progress_content = [
+            urwid.Text(f" Card {self.current_index + 1} de {len(self.cards)}"),
+            urwid.Text(f" [{bar}] {progress_pct*100:.0f}%"),
+        ]
+        progress_pile = urwid.Pile(progress_content)
+        progress_box = urwid.LineBox(progress_pile, title="Progresso")
+
+        stats_content = [
+            urwid.Text(f" Tempo: {elapsed_str}"),
+            urwid.Text(f" Corretos: {self.correct} | Erros: {self.incorrect} | Precisao: {accuracy:.0f}%"),
+        ]
+        stats_pile = urwid.Pile(stats_content)
+        stats_box = urwid.LineBox(stats_pile, title="Sessao")
+
+        top_panel = urwid.Columns([
+            ('weight', 50, progress_box),
+            ('weight', 50, stats_box),
+        ], dividechars=0)
+
+        # ═══════════════════════════════════════════════════════════════════
+        # PAINEL CENTRAL: Conteudo do Card
+        # ═══════════════════════════════════════════════════════════════════
+
+        # Info do card
+        difficulty = card.get('difficulty', 2.5)
+        repetitions = card.get('repetitions', 0)
+        if repetitions >= 5:
+            level = "Dominado"
+        elif repetitions >= 3:
+            level = "Aprendendo"
+        elif repetitions >= 1:
+            level = "Iniciante"
+        else:
+            level = "Novo"
+
+        card_info = f"Nivel: {level} | Repeticoes: {repetitions} | Dificuldade: {difficulty:.1f}"
+
+        card_content = []
+        card_content.append(urwid.Divider())
+        card_content.append(urwid.Text(('secondary', card_info), align='center'))
+        card_content.append(urwid.Divider())
+        card_content.append(urwid.Text(('divider', "─" * 60), align='center'))
+        card_content.append(urwid.Divider())
+
+        # Pergunta
+        card_content.append(urwid.Text(('label', "PERGUNTA:"), align='center'))
+        card_content.append(urwid.Divider())
+        card_content.append(urwid.Text(('card_front', card['front']), align='center'))
+        card_content.append(urwid.Divider())
+        card_content.append(urwid.Divider())
+
+        if self.showing_answer:
+            # Mostrar resposta
+            card_content.append(urwid.Text(('divider', "─" * 60), align='center'))
+            card_content.append(urwid.Divider())
+            card_content.append(urwid.Text(('label', "RESPOSTA:"), align='center'))
+            card_content.append(urwid.Divider())
+            card_content.append(urwid.Text(('card_back', card['back']), align='center'))
+            card_content.append(urwid.Divider())
+        else:
+            # Aguardando revelar
+            card_content.append(urwid.Text(('divider', "─" * 60), align='center'))
+            card_content.append(urwid.Divider())
+            card_content.append(urwid.Text(('card_hint', "Pressione SPACE para revelar"), align='center'))
+
+        # Tags
+        if card.get('tags'):
+            card_content.append(urwid.Divider())
+            tags_str = ', '.join(card['tags'])
+            card_content.append(urwid.Text(('secondary', f"Tags: {tags_str}"), align='center'))
+
+        card_listbox = urwid.ListBox(urwid.SimpleFocusListWalker(card_content))
+        card_box = urwid.LineBox(card_listbox, title="Flashcard")
+
+        # ═══════════════════════════════════════════════════════════════════
+        # PAINEL INFERIOR: Instrucoes/Atalhos
+        # ═══════════════════════════════════════════════════════════════════
+
+        if self.showing_answer:
+            shortcuts_content = [
+                urwid.Columns([
+                    urwid.Text(('quality_1', " [1] Errei")),
+                    urwid.Text(('quality_2', " [2] Dificil")),
+                    urwid.Text(('quality_3', " [3] Facil")),
+                    urwid.Text(('success', " [4] Dominado")),
+                ]),
+            ]
+        else:
+            shortcuts_content = [
+                urwid.Text(" [SPACE] Revelar resposta    [s] Pular card    [ESC] Encerrar sessao", align='center'),
+            ]
+
+        shortcuts_pile = urwid.Pile(shortcuts_content)
+        shortcuts_box = urwid.LineBox(shortcuts_pile, title="Comandos")
+
+        # ═══════════════════════════════════════════════════════════════════
+        # LAYOUT FINAL: Empilhamento vertical
+        # ═══════════════════════════════════════════════════════════════════
+
+        main_pile = urwid.Pile([
+            ('pack', top_panel),
+            card_box,
+            ('pack', shortcuts_box),
+        ])
+
+        # Footer
+        if self.showing_answer:
+            footer_text = " [1]Errei [2]Dificil [3]Facil [s]Pular [ESC]Sair "
+        else:
+            footer_text = " [SPACE]Revelar [s]Pular [ESC]Sair "
+        footer = urwid.AttrMap(urwid.Text(footer_text, align='center'), 'footer')
+
+        frame = urwid.Frame(header=header, body=main_pile, footer=footer)
+        self._w = frame
+
+    def _end_session(self):
+        """Finaliza a sessao e salva estatisticas"""
+        duration = int((datetime.now() - self.session_start).total_seconds() / 60)
+        cards_reviewed = self.correct + self.incorrect
+
+        if cards_reviewed > 0:
+            self.app.state.add_session(
+                topic_id=self.topic_id,
+                duration_minutes=max(1, duration),
+                cards_reviewed=cards_reviewed,
+                correct=self.correct,
+                incorrect=self.incorrect
+            )
+            self.app.state.save_data()
+
+    def _show_summary(self):
+        """Mostra resumo da sessao com layout de paineis"""
+        duration = int((datetime.now() - self.session_start).total_seconds() / 60)
+        total = self.correct + self.incorrect
+        accuracy = (self.correct / total * 100) if total > 0 else 0
+
+        # Header
+        header_text = urwid.Text(" SESSAO CONCLUIDA ", align='center')
+        header = urwid.AttrMap(header_text, 'header')
+
+        # Painel de estatisticas
+        stats_content = [
+            urwid.Text(f" Tempo total: {duration} minutos"),
+            urwid.Divider('─'),
+            urwid.Text(f" Cards revisados: {total}"),
+            urwid.Text(f" Acertos: {self.correct}"),
+            urwid.Text(f" Erros: {self.incorrect}"),
+            urwid.Text(('success', f" Dominados: {getattr(self, 'mastered', 0)}")),
+            urwid.Divider('─'),
+            urwid.Text(f" Taxa de acerto: {accuracy:.0f}%"),
+        ]
+        stats_pile = urwid.Pile(stats_content)
+        stats_box = urwid.LineBox(stats_pile, title="Resultados")
+
+        # Painel de feedback
+        if total == 0:
+            feedback = "Nenhum card revisado."
+            feedback_attr = 'secondary'
+        elif accuracy >= 80:
+            feedback = "Excelente! Continue assim!"
+            feedback_attr = 'success'
+        elif accuracy >= 60:
+            feedback = "Bom trabalho! Pratique mais."
+            feedback_attr = 'warning'
+        else:
+            feedback = "Revise mais frequentemente."
+            feedback_attr = 'error'
+
+        feedback_content = [
+            urwid.Divider(),
+            urwid.Text((feedback_attr, feedback), align='center'),
+            urwid.Divider(),
+        ]
+        feedback_pile = urwid.Pile(feedback_content)
+        feedback_box = urwid.LineBox(feedback_pile, title="Feedback")
+
+        # Painel de explicacao do algoritmo (2x2 grid)
+        box1 = urwid.Pile([
+            urwid.Text(('quality_1', " [1] Errei")),
+            urwid.Text(" Card volta amanha."),
+            urwid.Text(" Contagem reinicia."),
+        ])
+        box2 = urwid.Pile([
+            urwid.Text(('quality_2', " [2] Dificil")),
+            urwid.Text(" Intervalo x1.2"),
+            urwid.Text(" Lembrou com esforco."),
+        ])
+        box3 = urwid.Pile([
+            urwid.Text(('quality_3', " [3] Facil")),
+            urwid.Text(" Intervalo x2.5"),
+            urwid.Text(" Lembrou facilmente."),
+        ])
+        box4 = urwid.Pile([
+            urwid.Text(('success', " [4] Dominado")),
+            urwid.Text(" Remove da fila."),
+            urwid.Text(" Dominou o card."),
+        ])
+
+        row1 = urwid.Columns([
+            ('weight', 50, urwid.LineBox(box1)),
+            ('weight', 50, urwid.LineBox(box2)),
+        ], dividechars=0)
+        row2 = urwid.Columns([
+            ('weight', 50, urwid.LineBox(box3)),
+            ('weight', 50, urwid.LineBox(box4)),
+        ], dividechars=0)
+
+        explain_pile = urwid.Pile([row1, row2])
+        explain_box = urwid.LineBox(explain_pile, title="Algoritmo SM-2")
+
+        # Layout
+        main_content = [
+            urwid.Divider(),
+            urwid.Text(('title', "Revisao Concluida!"), align='center'),
+            urwid.Divider(),
+        ]
+
+        summary_columns = urwid.Columns([
+            ('weight', 50, stats_box),
+            ('weight', 50, feedback_box),
+        ], dividechars=0)
+
+        main_content.append(summary_columns)
+        main_content.append(urwid.Divider())
+        main_content.append(explain_box)
+        main_content.append(urwid.Divider())
+        main_content.append(urwid.Text("Pressione ESC para voltar.", align='center'))
+        main_content.append(urwid.Divider())
+
+        listbox = urwid.ListBox(urwid.SimpleFocusListWalker(main_content))
+
+        footer_text = " [ESC] Voltar "
+        footer = urwid.AttrMap(urwid.Text(footer_text, align='center'), 'footer')
+
+        frame = urwid.Frame(header=header, body=listbox, footer=footer)
+        self._w = frame
+
+    def keypress(self, size, key):
+        if key in ('esc', 'q', 'Q'):
+            self._end_session()
+            self.app.pop_screen()
+            return None
+
+        # Se acabaram os cards ou mostrando resumo, ignorar outras teclas
+        if not self.cards or self.current_index >= len(self.cards):
+            return key
+
+        if key == ' ' and not self.showing_answer:
+            # Revelar resposta
+            self.showing_answer = True
+            self.build_ui()
+            return None
+
+        elif key in ('1', '2', '3') and self.showing_answer:
+            # Aplicar SM-2
+            quality = int(key)
+            card = self.cards[self.current_index]
+            self.app.state.apply_sm2_review(card['id'], quality)
+
+            if quality == 1:
+                self.incorrect += 1
+            else:
+                self.correct += 1
+
+            # Proximo card
+            self.current_index += 1
+            self.showing_answer = False
+
+            if self.current_index >= len(self.cards):
+                self._end_session()
+                self._show_summary()
+            else:
+                self.build_ui()
+            return None
+
+        elif key == '4' and self.showing_answer:
+            # Marcar como dominado
+            card = self.cards[self.current_index]
+            self.app.state.master_card(card['id'])
+            self.correct += 1
+            self.mastered = getattr(self, 'mastered', 0) + 1
+
+            # Proximo card
+            self.current_index += 1
+            self.showing_answer = False
+
+            if self.current_index >= len(self.cards):
+                self._end_session()
+                self._show_summary()
+            else:
+                self.build_ui()
+            return None
+
+        elif key == 's':
+            # Pular card
+            self.current_index += 1
+            self.showing_answer = False
+
+            if self.current_index >= len(self.cards):
+                self._end_session()
+                self._show_summary()
+            else:
+                self.build_ui()
+            return None
+
+        return key
+
+
+class NoteViewScreen(urwid.WidgetWrap):
+    """Tela de visualizacao de nota"""
+
+    def __init__(self, app, note_id):
+        self.app = app
+        self.note_id = note_id
+        self.note = app.state.get_note(note_id)
+
+        # Header
+        topic = app.state.get_topic(self.note['topic_id'])
+        topic_name = topic['name'] if topic else ""
+
+        header_text = urwid.Text(
+            f" NOTA  |  {topic_name}  |  {self.note['title']} ",
+            align='center'
+        )
+        header = urwid.AttrMap(header_text, 'header')
+
+        # Content
+        content = []
+        content.append(urwid.Divider())
+        content.append(urwid.Text(('title', self.note['title']), align='left'))
+        content.append(urwid.Divider())
+
+        # Metadata
+        created = datetime.fromisoformat(self.note['created']).strftime("%d/%m/%Y %H:%M")
+        updated = datetime.fromisoformat(self.note['updated']).strftime("%d/%m/%Y %H:%M")
+        content.append(urwid.Text(('secondary', f"Criada: {created}  |  Atualizada: {updated}")))
+
+        if self.note.get('tags'):
+            tags_str = ', '.join(self.note['tags'])
+            content.append(urwid.Text(('secondary', f"Tags: {tags_str}")))
+
+        content.append(urwid.Divider())
+        content.append(urwid.Text(('divider', "─" * 60)))
+        content.append(urwid.Divider())
+
+        # Conteudo (markdown basico)
+        for line in self.note.get('content', '').split('\n'):
+            if line.startswith('# '):
+                content.append(urwid.Text(('title', line[2:])))
+            elif line.startswith('## '):
+                content.append(urwid.Text(('subtitle', line[3:])))
+            elif line.startswith('- '):
+                content.append(urwid.Text(f"  * {line[2:]}"))
+            elif line.startswith('```'):
+                continue
+            else:
+                content.append(urwid.Text(line))
+
+        content.append(urwid.Divider())
+
+        listbox = urwid.ListBox(urwid.SimpleFocusListWalker(content))
+
+        # Footer
+        footer_text = " [ESC]Voltar [e]Editar "
+        footer = urwid.AttrMap(urwid.Text(footer_text, align='center'), 'footer')
+
+        frame = urwid.Frame(header=header, body=listbox, footer=footer)
+        super().__init__(frame)
+
+    def keypress(self, size, key):
+        if key == 'j':
+            key = 'down'
+        elif key == 'k':
+            key = 'up'
+
+        key = super().keypress(size, key)
+
+        if key == 'esc':
+            self.app.pop_screen()
+            return None
+
+        elif key == 'e':
+            screen = NoteEditScreen(self.app, self.note_id)
+            self.app.push_screen(screen)
+            return None
+
+        return key
+
+
+class NoteEditScreen(urwid.WidgetWrap):
+    """Tela de edicao de nota"""
+
+    def __init__(self, app, note_id):
+        self.app = app
+        self.note_id = note_id
+        self.note = app.state.get_note(note_id)
+        self.dirty = False
+
+        # Header
+        header_text = urwid.Text(" EDITAR NOTA  |  F2 para salvar  |  ESC para cancelar ", align='center')
+        header = urwid.AttrMap(header_text, 'header')
+
+        # Campos
+        self.title_edit = urwid.Edit("Titulo: ", edit_text=self.note['title'])
+        self.tags_edit = urwid.Edit("Tags: ", edit_text=', '.join(self.note.get('tags', [])))
+        self.content_edit = urwid.Edit("", edit_text=self.note.get('content', ''), multiline=True)
+
+        # Botao de salvar
+        save_btn = urwid.Button("[ Salvar (F2) ]", on_press=self._on_save_btn)
+
+        content = [
+            urwid.Divider(),
+            urwid.AttrMap(self.title_edit, None, focus_map='focus'),
+            urwid.AttrMap(self.tags_edit, None, focus_map='focus'),
+            urwid.Divider(),
+            urwid.Text(('secondary', "Conteudo (Markdown suportado):")),
+            urwid.AttrMap(self.content_edit, None, focus_map='focus'),
+            urwid.Divider(),
+            urwid.AttrMap(save_btn, 'button', focus_map='button_focus'),
+        ]
+
+        listbox = urwid.ListBox(urwid.SimpleFocusListWalker(content))
+
+        # Footer
+        footer_text = " [F2]Salvar [ESC]Cancelar [Tab]Proximo campo "
+        footer = urwid.AttrMap(urwid.Text(footer_text, align='center'), 'footer')
+
+        frame = urwid.Frame(header=header, body=listbox, footer=footer)
+        super().__init__(frame)
+
+    def _on_save_btn(self, button):
+        if self._save():
+            self.app.pop_screen()
+
+    def _save(self):
+        title = self.title_edit.get_edit_text().strip()
+        tags_str = self.tags_edit.get_edit_text().strip()
+        tags = [t.strip() for t in tags_str.split(',') if t.strip()] if tags_str else []
+        content = self.content_edit.get_edit_text()
+
+        if not title:
+            title = "Nota sem titulo"
+
+        self.app.state.update_note(self.note_id, title=title, tags=tags, content=content)
+        self.app.state.save_data()
+        self.dirty = False
+        return True
+
+    def keypress(self, size, key):
+        # Primeiro passa para os widgets filhos
+        key = super().keypress(size, key)
+
+        if key is None:
+            # Widget filho consumiu a tecla, marcar como dirty
+            self.dirty = True
+            return None
+
+        if key == 'esc':
+            if self.dirty:
+                def on_yes():
+                    self._save()
+                    self.app.close_overlay()
+                    self.app.pop_screen()
+
+                def on_no():
+                    self.app.close_overlay()
+                    self.app.pop_screen()
+
+                dialog = ConfirmDialog(
+                    "Salvar Alteracoes?",
+                    "Deseja salvar as alteracoes antes de sair?",
+                    on_yes=on_yes,
+                    on_no=on_no
+                )
+                self.app.show_overlay(dialog, width=('relative', 50), height=('relative', 30))
+            else:
+                self.app.pop_screen()
+            return None
+
+        elif key in ('f2', 'ctrl s'):
+            if self._save():
+                self.app.pop_screen()
+            return None
+
+        return key
+
+
+class SubGoalRow(urwid.WidgetWrap):
+    """Widget que exibe uma sub-meta"""
+
+    def __init__(self, goal_id, index, sub_goal):
+        self.goal_id = goal_id
+        self.index = index
+        self.sub_goal = sub_goal
+
+        done = sub_goal.get('done', False)
+        check = "[x]" if done else "[ ]"
+        text = sub_goal.get('text', '')
+
+        attr = 'row_done' if done else 'row'
+        line = f"      {check} {text}"
+
+        text_widget = urwid.Text(line)
+        attr_map = urwid.AttrMap(text_widget, attr, focus_map='row_focus')
+
+        super().__init__(attr_map)
+
+    def selectable(self):
+        return True
+
+    def keypress(self, size, key):
+        return key
+
+
+class GoalsScreen(urwid.WidgetWrap):
+    """Tela de metas - Layout com paineis"""
+
+    def __init__(self, app):
+        self.app = app
+        self.expanded_goals = set()  # IDs das metas expandidas
+
+        # Goals list walker (para navegacao)
+        self.list_walker = urwid.SimpleFocusListWalker([])
+        self.listbox = urwid.ListBox(self.list_walker)
+
+        # Build layout
+        self.body = self.build_layout()
+
+        # Footer
+        footer_text = " [ESC]Voltar [n]Nova [e]Editar [d]Deletar [+]Sub-meta [c]Concluir [Enter]Expandir [SPACE]Toggle "
+        self.footer = urwid.AttrMap(urwid.Text(footer_text, align='center'), 'footer')
+
+        # Header
+        header_text = urwid.Text(" METAS ", align='center')
+        self.header = urwid.AttrMap(header_text, 'header')
+
+        self.frame = urwid.Frame(
+            header=self.header,
+            body=self.body,
+            footer=self.footer
+        )
+
+        super().__init__(self.frame)
+
+    def build_layout(self):
+        """Constroi o layout de paineis das metas"""
+
+        # ═══════════════════════════════════════════════════════════════════
+        # PAINEL ESQUERDO: Resumo de Metas
+        # ═══════════════════════════════════════════════════════════════════
+
+        active_goals = [g for g in self.app.state.goals if not g.get('completed_at')]
+        completed_goals = [g for g in self.app.state.goals if g.get('completed_at')]
+
+        total_goals = len(self.app.state.goals)
+        total_active = len(active_goals)
+        total_completed = len(completed_goals)
+
+        # Calcular sub-metas
+        total_subgoals = sum(len(g.get('sub_goals', [])) for g in self.app.state.goals)
+        done_subgoals = sum(
+            sum(1 for sg in g.get('sub_goals', []) if sg.get('done'))
+            for g in self.app.state.goals
+        )
+
+        # Metas urgentes (deadline < 7 dias)
+        today = datetime.now().date()
+        urgent = 0
+        for g in active_goals:
+            if g.get('deadline'):
+                deadline = datetime.fromisoformat(g['deadline']).date()
+                if (deadline - today).days < 7:
+                    urgent += 1
+
+        # Progresso medio
+        if active_goals:
+            avg_progress = sum(g.get('progress', 0) for g in active_goals) / len(active_goals)
+        else:
+            avg_progress = 0
+
+        bar_len = 10
+        filled = int(avg_progress / 100 * bar_len)
+        bar = '█' * filled + '░' * (bar_len - filled)
+
+        stats_content = [
+            urwid.Text(f" Total: {total_goals} metas"),
+            urwid.Divider('─'),
+            urwid.Text(f" Ativas: {total_active}"),
+            urwid.Text(f" Concluidas: {total_completed}"),
+            urwid.Divider('─'),
+            urwid.Text(f" Sub-metas:"),
+            urwid.Text(f"   {done_subgoals}/{total_subgoals} feitas"),
+            urwid.Divider('─'),
+            urwid.Text(f" Urgentes: {urgent}"),
+            urwid.Divider('─'),
+            urwid.Text(f" Progresso medio:"),
+            urwid.Text(f" [{bar}] {avg_progress:.0f}%"),
+        ]
+
+        stats_pile = urwid.Pile(stats_content)
+        stats_filler = urwid.Filler(stats_pile, valign='top')
+        stats_box = urwid.LineBox(stats_filler, title="Resumo")
+
+        # ═══════════════════════════════════════════════════════════════════
+        # PAINEL CENTRAL: Lista de Metas
+        # ═══════════════════════════════════════════════════════════════════
+
+        self.list_walker.clear()
+
+        if active_goals:
+            self.list_walker.append(urwid.Text(('subtitle', " Metas Ativas")))
+            self.list_walker.append(urwid.Divider())
+            for goal in active_goals:
+                row = GoalRow(goal, expanded=goal['id'] in self.expanded_goals)
+                self.list_walker.append(row)
+                # Se expandida, mostrar sub-metas
+                if goal['id'] in self.expanded_goals and goal.get('sub_goals'):
+                    for i, sg in enumerate(goal['sub_goals']):
+                        sg_row = SubGoalRow(goal['id'], i, sg)
+                        self.list_walker.append(sg_row)
+
+        if completed_goals:
+            self.list_walker.append(urwid.Divider())
+            self.list_walker.append(urwid.Text(('subtitle', " Metas Concluidas")))
+            self.list_walker.append(urwid.Divider())
+            for goal in completed_goals[-5:]:  # Ultimas 5
+                row = GoalRow(goal, expanded=goal['id'] in self.expanded_goals)
+                self.list_walker.append(row)
+                if goal['id'] in self.expanded_goals and goal.get('sub_goals'):
+                    for i, sg in enumerate(goal['sub_goals']):
+                        sg_row = SubGoalRow(goal['id'], i, sg)
+                        self.list_walker.append(sg_row)
+
+        if not self.app.state.goals:
+            self.list_walker.append(urwid.Text(" Nenhuma meta."))
+            self.list_walker.append(urwid.Text(" Pressione [n]"))
+
+        goals_box = urwid.LineBox(self.listbox, title="Metas")
+
+        # ═══════════════════════════════════════════════════════════════════
+        # LAYOUT FINAL: 2 colunas
+        # ═══════════════════════════════════════════════════════════════════
+
+        columns = urwid.Columns([
+            ('weight', 25, stats_box),
+            ('weight', 75, goals_box),
+        ], dividechars=0)
+
+        return columns
+
+    def refresh_content(self, focus_goal_id=None, focus_subgoal_index=None):
+        """Reconstroi o layout completo"""
+        self.body = self.build_layout()
+        self.frame.body = self.body
+
+        # Tentar restaurar foco
+        if focus_goal_id is not None:
+            for i, widget in enumerate(self.list_walker):
+                if isinstance(widget, GoalRow) and widget.goal['id'] == focus_goal_id:
+                    if focus_subgoal_index is None:
+                        self.list_walker.set_focus(i)
+                        break
+                elif isinstance(widget, SubGoalRow) and widget.goal_id == focus_goal_id:
+                    if widget.index == focus_subgoal_index:
+                        self.list_walker.set_focus(i)
+                        break
+
+    def get_selected_goal(self):
+        focus_widget = self.listbox.focus
+        if isinstance(focus_widget, GoalRow):
+            return focus_widget.goal
+        elif isinstance(focus_widget, SubGoalRow):
+            return self.app.state.get_goal(focus_widget.goal_id)
+        return None
+
+    def get_selected_subgoal(self):
+        focus_widget = self.listbox.focus
+        if isinstance(focus_widget, SubGoalRow):
+            return focus_widget.goal_id, focus_widget.index
+        return None, None
+
+    def keypress(self, size, key):
+        if key == 'j':
+            key = 'down'
+        elif key == 'k':
+            key = 'up'
+
+        key = super().keypress(size, key)
+
+        if key == 'esc':
+            self.app.pop_screen()
+            return None
+
+        elif key == 'enter':
+            # Expandir/colapsar meta
+            goal = self.get_selected_goal()
+            if goal:
+                if goal['id'] in self.expanded_goals:
+                    self.expanded_goals.remove(goal['id'])
+                else:
+                    self.expanded_goals.add(goal['id'])
+                self.refresh_content(focus_goal_id=goal['id'])
+            return None
+
+        elif key == ' ':
+            # Toggle sub-meta
+            goal_id, sg_index = self.get_selected_subgoal()
+            if goal_id is not None and sg_index is not None:
+                self.app.state.toggle_sub_goal(goal_id, sg_index)
+                self.app.state.save_data()
+                self.refresh_content(focus_goal_id=goal_id, focus_subgoal_index=sg_index)
+            return None
+
+        elif key == 'n':
+            def on_close():
+                self.app.close_overlay()
+                self.refresh_content()
+
+            dialog = GoalDialog(self.app, on_close=on_close)
+            self.app.show_overlay(dialog, width=('relative', 60), height=('relative', 40))
+            return None
+
+        elif key == 'e':
+            goal = self.get_selected_goal()
+            if goal:
+                def on_close():
+                    self.app.close_overlay()
+                    self.refresh_content()
+
+                dialog = GoalDialog(self.app, goal=goal, on_close=on_close)
+                self.app.show_overlay(dialog, width=('relative', 60), height=('relative', 40))
+            return None
+
+        elif key == 'd':
+            goal = self.get_selected_goal()
+            if goal:
+                def on_yes():
+                    self.app.state.delete_goal(goal['id'])
+                    self.app.state.save_data()
+                    self.app.close_overlay()
+                    self.refresh_content()
+
+                def on_no():
+                    self.app.close_overlay()
+
+                dialog = ConfirmDialog(
+                    "Confirmar Exclusao",
+                    f"Deletar meta '{goal['title']}'?",
+                    on_yes=on_yes,
+                    on_no=on_no
+                )
+                self.app.show_overlay(dialog, width=('relative', 50), height=('relative', 30))
+            return None
+
+        elif key == '+':
+            goal = self.get_selected_goal()
+            if goal:
+                edit = urwid.Edit("Sub-meta: ")
+
+                def on_ok(button):
+                    text = edit.get_edit_text().strip()
+                    if text:
+                        self.app.state.add_sub_goal(goal['id'], text)
+                        self.app.state.save_data()
+                        # Auto-expandir a meta
+                        self.expanded_goals.add(goal['id'])
+                    self.app.close_overlay()
+                    self.refresh_content()
+
+                def on_cancel(button):
+                    self.app.close_overlay()
+
+                ok_btn = urwid.Button("Adicionar", on_press=on_ok)
+                cancel_btn = urwid.Button("Cancelar", on_press=on_cancel)
+
+                button_row = urwid.Columns([
+                    urwid.AttrMap(ok_btn, 'button', focus_map='button_focus'),
+                    urwid.AttrMap(cancel_btn, 'button', focus_map='button_focus'),
+                ], dividechars=2)
+
+                content = [
+                    urwid.Text(f"\nAdicionar sub-meta a '{goal['title']}'\n", align='center'),
+                    urwid.Divider(),
+                    urwid.AttrMap(edit, None, focus_map='focus'),
+                    urwid.Divider(),
+                    button_row,
+                ]
+
+                listbox = urwid.ListBox(urwid.SimpleFocusListWalker(content))
+                box = urwid.LineBox(listbox, title="Nova Sub-meta")
+                dialog = urwid.AttrMap(box, 'dialog_bg')
+
+                self.app.show_overlay(dialog, width=('relative', 60), height=('relative', 40))
+            return None
+
+        elif key == 'c':
+            goal = self.get_selected_goal()
+            if goal and not goal.get('completed_at'):
+                self.app.state.update_goal(goal['id'], completed_at=datetime.now().isoformat(), progress=100)
+                self.app.state.save_data()
+                self.refresh_content()
+            return None
+
+        return key
+
+
+class SessionLogScreen(urwid.WidgetWrap):
+    """Tela de log de sessoes - Layout com paineis"""
+
+    def __init__(self, app):
+        self.app = app
+        self.current_date = datetime.now().date()
+        self.current_year = self.current_date.year
+        self.current_month = self.current_date.month
+
+        self.build_ui()
+
+    def build_ui(self):
+        # Header
+        header_text = urwid.Text(
+            f" LOG DE SESSOES  |  {self.current_date.strftime('%d/%m/%Y')} ",
+            align='center'
+        )
+        header = urwid.AttrMap(header_text, 'header')
+
+        sessions_by_day = self.app.state.get_sessions_by_day()
+
+        # ═══════════════════════════════════════════════════════════════════
+        # PAINEL ESQUERDO: Calendario Heatmap
+        # ═══════════════════════════════════════════════════════════════════
+
+        heatmap_lines = draw_heatmap_calendar(sessions_by_day, self.current_year, self.current_month, self.current_date)
+        calendar_content = [urwid.Text(line) for line in heatmap_lines]
+        calendar_pile = urwid.Pile(calendar_content)
+        calendar_filler = urwid.Filler(calendar_pile, valign='top')
+        calendar_box = urwid.LineBox(calendar_filler, title="Calendario")
+
+        # ═══════════════════════════════════════════════════════════════════
+        # PAINEL DIREITO: Sessoes do Dia + Stats do Mes
+        # ═══════════════════════════════════════════════════════════════════
+
+        # Sessoes do dia selecionado
+        day_sessions = self.app.state.get_sessions_by_date(self.current_date)
+        sessions_content = []
+
+        if day_sessions:
+            day_total = sum(s.get('duration_minutes', 0) for s in day_sessions)
+            day_cards = sum(s.get('cards_reviewed', 0) for s in day_sessions)
+            sessions_content.append(urwid.Text(f" Total: {day_total}min | {day_cards} cards"))
+            sessions_content.append(urwid.Divider('─'))
+
+            for session in day_sessions:
+                topic = self.app.state.get_topic(session.get('topic_id'))
+                topic_name = topic['name'][:15] if topic else "Geral"
+                topic_icon = topic.get('icon', '') if topic else ''
+                started = datetime.fromisoformat(session['started']).strftime("%H:%M")
+                duration = session.get('duration_minutes', 0)
+                cards = session.get('cards_reviewed', 0)
+                correct = session.get('correct', 0)
+                accuracy = (correct / cards * 100) if cards > 0 else 0
+
+                sessions_content.append(urwid.Text(f" {started} {topic_icon} {topic_name}"))
+                sessions_content.append(urwid.Text(f"   {duration}min | {cards}c | {accuracy:.0f}%"))
+                sessions_content.append(urwid.Divider())
+        else:
+            sessions_content.append(urwid.Text(" Nenhuma sessao"))
+            sessions_content.append(urwid.Text(" neste dia."))
+
+        sessions_pile = urwid.Pile(sessions_content)
+        sessions_listbox = urwid.ListBox(urwid.SimpleFocusListWalker(sessions_content))
+        sessions_box = urwid.LineBox(sessions_listbox, title=f"Sessoes {self.current_date.strftime('%d/%m')}")
+
+        # Stats do mes
+        month_minutes = sum(
+            s.get('duration_minutes', 0) for s in self.app.state.sessions
+            if datetime.fromisoformat(s['started']).month == self.current_month
+            and datetime.fromisoformat(s['started']).year == self.current_year
+        )
+        month_sessions = len([
+            s for s in self.app.state.sessions
+            if datetime.fromisoformat(s['started']).month == self.current_month
+            and datetime.fromisoformat(s['started']).year == self.current_year
+        ])
+        month_cards = sum(
+            s.get('cards_reviewed', 0) for s in self.app.state.sessions
+            if datetime.fromisoformat(s['started']).month == self.current_month
+            and datetime.fromisoformat(s['started']).year == self.current_year
+        )
+        active_days = len(set(
+            datetime.fromisoformat(s['started']).date()
+            for s in self.app.state.sessions
+            if datetime.fromisoformat(s['started']).month == self.current_month
+            and datetime.fromisoformat(s['started']).year == self.current_year
+        ))
+
+        month_hours = month_minutes // 60
+        month_mins = month_minutes % 60
+        avg_per_day = (month_minutes / active_days) if active_days > 0 else 0
+
+        month_names = {
+            1: "Jan", 2: "Fev", 3: "Mar", 4: "Abr",
+            5: "Mai", 6: "Jun", 7: "Jul", 8: "Ago",
+            9: "Set", 10: "Out", 11: "Nov", 12: "Dez"
+        }
+
+        month_content = [
+            urwid.Text(f" Tempo: {month_hours}h{month_mins:02d}m"),
+            urwid.Text(f" Sessoes: {month_sessions}"),
+            urwid.Text(f" Cards: {month_cards}"),
+            urwid.Divider('─'),
+            urwid.Text(f" Dias ativos: {active_days}"),
+            urwid.Text(f" Media/dia: {avg_per_day:.0f}min"),
+        ]
+
+        month_pile = urwid.Pile(month_content)
+        month_filler = urwid.Filler(month_pile, valign='top')
+        month_box = urwid.LineBox(month_filler, title=f"{month_names[self.current_month]} {self.current_year}")
+
+        # Painel direito: Sessoes + Stats empilhados
+        right_panel = urwid.Pile([
+            sessions_box,
+            ('pack', month_box),
+        ])
+
+        # ═══════════════════════════════════════════════════════════════════
+        # LAYOUT FINAL: 2 colunas
+        # ═══════════════════════════════════════════════════════════════════
+
+        columns = urwid.Columns([
+            ('weight', 60, calendar_box),
+            ('weight', 40, right_panel),
+        ], dividechars=0)
+
+        # Footer
+        footer_text = " [ESC]Voltar [h/l]Dia [H/L]Mes [t]Timer "
+        footer = urwid.AttrMap(urwid.Text(footer_text, align='center'), 'footer')
+
+        frame = urwid.Frame(header=header, body=columns, footer=footer)
+        self._w = frame
+
+    def keypress(self, size, key):
+        if key == 'j':
+            key = 'down'
+        elif key == 'k':
+            key = 'up'
+
+        key = super().keypress(size, key)
+
+        if key == 'esc':
+            self.app.pop_screen()
+            return None
+
+        elif key == 'h':
+            self.current_date -= timedelta(days=1)
+            self.build_ui()
+            return None
+
+        elif key == 'l':
+            self.current_date += timedelta(days=1)
+            self.build_ui()
+            return None
+
+        elif key == 'H':
+            # Mes anterior
+            if self.current_month == 1:
+                self.current_month = 12
+                self.current_year -= 1
+            else:
+                self.current_month -= 1
+            self.current_date = datetime(self.current_year, self.current_month, 1).date()
+            self.build_ui()
+            return None
+
+        elif key == 'L':
+            # Proximo mes
+            if self.current_month == 12:
+                self.current_month = 1
+                self.current_year += 1
+            else:
+                self.current_month += 1
+            self.current_date = datetime(self.current_year, self.current_month, 1).date()
+            self.build_ui()
+            return None
+
+        elif key == 't':
+            def on_close():
+                self.app.close_overlay()
+                self.build_ui()
+
+            dialog = TimerDialog(self.app, on_close=on_close)
+            self.app.show_overlay(dialog, width=('relative', 50), height=('relative', 55))
+            return None
+
+        return key
+
+
+class StudyMetricsScreen(urwid.WidgetWrap):
+    """Tela de metricas de estudo - Layout com paineis em grid"""
+
+    def __init__(self, app, days=30):
+        self.app = app
+        self.days = days
+
+        self.build_ui()
+
+    def build_ui(self):
+        # Header
+        header_text = urwid.Text(" METRICAS DE ESTUDO ", align='center')
+        header = urwid.AttrMap(header_text, 'header')
+
+        metrics = self.app.state.get_study_metrics(self.days)
+        sessions_by_day = self.app.state.get_sessions_by_day()
+
+        # ═══════════════════════════════════════════════════════════════════
+        # LINHA 1: Stats principais (4 paineis lado a lado)
+        # ═══════════════════════════════════════════════════════════════════
+
+        # Painel 1: Tempo Total
+        hours = metrics['total_minutes'] // 60
+        mins = metrics['total_minutes'] % 60
+        time_content = [
+            urwid.Text(('title', f"{hours}h {mins:02d}m"), align='center'),
+            urwid.Divider(),
+            urwid.Text(f" {metrics['total_minutes']} minutos", align='center'),
+        ]
+        time_pile = urwid.Pile(time_content)
+        time_filler = urwid.Filler(time_pile, valign='middle')
+        time_box = urwid.LineBox(time_filler, title="Tempo Total")
+
+        # Painel 2: Cards Revisados
+        cards_content = [
+            urwid.Text(('title', f"{metrics['total_cards']}"), align='center'),
+            urwid.Divider(),
+            urwid.Text(f" cards revisados", align='center'),
+        ]
+        cards_pile = urwid.Pile(cards_content)
+        cards_filler = urwid.Filler(cards_pile, valign='middle')
+        cards_box = urwid.LineBox(cards_filler, title="Cards")
+
+        # Painel 3: Taxa de Acerto
+        accuracy = metrics['accuracy']
+        if accuracy >= 80:
+            acc_attr = 'success'
+        elif accuracy >= 60:
+            acc_attr = 'warning'
+        else:
+            acc_attr = 'error'
+        bar_len = 10
+        filled = int(accuracy / 100 * bar_len)
+        bar = '█' * filled + '░' * (bar_len - filled)
+        accuracy_content = [
+            urwid.Text((acc_attr, f"{accuracy:.0f}%"), align='center'),
+            urwid.Divider(),
+            urwid.Text(f" [{bar}]", align='center'),
+        ]
+        accuracy_pile = urwid.Pile(accuracy_content)
+        accuracy_filler = urwid.Filler(accuracy_pile, valign='middle')
+        accuracy_box = urwid.LineBox(accuracy_filler, title="Precisao")
+
+        # Painel 4: Streak
+        streak = metrics['streak']
+        streak_icon = "🔥" if streak >= 7 else "⚡" if streak >= 3 else "·"
+        streak_content = [
+            urwid.Text(('title', f"{streak_icon} {streak}"), align='center'),
+            urwid.Divider(),
+            urwid.Text(" dias seguidos", align='center'),
+        ]
+        streak_pile = urwid.Pile(streak_content)
+        streak_filler = urwid.Filler(streak_pile, valign='middle')
+        streak_box = urwid.LineBox(streak_filler, title="Streak")
+
+        top_row = urwid.Columns([
+            ('weight', 25, time_box),
+            ('weight', 25, cards_box),
+            ('weight', 25, accuracy_box),
+            ('weight', 25, streak_box),
+        ], dividechars=0)
+
+        # ═══════════════════════════════════════════════════════════════════
+        # LINHA 2: Grafico de Atividade (timeline)
+        # ═══════════════════════════════════════════════════════════════════
+
+        timeline = draw_timeline_chart(sessions_by_day, days=min(14, self.days))
+        timeline_content = [urwid.Text(timeline)]
+        timeline_pile = urwid.Pile(timeline_content)
+        timeline_filler = urwid.Filler(timeline_pile, valign='top')
+        timeline_box = urwid.LineBox(timeline_filler, title=f"Atividade (ultimos {min(14, self.days)} dias)")
+
+        # ═══════════════════════════════════════════════════════════════════
+        # LINHA 3: Por Topico + Insights + Sessoes
+        # ═══════════════════════════════════════════════════════════════════
+
+        # Painel: Cards por Topico
+        topic_content = []
+        for topic in self.app.state.topics[:8]:  # Limitar a 8 topicos
+            cards = self.app.state.get_cards_by_topic(topic['id'])
+            mastered = len([c for c in cards if c.get('repetitions', 0) >= 5])
+            due = len(self.app.state.get_cards_due(topic['id']))
+            if cards:
+                progress = int(mastered / len(cards) * 100) if len(cards) > 0 else 0
+                bar_len = 8
+                filled = int(progress / 100 * bar_len)
+                bar = '█' * filled + '░' * (bar_len - filled)
+                name = topic['name'][:12]
+                if len(topic['name']) > 12:
+                    name += ".."
+                topic_content.append(urwid.Text(f" {topic.get('icon', '')} {name}"))
+                topic_content.append(urwid.Text(f"   [{bar}] {len(cards)}c {due}p"))
+
+        if not topic_content:
+            topic_content.append(urwid.Text(" Nenhum topico"))
+
+        topic_listbox = urwid.ListBox(urwid.SimpleFocusListWalker(topic_content))
+        topic_box = urwid.LineBox(topic_listbox, title="Topicos")
+
+        # Painel: Insights
+        insights_content = []
+        due_count = len(self.app.state.get_cards_due())
+
+        if accuracy >= 80:
+            insights_content.append(urwid.Text(('success', " Excelente precisao!")))
+        elif accuracy < 50 and metrics['total_cards'] > 10:
+            insights_content.append(urwid.Text(('warning', " Precisao baixa")))
+            insights_content.append(urwid.Text(" Revise mais"))
+
+        if streak >= 7:
+            insights_content.append(urwid.Text(('success', f" {streak}d de streak!")))
+        elif streak == 0:
+            insights_content.append(urwid.Text(('secondary', " Comece seu streak")))
+
+        if due_count > 20:
+            insights_content.append(urwid.Text(('warning', f" {due_count} pendentes")))
+        elif due_count > 0:
+            insights_content.append(urwid.Text(f" {due_count} para revisar"))
+        else:
+            insights_content.append(urwid.Text(('success', " Tudo em dia!")))
+
+        insights_content.append(urwid.Divider('─'))
+        insights_content.append(urwid.Text(f" Sessoes: {metrics['sessions_count']}"))
+
+        avg_session = metrics['total_minutes'] / metrics['sessions_count'] if metrics['sessions_count'] > 0 else 0
+        insights_content.append(urwid.Text(f" Media: {avg_session:.0f}min"))
+
+        insights_pile = urwid.Pile(insights_content)
+        insights_filler = urwid.Filler(insights_pile, valign='top')
+        insights_box = urwid.LineBox(insights_filler, title="Insights")
+
+        # Painel: Ultimas Sessoes
+        recent_sessions = sorted(self.app.state.sessions, key=lambda s: s['started'], reverse=True)[:5]
+        sessions_content = []
+        for session in recent_sessions:
+            topic = self.app.state.get_topic(session.get('topic_id'))
+            topic_icon = topic.get('icon', '') if topic else ''
+            topic_name = topic['name'][:10] if topic else "Geral"
+            started = datetime.fromisoformat(session['started'])
+            date_str = started.strftime("%d/%m")
+            duration = session.get('duration_minutes', 0)
+            cards = session.get('cards_reviewed', 0)
+            sessions_content.append(urwid.Text(f" {date_str} {topic_icon} {topic_name}"))
+            sessions_content.append(urwid.Text(f"   {duration}m | {cards}c"))
+
+        if not sessions_content:
+            sessions_content.append(urwid.Text(" Sem sessoes"))
+
+        sessions_listbox = urwid.ListBox(urwid.SimpleFocusListWalker(sessions_content))
+        sessions_box = urwid.LineBox(sessions_listbox, title="Recentes")
+
+        bottom_row = urwid.Columns([
+            ('weight', 40, topic_box),
+            ('weight', 30, insights_box),
+            ('weight', 30, sessions_box),
+        ], dividechars=0)
+
+        # ═══════════════════════════════════════════════════════════════════
+        # LAYOUT FINAL: Empilhamento vertical
+        # ═══════════════════════════════════════════════════════════════════
+
+        # Tabs de periodo
+        periods = [("7d", 7), ("30d", 30), ("90d", 90)]
+        period_items = []
+        for label, d in periods:
+            if d == self.days:
+                period_items.append(urwid.Text(('focus', f" [{label}] ")))
+            else:
+                period_items.append(urwid.Text(f"  {label}  "))
+
+        period_row = urwid.Columns(period_items, dividechars=0)
+        period_centered = urwid.Padding(period_row, align='center', width=('relative', 30))
+
+        main_pile = urwid.Pile([
+            ('pack', period_centered),
+            ('pack', urwid.Divider()),
+            (5, top_row),
+            (14, timeline_box),
+            bottom_row,
+        ])
+
+        # Footer
+        footer_text = " [7]7 dias [3]30 dias [9]90 dias [ESC]Voltar "
+        footer = urwid.AttrMap(urwid.Text(footer_text, align='center'), 'footer')
+
+        frame = urwid.Frame(header=header, body=main_pile, footer=footer)
+        self._w = frame
+
+    def keypress(self, size, key):
+        if key == 'j':
+            key = 'down'
+        elif key == 'k':
+            key = 'up'
+
+        key = super().keypress(size, key)
+
+        if key == 'esc':
+            self.app.pop_screen()
+            return None
+
+        elif key == '7':
+            self.days = 7
+            self.build_ui()
+            return None
+
+        elif key == '3':
+            self.days = 30
+            self.build_ui()
+            return None
+
+        elif key == '9':
+            self.days = 90
+            self.build_ui()
+            return None
+
+        return key
+
+
+class HelpScreen(urwid.WidgetWrap):
+    """Tela de ajuda"""
+
+    def __init__(self, app):
+        self.app = app
+
+        # Header
+        header_text = urwid.Text(" AJUDA  |  QuickStudy ", align='center')
+        header = urwid.AttrMap(header_text, 'header')
+
+        # Content
+        content = []
+        content.append(urwid.Divider())
+
+        content.append(urwid.Text(('title', " QuickStudy - Sistema de Estudos com Spaced Repetition")))
+        content.append(urwid.Divider())
+
+        sections = [
+            ("Dashboard", [
+                ("n", "Novo topico"),
+                ("Enter", "Abrir topico selecionado"),
+                ("s", "Iniciar estudo do topico"),
+                ("r", "Revisao rapida (todos cards pendentes)"),
+                ("m", "Metricas"),
+                ("g", "Metas"),
+                ("l", "Log de sessoes"),
+                ("t", "Timer de estudo"),
+                ("d", "Deletar topico"),
+                ("T", "Voltar para QuickTasks"),
+                ("q", "Sair"),
+            ]),
+            ("Tela de Topico", [
+                ("Tab", "Alternar abas (Cards/Notas/Recursos)"),
+                ("a", "Adicionar item"),
+                ("e", "Editar item"),
+                ("d", "Deletar item"),
+                ("s", "Estudar cards (aba Cards)"),
+                ("Enter", "Ver nota (aba Notas)"),
+                ("ESC", "Voltar"),
+            ]),
+            ("Revisao de Cards", [
+                ("SPACE", "Revelar resposta"),
+                ("1", "Errei (revisar amanha)"),
+                ("2", "Dificil (intervalo x1.2)"),
+                ("3", "Facil (intervalo x2.5)"),
+                ("4", "Dominado (remove da fila)"),
+                ("s", "Pular card"),
+                ("ESC", "Encerrar sessao"),
+            ]),
+            ("Navegacao Geral", [
+                ("j/k", "Mover para baixo/cima"),
+                ("ESC", "Voltar"),
+                ("?", "Ajuda"),
+            ]),
+        ]
+
+        for section_name, shortcuts in sections:
+            content.append(urwid.Text(('subtitle', f" {section_name}")))
+            content.append(urwid.Divider())
+            for key, desc in shortcuts:
+                content.append(urwid.Text(f"   [{key}] {desc}"))
+            content.append(urwid.Divider())
+
+        content.append(urwid.Text(('secondary', " Algoritmo SM-2:")))
+        content.append(urwid.Text("   O sistema usa spaced repetition para otimizar a memoria."))
+        content.append(urwid.Text("   Cards mais dificeis aparecem mais frequentemente."))
+        content.append(urwid.Text("   Cards faceis tem intervalos cada vez maiores."))
+
+        content.append(urwid.Divider())
+
+        listbox = urwid.ListBox(urwid.SimpleFocusListWalker(content))
+
+        # Footer
+        footer_text = " [ESC]Voltar "
+        footer = urwid.AttrMap(urwid.Text(footer_text, align='center'), 'footer')
+
+        frame = urwid.Frame(header=header, body=listbox, footer=footer)
+        super().__init__(frame)
+
+    def keypress(self, size, key):
+        if key == 'j':
+            key = 'down'
+        elif key == 'k':
+            key = 'up'
+
+        key = super().keypress(size, key)
+
+        if key == 'esc':
+            self.app.pop_screen()
+            return None
+
+        return key
+
+
+# ============================================================================
+# QuickStudyApp - Aplicacao principal
+# ============================================================================
+
+class QuickStudyApp:
+    """Aplicacao TUI principal"""
+
+    def __init__(self):
+        self.state = StudyState()
+        self.state.load_data()
+
+        self.palette = create_palette()
+
+        self.main_screen = StudyDashboardScreen(self)
+        self.main_widget = urwid.WidgetPlaceholder(self.main_screen)
+        self.screen_stack = [self.main_screen]
+
+        self.loop = None
+
+    def run(self):
+        screen = urwid.raw_display.Screen()
+        screen.set_terminal_properties(colors=256)
+
+        self.loop = urwid.MainLoop(
+            self.main_widget,
+            palette=self.palette,
+            screen=screen,
+            unhandled_input=self.unhandled_input,
+            handle_mouse=False
+        )
+
+        try:
+            self.loop.run()
+        except KeyboardInterrupt:
+            self.quit()
+
+    def unhandled_input(self, key):
+        if key in ('q', 'Q'):
+            self.quit()
+        elif key in ('f1', '?'):
+            help_screen = HelpScreen(self)
+            self.push_screen(help_screen)
+
+    def push_screen(self, screen):
+        self.screen_stack.append(screen)
+        self.main_widget.original_widget = screen
+
+    def pop_screen(self):
+        if len(self.screen_stack) > 1:
+            self.screen_stack.pop()
+            self.main_widget.original_widget = self.screen_stack[-1]
+
+            if isinstance(self.screen_stack[-1], StudyDashboardScreen):
+                self.screen_stack[-1].refresh_content()
+
+    def show_overlay(self, dialog_widget, width=('relative', 50), height=('relative', 50)):
+        current_screen = self.screen_stack[-1]
+
+        overlay = urwid.Overlay(
+            dialog_widget,
+            current_screen,
+            align='center', width=width,
+            valign='middle', height=height
+        )
+
+        self.main_widget.original_widget = overlay
+
+    def close_overlay(self):
+        self.main_widget.original_widget = self.screen_stack[-1]
+
+    def quit(self):
+        if self.state.dirty:
+            self.state.save_data()
+
+        raise urwid.ExitMainLoop()
+
+
+# ============================================================================
+# Entry point
+# ============================================================================
+
+if __name__ == '__main__':
+    app = QuickStudyApp()
+    app.run()

@@ -1,0 +1,234 @@
+#!/usr/bin/env python3
+"""
+QuickNotes (qn) - Ferramenta rápida para anotações integrada ao QuickStudy.
+Uso:
+  qn "Minha nota"         -> Adiciona nota ao Inbox
+  qn -t Python "Nota..."  -> Adiciona nota ao tópico Python
+  qn                      -> Abre TUI para visualizar notas
+"""
+
+import argparse
+import json
+import sys
+import os
+from datetime import datetime
+from pathlib import Path
+
+try:
+    import urwid
+except ImportError:
+    print("❌ urwid não instalado. Instale com: sudo pacman -S python-urwid")
+    sys.exit(1)
+
+# Caminho dos dados (mesmo do QuickStudy)
+QS_DATA = Path.home() / ".local/share/quickstudy/data.json"
+
+# ============================================================================
+# Data Management (Based on QT/QS Skill)
+# ============================================================================
+
+def load_data():
+    if not QS_DATA.exists():
+        return {"topics": [], "notes": []}
+    try:
+        with open(QS_DATA, 'r') as f:
+            return json.load(f)
+    except:
+        return {"topics": [], "notes": []}
+
+def save_data(data):
+    QS_DATA.parent.mkdir(parents=True, exist_ok=True)
+    with open(QS_DATA, 'w') as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+def get_next_id(list_obj):
+    if not list_obj: return 1
+    return max(item['id'] for item in list_obj) + 1
+
+def ensure_topic(data, name):
+    topic = next((t for t in data.get('topics', []) if t['name'].lower() == name.lower()), None)
+    if not topic:
+        # Create topic
+        if 'topics' not in data: data['topics'] = []
+        topic = {
+            "id": get_next_id(data['topics']),
+            "name": name,
+            "icon": "📝",
+            "color": "#ffffff",
+            "created": datetime.now().isoformat()
+        }
+        data['topics'].append(topic)
+    return topic
+
+def add_note(content, topic_name="Inbox", title=None, tags=None):
+    data = load_data()
+    topic = ensure_topic(data, topic_name)
+    
+    if 'notes' not in data: data['notes'] = []
+    
+    # Extract title from first line of content if not provided
+    if not title:
+        lines = content.strip().split('\n')
+        title = lines[0][:50] + "..." if len(lines[0]) > 50 else lines[0]
+    
+    new_note = {
+        "id": get_next_id(data['notes']),
+        "topic_id": topic['id'],
+        "title": title,
+        "content": content,
+        "tags": tags or [],
+        "created": datetime.now().isoformat(),
+        "updated": datetime.now().isoformat()
+    }
+    data['notes'].append(new_note)
+    save_data(data)
+    
+    tags_str = f" [Tags: {', '.join(tags)}]" if tags else ""
+    print(f"✅ Nota adicionada em '{topic['name']}': {title}{tags_str}")
+
+# ============================================================================
+# TUI Implementation
+# ============================================================================
+
+class NoteWidget(urwid.WidgetWrap):
+    def __init__(self, note, topic_name):
+        self.note = note
+        
+        # Format date
+        try:
+            dt = datetime.fromisoformat(note['created'])
+            date_str = dt.strftime("%d/%m %H:%M")
+        except:
+            date_str = ""
+
+        # Content preview (remove newlines for list view)
+        preview = note.get('content', '').replace('\n', ' ')
+        if len(preview) > 60:
+            preview = preview[:57] + "..."
+
+        tags = note.get('tags', [])
+        tags_str = f" [{', '.join(tags)}]" if tags else ""
+
+        text = f"{date_str} | [{topic_name}] {preview}{tags_str}"
+        
+        attr = 'body'
+        self.w = urwid.AttrMap(urwid.Text(text), attr, 'focus')
+
+    def selectable(self):
+        return True
+
+    def keypress(self, size, key):
+        return key
+
+class NotesTUI:
+    def __init__(self):
+        self.data = load_data()
+        self.notes = self.data.get('notes', [])
+        self.topics = {t['id']: t['name'] for t in self.data.get('topics', [])}
+        
+        self.palette = [
+            ('header', 'black', 'dark cyan'),
+            ('body', 'white', 'black'),
+            ('focus', 'black', 'dark cyan'),
+            ('footer', 'dark gray', 'black'),
+            ('tag', 'dark blue', 'white'),
+        ]
+        
+        self.main_loop = None
+        self.viewing_note = None
+
+    def build_list(self):
+        items = []
+        # Sort by date desc
+        sorted_notes = sorted(self.notes, key=lambda n: n['created'], reverse=True)
+        
+        for note in sorted_notes:
+            t_name = self.topics.get(note['topic_id'], "?")
+            tags = note.get('tags', [])
+            tags_suffix = f" 🏷️ {','.join(tags)}" if tags else ""
+            btn = urwid.Button(f"[{t_name}] {note.get('title', 'Sem título')}{tags_suffix}", on_press=self.on_note_select)
+            btn.note_data = note
+            items.append(urwid.AttrMap(btn, 'body', 'focus'))
+            
+        return urwid.ListBox(urwid.SimpleFocusListWalker(items))
+
+    def on_note_select(self, button):
+        note = button.note_data
+        self.show_note_details(note)
+
+    def show_note_details(self, note):
+        t_name = self.topics.get(note['topic_id'], "?")
+        tags_str = ", ".join(note.get('tags', []))
+        
+        content = [
+            urwid.Text(('header', f" Tópico: {t_name} ")),
+            urwid.Divider(),
+            urwid.Text(('header', f" {note.get('title')} ")),
+        ]
+        
+        if tags_str:
+            content.append(urwid.Text(('tag', f" Tags: {tags_str} ")))
+            
+        content.extend([
+            urwid.Divider(),
+            urwid.Text(note.get('content', '')),
+            urwid.Divider(),
+            urwid.Text(('footer', "Pressione ESC para voltar"))
+        ])
+        
+        listbox = urwid.ListBox(urwid.SimpleFocusListWalker(content))
+        self.main_loop.widget = urwid.Padding(listbox, left=2, right=2)
+        self.viewing_note = True
+
+    def handle_input(self, key):
+        if key in ('q', 'Q'):
+            raise urwid.ExitMainLoop()
+        if key == 'esc' and self.viewing_note:
+            self.refresh_main_list()
+            self.viewing_note = False
+            return
+
+    def refresh_main_list(self):
+        header = urwid.AttrMap(urwid.Text(" QuickNotes (qn) - ESC/q: Sair"), 'header')
+        listbox = self.build_list()
+        view = urwid.Frame(listbox, header=header)
+        self.main_loop.widget = view
+
+    def run(self):
+        if not self.notes:
+            print("Nenhuma nota encontrada. Use 'qn \"mensagem\"' para criar uma.")
+            return
+
+        header = urwid.AttrMap(urwid.Text(" QuickNotes (qn) - ESC/q: Sair"), 'header')
+        listbox = self.build_list()
+        view = urwid.Frame(listbox, header=header)
+        
+        self.main_loop = urwid.MainLoop(view, self.palette, unhandled_input=self.handle_input)
+        self.main_loop.run()
+
+# ============================================================================
+# Main
+# ============================================================================
+
+def main():
+    parser = argparse.ArgumentParser(description="QuickNotes - CLI/TUI para anotações")
+    parser.add_argument("content", nargs="?", help="Conteúdo da nota (se omitido, abre TUI)")
+    parser.add_argument("-t", "--topic", default="Inbox", help="Tópico (padrão: Inbox)")
+    parser.add_argument("-T", "--title", help="Título explícito da nota")
+    parser.add_argument("--tags", help="Lista de tags separadas por vírgula (ex: 'python,cli')")
+    
+    args = parser.parse_args()
+    
+    if args.content:
+        # CLI Mode
+        tags_list = [t.strip() for t in args.tags.split(',')] if args.tags else []
+        add_note(args.content, args.topic, args.title, tags_list)
+    else:
+        # TUI Mode
+        try:
+            NotesTUI().run()
+        except KeyboardInterrupt:
+            pass
+
+if __name__ == "__main__":
+    main()

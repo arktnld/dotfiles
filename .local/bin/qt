@@ -1,0 +1,4254 @@
+#!/usr/bin/env python3
+"""
+Quick Tasks - TUI moderno para tracking rápido de tarefas
+Requer: sudo pacman -S python-urwid
+"""
+
+import json
+import os
+import subprocess
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+import sys
+
+try:
+    import urwid
+except ImportError:
+    print("❌ urwid não está instalado. Instale com:")
+    print("sudo pacman -S python-urwid")
+    sys.exit(1)
+
+try:
+    import plotext as plt
+except ImportError:
+    print("❌ plotext não está instalado. Instale com:")
+    print("pip install --user --break-system-packages plotext")
+    sys.exit(1)
+
+# Arquivo de dados
+DATA_FILE = Path.home() / ".local/share/quicktasks/tasks.json"
+CONFIG_FILE = Path.home() / ".local/share/quicktasks/config.json"
+
+# Emojis e cores para status
+STATUS = {
+    "todo": {"emoji": "⏳", "color": "#f3e430", "label": "A Fazer"},
+    "doing": {"emoji": "🔄", "color": "#4fb8cc", "label": "Fazendo"},
+    "paused": {"emoji": "⏸️", "color": "#ff9800", "label": "Pausado"},  # NOVO
+    "done": {"emoji": "✅", "color": "#5fd7a7", "label": "Concluído"},
+    "finished": {"emoji": "🎉", "color": "#10a778", "label": "Finalizado"},
+    "blocked": {"emoji": "🚫", "color": "#e32791", "label": "Bloqueado"}
+}
+
+PRIORITY = {
+    "low": {"emoji": "🟢", "color": "#5fd7a7"},
+    "medium": {"emoji": "🟡", "color": "#f3e430"},
+    "high": {"emoji": "🔴", "color": "#e32791"}
+}
+
+CATEGORIES = {
+    "dev": {"emoji": "💻", "label": "Desenvolvimento"},
+    "bug": {"emoji": "🐛", "label": "Bug"},
+    "feature": {"emoji": "✨", "label": "Feature"},
+    "docs": {"emoji": "📝", "label": "Documentação"},
+    "meeting": {"emoji": "🤝", "label": "Reunião"},
+    "review": {"emoji": "👀", "label": "Review"},
+    "infra": {"emoji": "🔧", "label": "Infraestrutura"},
+    "support": {"emoji": "🆘", "label": "Suporte"},
+    "other": {"emoji": "📦", "label": "Outros"}
+}
+
+
+# ============================================================================
+# Cron Notification Helpers
+# ============================================================================
+
+def get_event_cron_id(event):
+    """Gera ID único para identificar crons de um evento"""
+    event_id = event.get('id', '')
+    # Usar só os primeiros 12 chars do ID
+    return f"QT_EVENT_{event_id[:12]}"
+
+def get_current_crontab():
+    """Retorna o crontab atual do usuário"""
+    try:
+        result = subprocess.run(['crontab', '-l'], capture_output=True, text=True)
+        if result.returncode == 0:
+            return result.stdout
+        return ""
+    except:
+        return ""
+
+def set_crontab(content):
+    """Define o crontab do usuário"""
+    try:
+        process = subprocess.Popen(
+            ['crontab', '-'],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            text=True
+        )
+        process.communicate(input=content)
+        return process.returncode == 0
+    except:
+        return False
+
+def event_has_notifications(event):
+    """Verifica se evento já tem notificações agendadas"""
+    cron_id = get_event_cron_id(event)
+    crontab = get_current_crontab()
+    return cron_id in crontab
+
+def cleanup_expired_notifications():
+    """Remove notificações de eventos que já passaram"""
+    import re
+    crontab = get_current_crontab()
+    if not crontab:
+        return 0
+
+    today = datetime.now().date()
+    lines = crontab.split('\n')
+    new_lines = []
+    removed = 0
+
+    for line in lines:
+        # Procurar por linhas com QT_EVENT e data de expiração
+        match = re.search(r'# QT_EVENT_\w+@(\d{4}-\d{2}-\d{2})', line)
+        if match:
+            try:
+                expiry_date = datetime.strptime(match.group(1), '%Y-%m-%d').date()
+                if expiry_date < today:
+                    removed += 1
+                    continue  # Não incluir linha expirada
+            except:
+                pass
+        new_lines.append(line)
+
+    if removed > 0:
+        new_crontab = '\n'.join(l for l in new_lines if l.strip())
+        if new_crontab:
+            new_crontab += '\n'
+        set_crontab(new_crontab)
+
+    return removed
+
+def create_event_notifications(event):
+    """Cria notificações cron para um evento"""
+    start = event['start'].get('dateTime', event['start'].get('date'))
+    summary = event.get('summary', 'Evento')
+
+    # Parse da data/hora
+    try:
+        dt_start = datetime.fromisoformat(start.replace('Z', '+00:00'))
+        # Converter para hora local
+        dt_start = dt_start.astimezone()
+    except:
+        return False, "Erro ao processar data do evento"
+
+    # Se o evento já passou, não criar
+    if dt_start < datetime.now().astimezone():
+        return False, "Evento já passou"
+
+    cron_id = get_event_cron_id(event)
+
+    # Tempos de notificação: 1h antes, 15min antes, 5min antes
+    notifications = [
+        (timedelta(hours=1), "Em 1 hora", "normal"),
+        (timedelta(minutes=15), "Em 15 min", "normal"),
+        (timedelta(minutes=5), "Em 5 min!", "critical"),
+    ]
+
+    cron_lines = []
+    for delta, msg, urgency in notifications:
+        notify_time = dt_start - delta
+
+        # Só criar se ainda não passou
+        if notify_time > datetime.now().astimezone():
+            minute = notify_time.minute
+            hour = notify_time.hour
+            day = notify_time.day
+            month = notify_time.month
+
+            # Escapar aspas no título (cron usa sh, não precisa escapar !)
+            safe_summary = summary.replace('"', '\\"').replace("'", "\\'")
+
+            urgency_flag = "--urgency=critical" if urgency == "critical" else ""
+
+            # Precisa de DISPLAY e DBUS_SESSION_BUS_ADDRESS para notify-send funcionar via cron
+            uid = os.getuid()
+            # Incluir data de expiração no comentário para limpeza automática
+            expiry = notify_time.strftime('%Y-%m-%d')
+            cron_line = f'{minute} {hour} {day} {month} * DISPLAY=:0 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/{uid}/bus notify-send "📅 {msg}" "{safe_summary}" {urgency_flag} # {cron_id}@{expiry}'
+            cron_lines.append(cron_line)
+
+    if not cron_lines:
+        return False, "Evento muito próximo para criar notificações"
+
+    # Adicionar ao crontab
+    current = get_current_crontab()
+
+    # Remover notificações antigas deste evento
+    lines = [l for l in current.split('\n') if cron_id not in l]
+
+    # Adicionar novas
+    lines.extend(cron_lines)
+
+    # Remover linhas vazias duplicadas
+    new_crontab = '\n'.join(l for l in lines if l.strip()) + '\n'
+
+    if set_crontab(new_crontab):
+        return True, f"{len(cron_lines)} notificações criadas"
+    else:
+        return False, "Erro ao atualizar crontab"
+
+def remove_event_notifications(event):
+    """Remove notificações cron de um evento"""
+    cron_id = get_event_cron_id(event)
+    current = get_current_crontab()
+
+    if cron_id not in current:
+        return False, "Evento não tem notificações"
+
+    # Filtrar linhas que não contêm o ID do evento
+    lines = [l for l in current.split('\n') if cron_id not in l]
+    new_crontab = '\n'.join(l for l in lines if l.strip())
+    if new_crontab:
+        new_crontab += '\n'
+
+    if set_crontab(new_crontab):
+        return True, "Notificações removidas"
+    else:
+        return False, "Erro ao atualizar crontab"
+
+
+# ============================================================================
+# ClickUp API Integration
+# ============================================================================
+
+def load_clickup_tasks():
+    """Carrega tasks do ClickUp da API"""
+    config = ClickUpAPI.load_config()
+    api_token = config.get("clickup_api_token", "")
+
+    if not api_token:
+        return []
+
+    try:
+        api = ClickUpAPI(api_token)
+        return api.get_all_my_tasks(include_closed=False)
+    except:
+        return []
+
+
+def sync_clickup_due_dates(state, clickup_tasks=None):
+    """Sincroniza due_dates e listas do ClickUp com tasks locais"""
+    if clickup_tasks is None:
+        clickup_tasks = load_clickup_tasks()
+
+    if not clickup_tasks:
+        return 0
+
+    # Pegar tasks locais que têm clickup_id mas não têm due_date ou clickup_list
+    tasks_to_sync = [t for t in state.tasks if t.get('clickup_id') and (not t.get('due_date') or not t.get('clickup_list'))]
+
+    if not tasks_to_sync:
+        return 0
+
+    try:
+        # Criar mapa de clickup_id -> {due_date, list_name}
+        clickup_data = {}
+        for ct in clickup_tasks:
+            cid = ct.get('id')
+            if cid:
+                data = {}
+                due = ct.get('due_date')
+                if due:
+                    try:
+                        data['due_date'] = datetime.fromtimestamp(int(due) / 1000).isoformat()
+                    except:
+                        pass
+                list_name = ct.get('list', {}).get('name', '')
+                if list_name:
+                    data['clickup_list'] = list_name
+                if data:
+                    clickup_data[cid] = data
+
+        # Atualizar tasks locais
+        updated = 0
+        for task in tasks_to_sync:
+            clickup_id = task.get('clickup_id')
+            if clickup_id in clickup_data:
+                data = clickup_data[clickup_id]
+                if not task.get('due_date') and 'due_date' in data:
+                    task['due_date'] = data['due_date']
+                    updated += 1
+                if not task.get('clickup_list') and 'clickup_list' in data:
+                    task['clickup_list'] = data['clickup_list']
+                    updated += 1
+
+        if updated > 0:
+            state.save_tasks()
+
+        return updated
+    except:
+        return 0
+
+
+class ClickUpAPI:
+    """Cliente para API do ClickUp"""
+
+    BASE_URL = "https://api.clickup.com/api/v2"
+
+    def __init__(self, api_token=None):
+        self.api_token = api_token
+        self._user_id = None
+        self._teams = None
+
+    @staticmethod
+    def load_config():
+        """Carrega configuração (API token)"""
+        if CONFIG_FILE.exists():
+            try:
+                with open(CONFIG_FILE, 'r') as f:
+                    return json.load(f)
+            except:
+                pass
+        return {}
+
+    @staticmethod
+    def save_config(config):
+        """Salva configuração"""
+        CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
+        with open(CONFIG_FILE, 'w') as f:
+            json.dump(config, f, indent=2)
+
+    def _request(self, endpoint, params=None):
+        """Faz request para API do ClickUp"""
+        import urllib.request
+        import urllib.parse
+
+        url = f"{self.BASE_URL}{endpoint}"
+        if params:
+            url += "?" + urllib.parse.urlencode(params, doseq=True)
+
+        req = urllib.request.Request(url)
+        req.add_header("Authorization", self.api_token)
+        req.add_header("Content-Type", "application/json")
+
+        try:
+            with urllib.request.urlopen(req, timeout=10) as response:
+                return json.loads(response.read().decode())
+        except Exception as e:
+            return {"error": str(e)}
+
+    def get_user(self):
+        """Obtém usuário autenticado"""
+        result = self._request("/user")
+        if "user" in result:
+            self._user_id = result["user"]["id"]
+        return result
+
+    def get_teams(self):
+        """Obtém workspaces/teams"""
+        result = self._request("/team")
+        if "teams" in result:
+            self._teams = result["teams"]
+        return result
+
+    def get_my_tasks(self, team_id, include_closed=False):
+        """Obtém tasks atribuídas ao usuário"""
+        if not self._user_id:
+            self.get_user()
+
+        params = {
+            "assignees[]": [self._user_id],
+            "include_closed": str(include_closed).lower(),
+            "subtasks": "true",
+            "order_by": "updated",
+            "reverse": "true"
+        }
+
+        result = self._request(f"/team/{team_id}/task", params)
+        return result.get("tasks", [])
+
+    def get_all_my_tasks(self, include_closed=False):
+        """Obtém todas as tasks atribuídas ao usuário em todos os workspaces"""
+        if not self._teams:
+            self.get_teams()
+
+        all_tasks = []
+        for team in (self._teams or []):
+            tasks = self.get_my_tasks(team["id"], include_closed)
+            for task in tasks:
+                task["_team_name"] = team["name"]
+            all_tasks.extend(tasks)
+
+        return all_tasks
+
+    @staticmethod
+    def map_priority(clickup_priority):
+        """Mapeia prioridade do ClickUp para qt"""
+        if not clickup_priority:
+            return "low"
+        priority_id = clickup_priority.get("id")
+        # ClickUp: 1=urgent, 2=high, 3=normal, 4=low
+        if priority_id in (1, 2):
+            return "high"
+        elif priority_id == 3:
+            return "medium"
+        return "low"
+
+    @staticmethod
+    def map_status(clickup_status):
+        """Mapeia status do ClickUp para qt"""
+        if not clickup_status:
+            return "todo"
+        status_type = clickup_status.get("type", "").lower()
+        status_name = clickup_status.get("status", "").lower()
+
+        if status_type == "closed" or "done" in status_name or "complete" in status_name:
+            return "done"
+        elif status_type == "open":
+            if "progress" in status_name or "doing" in status_name or "working" in status_name:
+                return "doing"
+            elif "block" in status_name or "wait" in status_name:
+                return "blocked"
+            elif "pause" in status_name or "hold" in status_name:
+                return "paused"
+        return "todo"
+
+
+    @staticmethod
+    def extract_company(task):
+        """Tenta extrair nome da empresa da task (lista ou pasta)"""
+        # Tentar da lista
+        if task.get("list", {}).get("name"):
+            return task["list"]["name"]
+        # Tentar da pasta
+        if task.get("folder", {}).get("name"):
+            return task["folder"]["name"]
+        # Tentar do space
+        if task.get("space", {}).get("name"):
+            return task["space"]["name"]
+        return ""
+
+
+# ============================================================================
+# Google Calendar Integration
+# ============================================================================
+
+class GoogleCalendarAPI:
+    """Cliente para API do Google Calendar"""
+
+    SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
+    CREDENTIALS_FILE = Path.home() / ".local/share/quicktasks/credentials.json"
+    TOKEN_FILE = Path.home() / ".local/share/quicktasks/token.json"
+
+    def __init__(self):
+        self.service = None
+        self.creds = None
+
+    def authenticate(self):
+        """Autentica com Google Calendar API"""
+        from google.auth.transport.requests import Request
+        from google.oauth2.credentials import Credentials
+        from google_auth_oauthlib.flow import InstalledAppFlow
+        from googleapiclient.discovery import build
+
+        try:
+            # Carregar token existente
+            if self.TOKEN_FILE.exists():
+                self.creds = Credentials.from_authorized_user_file(str(self.TOKEN_FILE), self.SCOPES)
+
+            # Se não tem credenciais válidas, logar
+            if not self.creds or not self.creds.valid:
+                if self.creds and self.creds.expired and self.creds.refresh_token:
+                    self.creds.refresh(Request())
+                else:
+                    if not self.CREDENTIALS_FILE.exists():
+                        return False # Falha silenciosa se não configurado
+                    
+                    flow = InstalledAppFlow.from_client_secrets_file(
+                        str(self.CREDENTIALS_FILE), self.SCOPES)
+                    self.creds = flow.run_local_server(port=0)
+                
+                # Salvar token para proxima vez
+                self.TOKEN_FILE.parent.mkdir(parents=True, exist_ok=True)
+                with open(self.TOKEN_FILE, 'w') as token:
+                    token.write(self.creds.to_json())
+
+            self.service = build('calendar', 'v3', credentials=self.creds)
+            return True
+        except Exception as e:
+            # print(f"Erro na autenticação do Google Calendar: {e}")
+            return False
+
+    def get_upcoming_events(self, max_results=20):
+        """Obtém próximos eventos"""
+        if not self.service:
+            if not self.authenticate():
+                return []
+
+        try:
+            # Usar UTC aware datetime e formatar manualmente para garantir RFC3339 sem microsegundos e com Z
+            now = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+            events_result = self.service.events().list(
+                calendarId='primary', timeMin=now,
+                maxResults=max_results, singleEvents=True,
+                orderBy='startTime').execute()
+            events = events_result.get('items', [])
+            return events
+        except Exception as e:
+            # print(f"Erro ao buscar eventos: {e}")
+            return []
+
+
+
+# ============================================================================
+# Funções de Gráficos com Plotext (compatível com Urwid)
+# ============================================================================
+
+def draw_bar_chart(data, max_width=60, show_values=True):
+    """Desenha um gráfico de barras usando plotext"""
+    if not data:
+        return "(Sem dados)"
+
+    plt.clear_figure()
+    plt.bar(list(data.keys()), list(data.values()))
+    plt.plotsize(max_width, 12)
+    output = plt.build()
+
+    # IMPORTANTE: Remover códigos ANSI para compatibilidade com urwid
+    return plt.uncolorize(output)
+
+
+def draw_timeline_chart(tasks_by_day, days=14):
+    """Desenha um gráfico de timeline usando plotext"""
+    if not tasks_by_day:
+        return "(Sem dados)"
+
+    today = datetime.now().date()
+    dates = [(today - timedelta(days=i)) for i in range(days-1, -1, -1)]
+
+    # Preparar dados
+    date_labels = [d.strftime("%d/%m") for d in dates]
+    values = [tasks_by_day.get(d, 0) for d in dates]
+    x_indices = list(range(len(dates)))
+
+    plt.clear_figure()
+    plt.plot(x_indices, values, marker="braille")
+
+    # Configurar labels do eixo X (mostrar apenas alguns)
+    step = max(1, len(dates) // 7)
+    x_ticks = x_indices[::step]
+    x_tick_labels = [date_labels[i] for i in x_ticks]
+    plt.xticks(x_ticks, x_tick_labels)
+
+    plt.plotsize(70, 12)
+    output = plt.build()
+
+    # IMPORTANTE: Remover códigos ANSI para compatibilidade com urwid
+    return plt.uncolorize(output)
+
+
+# ============================================================================
+# AppState - Gerenciamento centralizado de tasks
+# ============================================================================
+
+class AppState:
+    """Gerencia o estado da aplicação e operações com tasks"""
+
+    def __init__(self):
+        self.tasks = []
+        self.current_filter = {}  # {status: 'todo', category: 'dev', ...}
+        self.selected_task_id = None
+        self.dirty = False  # Flag para mudanças não salvas
+        
+        # Google Calendar
+        self.calendar_api = GoogleCalendarAPI()
+        self.events = []
+
+    def load_tasks(self):
+        """Carrega as tarefas do arquivo JSON"""
+        DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
+        if not DATA_FILE.exists():
+            self.tasks = []
+            return
+
+        try:
+            with open(DATA_FILE, 'r', encoding='utf-8') as f:
+                self.tasks = json.load(f)
+        except json.JSONDecodeError:
+            # JSON corrompido, backup e resetar
+            backup_file = DATA_FILE.with_suffix('.json.corrupted')
+            DATA_FILE.rename(backup_file)
+            self.tasks = []
+
+            self.tasks = []
+
+    def load_events(self):
+        """Carrega eventos do Google Calendar"""
+        self.events = self.calendar_api.get_upcoming_events()
+
+    def save_tasks(self):
+        """Salva as tarefas no arquivo JSON"""
+        with open(DATA_FILE, 'w', encoding='utf-8') as f:
+            json.dump(self.tasks, f, ensure_ascii=False, indent=2)
+        self.dirty = False
+
+    def get_next_id(self):
+        """Retorna o próximo ID disponível"""
+        if not self.tasks:
+            return 1
+        return max(task['id'] for task in self.tasks) + 1
+
+    def get_task(self, task_id):
+        """Busca uma task pelo ID"""
+        return next((t for t in self.tasks if t['id'] == task_id), None)
+
+    def get_filtered_tasks(self):
+        """Retorna tasks filtradas de acordo com current_filter"""
+        tasks = self.tasks
+
+        # Filtro por status
+        if self.current_filter.get('status'):
+            tasks = [t for t in tasks if t['status'] == self.current_filter['status']]
+
+        # Filtro por categoria
+        if self.current_filter.get('category'):
+            tasks = [t for t in tasks if t.get('category') == self.current_filter['category']]
+
+        # Filtro por empresa
+        if self.current_filter.get('company'):
+            company = self.current_filter['company'].lower()
+            tasks = [t for t in tasks if company in t.get('company', '').lower()]
+
+        # Esconder finalizadas por padrão (a menos que filtro explícito)
+        if not self.current_filter.get('show_finished'):
+            tasks = [t for t in tasks if t['status'] != 'finished']
+
+        return tasks
+
+    def get_streak(self):
+        """Calcula o streak de dias com tasks concluidas"""
+        from collections import defaultdict
+
+        # Coletar dias com tasks finalizadas
+        completed_days = set()
+        for task in self.tasks:
+            if task['status'] in ('done', 'finished'):
+                try:
+                    completed_date = datetime.fromisoformat(task['updated']).date()
+                    completed_days.add(completed_date)
+                except (ValueError, KeyError):
+                    pass
+
+        if not completed_days:
+            return 0
+
+        # Calcular streak a partir de hoje
+        today = datetime.now().date()
+        streak = 0
+        current_date = today
+
+        while current_date in completed_days:
+            streak += 1
+            current_date -= timedelta(days=1)
+
+        return streak
+
+    def add_task(self, description, priority='low', who='', category='other', company='', status='todo'):
+        """Adiciona uma nova task"""
+        task = {
+            'id': self.get_next_id(),
+            'description': description,
+            'status': status,
+            'priority': priority,
+            'who': who,
+            'category': category,
+            'company': company,
+            'comments': [],
+            'created': datetime.now().isoformat(),
+            'updated': datetime.now().isoformat()
+        }
+        self.tasks.append(task)
+        self.dirty = True
+        return task
+
+    def update_task(self, task_id, **updates):
+        """Atualiza campos de uma task"""
+        task = self.get_task(task_id)
+        if not task:
+            return False
+
+        # Atualizar campos
+        for key, value in updates.items():
+            if key not in ['id', 'created']:  # Campos imutáveis
+                task[key] = value
+
+        # Auto-atualizar timestamp
+        task['updated'] = datetime.now().isoformat()
+
+        # Se mudou para finished, adicionar timestamp
+        if updates.get('status') == 'finished' and 'finished_at' not in task:
+            task['finished_at'] = datetime.now().isoformat()
+
+        self.dirty = True
+        return True
+
+    def delete_task(self, task_id):
+        """Remove uma task"""
+        task = self.get_task(task_id)
+        if not task:
+            return False
+
+        self.tasks.remove(task)
+        self.dirty = True
+        return True
+
+    def add_comment(self, task_id, comment_text):
+        """Adiciona um comentário a uma task"""
+        task = self.get_task(task_id)
+        if not task:
+            return False
+
+        if 'comments' not in task:
+            task['comments'] = []
+
+        task['comments'].append({
+            'text': comment_text,
+            'timestamp': datetime.now().isoformat()
+        })
+        task['updated'] = datetime.now().isoformat()
+        self.dirty = True
+        return True
+
+    def bulk_finish_done_tasks(self):
+        """Move todas as tasks 'done' para 'finished'"""
+        count = 0
+        for task in self.tasks:
+            if task['status'] == 'done':
+                task['status'] = 'finished'
+                task['finished_at'] = datetime.now().isoformat()
+                task['updated'] = datetime.now().isoformat()
+                count += 1
+
+        if count > 0:
+            self.dirty = True
+
+        return count
+
+    def add_todo(self, task_id, text):
+        """Adicionar TODO à task"""
+        task = self.get_task(task_id)
+        if not task:
+            return False
+
+        if 'todos' not in task:
+            task['todos'] = []
+
+        task['todos'].append({'text': text, 'done': False})
+        task['updated'] = datetime.now().isoformat()
+        self.dirty = True
+        return True
+
+    def toggle_todo(self, task_id, todo_index):
+        """Alternar estado done/not done de um TODO"""
+        task = self.get_task(task_id)
+        if not task:
+            return False
+
+        if 'todos' in task and 0 <= todo_index < len(task['todos']):
+            task['todos'][todo_index]['done'] = not task['todos'][todo_index]['done']
+            task['updated'] = datetime.now().isoformat()
+            self.dirty = True
+            return True
+
+        return False
+
+    def update_todo(self, task_id, todo_index, new_text):
+        """Editar texto de um TODO"""
+        task = self.get_task(task_id)
+        if not task:
+            return False
+
+        if 'todos' in task and 0 <= todo_index < len(task['todos']):
+            task['todos'][todo_index]['text'] = new_text
+            task['updated'] = datetime.now().isoformat()
+            self.dirty = True
+            return True
+
+        return False
+
+    def delete_todo(self, task_id, todo_index):
+        """Deletar um TODO"""
+        task = self.get_task(task_id)
+        if not task:
+            return False
+
+        if 'todos' in task and 0 <= todo_index < len(task['todos']):
+            task['todos'].pop(todo_index)
+            task['updated'] = datetime.now().isoformat()
+            self.dirty = True
+            return True
+
+        return False
+
+
+# ============================================================================
+# Palette de cores para urwid (24-bit color support)
+# ============================================================================
+
+def create_palette():
+    """Cria a palette de cores baseada em STATUS e PRIORITY"""
+    palette = []
+
+    # Cores de status
+    for status_key, info in STATUS.items():
+        palette.append((
+            f'status_{status_key}',
+            '',           # foreground (padrão)
+            '',           # background (padrão)
+            '',           # mono
+            info['color'],  # foreground (24-bit)
+            ''            # background (24-bit)
+        ))
+
+    # Cores de prioridade
+    for priority_key, info in PRIORITY.items():
+        palette.append((
+            f'priority_{priority_key}',
+            '',
+            '',
+            '',
+            info['color'],
+            ''
+        ))
+
+    # Cores gerais da UI - Visual clean: branco, cinza, verde, bold
+    palette.extend([
+        # Headers e estrutura (verde)
+        ('header', 'white,bold', 'dark green', '', '#ffffff,bold', '#005f00'),
+        ('footer', 'dark gray', '', '', '#6c6c6c', ''),
+        ('focus', 'white,bold', '', '', '#ffffff,bold', '#005f00'),
+
+        # Task rows - específico para lista de tasks (mesma cor do header)
+        ('task_row', 'white', '', '', '#ffffff', ''),
+        ('task_row_focus', 'white,bold', 'dark green', '', '#ffffff,bold', '#005f00'),
+
+        # Botões e dialogs
+        ('button', 'white', '', '', '#ffffff', ''),
+        ('button_focus', 'black,bold', 'white', '', '#000000,bold', '#ffffff'),
+        ('dialog_bg', 'white', 'black', '', '#e4e4e4', '#1c1c1c'),
+
+        # Mensagens
+        ('error', 'light red,bold', '', '', '#ff5f5f,bold', ''),
+        ('success', 'light green,bold', '', '', '#5fd787,bold', ''),
+
+        # Hierarquia de texto - clean com azul para destaque
+        ('title', 'light blue,bold', '', '', '#5fafff,bold', ''),      # Títulos principais (azul)
+        ('subtitle', 'light cyan,bold', '', '', '#5fd7ff,bold', ''),   # Subtítulos (azul claro)
+        ('text', 'white', '', '', '#ffffff', ''),                      # Texto principal
+        ('text_bold', 'white,bold', '', '', '#ffffff,bold', ''),       # Texto com destaque
+        ('label', 'dark gray,bold', '', '', '#9e9e9e,bold', ''),       # Labels (ID:, Status:)
+        ('secondary', 'dark gray', '', '', '#6c6c6c', ''),             # Info secundária
+        ('dimmed', 'dark gray', '', '', '#4e4e4e', ''),                # Texto desabilitado/completo
+        ('divider', 'dark gray', '', '', '#3a3a3a', ''),               # Separadores
+    ])
+
+    return palette
+
+
+# ============================================================================
+# TaskRow - Widget customizado para exibir uma task
+# ============================================================================
+
+class TaskRow(urwid.WidgetWrap):
+    """Widget que exibe uma task formatada na lista (versão completa)"""
+
+    def __init__(self, task):
+        self.task = task
+
+        # Extrair info da task
+        task_id = task['id']
+        status = task['status']
+        priority = task['priority']
+        category = task.get('category', 'other')
+        description = task['description']
+        who = task.get('who', '')
+        company = task.get('company', '')
+
+        # Emojis
+        status_emoji = STATUS[status]['emoji']
+        priority_emoji = PRIORITY[priority]['emoji']
+        category_emoji = CATEGORIES[category]['emoji']
+
+        # Truncar descrição se muito longa
+        max_desc_len = 50
+        if len(description) > max_desc_len:
+            description = description[:max_desc_len-3] + '...'
+
+        # Formatar campos (sempre mostrar colunas para manter alinhamento)
+        who_str = f"[{who}]" if who else "[-]"
+        company_str = f"🏢{company}" if company else "🏢-"
+        clickup_str = "[C]" if task.get('clickup_id') else "   "
+
+        # Montar texto da linha SEM atributos inline - isso permite que o foco funcione
+        # Formato: [ID] status pri cat │ Descrição │ Who │ Company │ ClickUp
+        line_text = f"#{task_id:<3} {status_emoji} {priority_emoji} {category_emoji} │ {description:<50} │ {who_str:<12} │ {company_str:<15} │ {clickup_str}"
+
+        # Criar widget de texto simples (sem atributos inline)
+        text_widget = urwid.Text(line_text)
+
+        # Usar AttrMap - visual clean com branco/cinza, azul quando selecionado
+        attr_map = urwid.AttrMap(text_widget, 'task_row', focus_map='task_row_focus')
+
+        super().__init__(attr_map)
+
+    def selectable(self):
+        return True
+
+    def keypress(self, size, key):
+        return key
+
+
+class CompactTaskRow(urwid.WidgetWrap):
+    """Widget compacto para task - descrição expande para ocupar todo espaço"""
+
+    def __init__(self, task):
+        self.task = task
+
+        # Extrair info da task
+        task_id = task['id']
+        status = task['status']
+        priority = task['priority']
+        description = task['description']
+        company = task.get('company', '')
+
+        # Emojis
+        status_emoji = STATUS[status]['emoji']
+        priority_emoji = PRIORITY[priority]['emoji']
+
+        # Company truncado
+        company_str = company[:12] if company else "-"
+
+        # Usar Columns para layout dinâmico
+        # Colunas fixas: ID, status, priority │ [peso: descrição] │ company
+        cols = urwid.Columns([
+            (12, urwid.Text(f"#{task_id:<3} {status_emoji} {priority_emoji} │")),
+            ('weight', 1, urwid.Text(description, wrap='clip')),
+            (16, urwid.Text(f"│ 🏢{company_str}")),
+        ], dividechars=0)
+
+        attr_map = urwid.AttrMap(cols, 'task_row', focus_map='task_row_focus')
+        super().__init__(attr_map)
+
+    def selectable(self):
+        return True
+
+    def keypress(self, size, key):
+        """Passa as teclas para o handler da tela"""
+        return key
+
+
+# ============================================================================
+# FullTasksScreen - Tela cheia de tasks
+# ============================================================================
+
+class FullTasksScreen(urwid.WidgetWrap):
+    """Tela de tasks em tela cheia (sem painéis laterais)"""
+
+    def __init__(self, app):
+        self.app = app
+
+        # Lista de tasks
+        self.task_list_walker = urwid.SimpleFocusListWalker([])
+        self.task_list = urwid.ListBox(self.task_list_walker)
+
+        # Header
+        self.update_header()
+
+        # Footer
+        footer_text = urwid.Text(
+            "━ [ESC]Voltar [n]New [e]Edit [d]Del [s]Status [f]Finish [m]Metrics [i]ClickUp [0-6]Filtros ━",
+            align='center'
+        )
+        self.footer = urwid.AttrMap(footer_text, 'footer')
+
+        # Frame
+        self.frame = urwid.Frame(
+            header=self.header,
+            body=self.task_list,
+            footer=self.footer
+        )
+
+        # Popular lista
+        self.refresh_task_list()
+
+        super().__init__(self.frame)
+
+    def update_header(self):
+        """Atualiza header"""
+        total = len(self.app.state.tasks)
+        filtered = len(self.app.state.get_filtered_tasks())
+
+        active_filters = []
+        if self.app.state.current_filter.get('status'):
+            status = self.app.state.current_filter['status']
+            active_filters.append(f"{STATUS[status]['label']}")
+
+        filter_str = " • ".join(active_filters) if active_filters else "TODAS"
+
+        header_text = urwid.Text(
+            f"━━━ 📋 TASKS ━━━ {filtered}/{total} ━━━ {filter_str} ━━━",
+            align='center'
+        )
+        self.header = urwid.AttrMap(header_text, 'header')
+
+        if hasattr(self, 'frame'):
+            self.frame.header = self.header
+
+    def refresh_task_list(self):
+        """Recarrega lista de tasks"""
+        self.update_header()
+        self.task_list_walker.clear()
+
+        tasks = self.app.state.get_filtered_tasks()
+
+        if not tasks:
+            self.task_list_walker.append(urwid.Text("📭 Nenhuma task", align='center'))
+            return
+
+        priority_order = {'high': 0, 'medium': 1, 'low': 2}
+
+        grouped = {}
+        for task in sorted(tasks, key=lambda x: (x['status'], priority_order.get(x.get('priority', 'low'), 2), -x['id'])):
+            status = task['status']
+            if status not in grouped:
+                grouped[status] = []
+            grouped[status].append(task)
+
+        status_order = ['blocked', 'doing', 'paused', 'todo', 'done', 'finished']
+
+        for status_key in status_order:
+            if status_key not in grouped:
+                continue
+
+            status_tasks = grouped[status_key]
+            status_info = STATUS[status_key]
+
+            divider_text = urwid.Text(
+                ('subtitle', f"\n─── {status_info['emoji']} {status_info['label'].upper()} ({len(status_tasks)}) ───"),
+                align='left'
+            )
+            self.task_list_walker.append(divider_text)
+
+            for task in status_tasks:
+                self.task_list_walker.append(TaskRow(task))
+
+        self.task_list_walker.append(urwid.Divider())
+
+    def keypress(self, size, key):
+        if key in ('esc', 'q', 't'):
+            self.app.pop_screen()
+            return None
+
+        if key == 'j':
+            key = 'down'
+        elif key == 'k':
+            key = 'up'
+
+        key = super().keypress(size, key)
+        if not key:
+            return None
+
+        status_keys = {
+            '1': 'todo', '2': 'doing', '3': 'paused',
+            '4': 'done', '5': 'blocked', '6': 'finished',
+        }
+
+        if key in status_keys:
+            self.app.state.current_filter['status'] = status_keys[key]
+            if status_keys[key] == 'finished':
+                self.app.state.current_filter['show_finished'] = True
+            self.refresh_task_list()
+            return None
+        elif key == '0':
+            self.app.state.current_filter = {}
+            self.refresh_task_list()
+            return None
+
+        focus_widget = self.task_list.focus
+
+        if key == 'enter' and isinstance(focus_widget, TaskRow):
+            detail_screen = TaskDetailScreen(self.app, focus_widget.task)
+            self.app.push_screen(detail_screen)
+            return None
+
+        elif key == 'n':
+            edit_screen = TaskEditScreen(self.app, task=None)
+            self.app.push_screen(edit_screen)
+            return None
+
+        elif key == 'e' and isinstance(focus_widget, TaskRow):
+            edit_screen = TaskEditScreen(self.app, focus_widget.task)
+            self.app.push_screen(edit_screen)
+            return None
+
+        elif key == 's' and isinstance(focus_widget, TaskRow):
+            task = focus_widget.task
+            def on_close():
+                self.app.close_overlay()
+                self.refresh_task_list()
+            dialog = StatusDialog(self.app, task, on_close)
+            self.app.show_overlay(dialog)
+            return None
+
+        elif key == 'p' and isinstance(focus_widget, TaskRow):
+            task = focus_widget.task
+            def on_close():
+                self.app.close_overlay()
+                self.refresh_task_list()
+            dialog = PriorityDialog(self.app, task, on_close)
+            self.app.show_overlay(dialog)
+            return None
+
+        elif key == 'd' and isinstance(focus_widget, TaskRow):
+            task = focus_widget.task
+            def on_yes():
+                self.app.state.delete_task(task['id'])
+                self.app.state.save_tasks()
+                self.app.close_overlay()
+                self.refresh_task_list()
+            def on_no():
+                self.app.close_overlay()
+            dialog = ConfirmDialog(
+                "Confirmar Exclusão",
+                f"Deletar task #{task['id']}?",
+                on_yes=on_yes,
+                on_no=on_no
+            )
+            self.app.show_overlay(dialog, width=('relative', 50), height=('relative', 25))
+            return None
+
+        elif key == 'f':
+            # Finalizar tasks done
+            done_count = len([t for t in self.app.state.tasks if t['status'] == 'done'])
+            if done_count == 0:
+                return None
+            def on_yes():
+                self.app.state.bulk_finish_done_tasks()
+                self.app.state.save_tasks()
+                self.app.close_overlay()
+                self.refresh_task_list()
+            def on_no():
+                self.app.close_overlay()
+            dialog = ConfirmDialog(
+                "Finalizar Tasks",
+                f"Arquivar {done_count} tasks Concluídas?",
+                on_yes=on_yes,
+                on_no=on_no
+            )
+            self.app.show_overlay(dialog, width=('relative', 50), height=('relative', 25))
+            return None
+
+        elif key == 'i':
+            # Importar do ClickUp
+            import_screen = ClickUpImportScreen(self.app)
+            self.app.push_screen(import_screen)
+            return None
+
+        elif key == 'm':
+            # Métricas
+            metrics_screen = MetricsScreen(self.app)
+            self.app.push_screen(metrics_screen)
+            return None
+
+        elif key == 'r':
+            # Refresh
+            self.refresh_task_list()
+            return None
+
+        return key
+
+
+# ============================================================================
+# Dialogs - Overlays para confirmações e inputs
+# ============================================================================
+
+class StatusDialog(urwid.WidgetWrap):
+    """Dialog para mudar o status de uma task"""
+
+    def __init__(self, app, task, on_close):
+        self.app = app
+        self.task = task
+        self.on_close = on_close
+
+        # RadioButtons para escolher status
+        self.status_group = []
+        self.status_buttons = {}
+
+        buttons = []
+        for status_key, info in STATUS.items():
+            rb = urwid.RadioButton(
+                self.status_group,
+                f"{info['emoji']} {info['label']}",
+                state=(status_key == task['status'])
+            )
+            self.status_buttons[status_key] = rb
+            buttons.append(urwid.AttrMap(rb, None, focus_map='focus'))
+
+        # Botões de ação
+        ok_btn = urwid.Button("OK", on_press=self.on_ok)
+        cancel_btn = urwid.Button("Cancel", on_press=self.on_cancel)
+
+        button_row = urwid.Columns([
+            urwid.AttrMap(ok_btn, 'button', focus_map='button_focus'),
+            urwid.AttrMap(cancel_btn, 'button', focus_map='button_focus'),
+        ], dividechars=2)
+
+        # Montar dialog com ListBox para permitir navegação
+        content = [
+            urwid.Text(f"Mudar status da task #{task['id']}:\n", align='center'),
+            urwid.Divider(),
+            *buttons,
+            urwid.Divider(),
+            button_row,
+        ]
+
+        listbox = urwid.ListBox(urwid.SimpleFocusListWalker(content))
+        box = urwid.LineBox(listbox, title="Status")
+        dialog = urwid.AttrMap(box, 'dialog_bg')
+
+        super().__init__(dialog)
+
+    def on_ok(self, button):
+        """Salvar novo status"""
+        # Encontrar status selecionado
+        for status_key, rb in self.status_buttons.items():
+            if rb.get_state():
+                self.app.state.update_task(self.task['id'], status=status_key)
+                self.app.state.save_tasks()
+                break
+
+        self.on_close()
+
+    def on_cancel(self, button):
+        """Fechar sem salvar"""
+        self.on_close()
+
+    def keypress(self, size, key):
+        """Esc para fechar"""
+        if key == 'esc':
+            self.on_cancel(None)
+            return None
+        return super().keypress(size, key)
+
+
+class PriorityDialog(urwid.WidgetWrap):
+    """Dialog para mudar a prioridade de uma task"""
+
+    def __init__(self, app, task, on_close):
+        self.app = app
+        self.task = task
+        self.on_close = on_close
+
+        # RadioButtons para escolher prioridade
+        self.priority_group = []
+        self.priority_buttons = {}
+
+        buttons = []
+        for priority_key, info in PRIORITY.items():
+            rb = urwid.RadioButton(
+                self.priority_group,
+                f"{info['emoji']} {priority_key.upper()}",
+                state=(priority_key == task.get('priority', 'low'))
+            )
+            self.priority_buttons[priority_key] = rb
+            buttons.append(urwid.AttrMap(rb, None, focus_map='focus'))
+
+        # Botões de ação
+        ok_btn = urwid.Button("OK", on_press=self.on_ok)
+        cancel_btn = urwid.Button("Cancel", on_press=self.on_cancel)
+
+        button_row = urwid.Columns([
+            urwid.AttrMap(ok_btn, 'button', focus_map='button_focus'),
+            urwid.AttrMap(cancel_btn, 'button', focus_map='button_focus'),
+        ], dividechars=2)
+
+        # Montar dialog com ListBox para permitir navegação
+        content = [
+            urwid.Text(f"Mudar prioridade da task #{task['id']}:\n", align='center'),
+            urwid.Divider(),
+            *buttons,
+            urwid.Divider(),
+            button_row,
+        ]
+
+        listbox = urwid.ListBox(urwid.SimpleFocusListWalker(content))
+        box = urwid.LineBox(listbox, title="Prioridade")
+        dialog = urwid.AttrMap(box, 'dialog_bg')
+
+        super().__init__(dialog)
+
+    def on_ok(self, button):
+        """Salvar nova prioridade"""
+        # Encontrar prioridade selecionada
+        for priority_key, rb in self.priority_buttons.items():
+            if rb.get_state():
+                self.app.state.update_task(self.task['id'], priority=priority_key)
+                self.app.state.save_tasks()
+                break
+
+        self.on_close()
+
+    def on_cancel(self, button):
+        """Fechar sem salvar"""
+        self.on_close()
+
+    def keypress(self, size, key):
+        """Esc para fechar"""
+        if key == 'esc':
+            self.on_cancel(None)
+            return None
+        return super().keypress(size, key)
+
+
+class CommentDialog(urwid.WidgetWrap):
+    """Dialog para adicionar comentário"""
+
+    def __init__(self, app, task, on_close):
+        self.app = app
+        self.task = task
+        self.on_close = on_close
+
+        # Edit widget para o comentário
+        self.edit = urwid.Edit(multiline=True)
+
+        # Botões de ação
+        ok_btn = urwid.Button("Add Comment", on_press=self.on_ok)
+        cancel_btn = urwid.Button("Cancel", on_press=self.on_cancel)
+
+        button_row = urwid.Columns([
+            urwid.AttrMap(ok_btn, 'button', focus_map='button_focus'),
+            urwid.AttrMap(cancel_btn, 'button', focus_map='button_focus'),
+        ], dividechars=2)
+
+        # Montar dialog
+        content = [
+            urwid.Text(f"Adicionar comentário à task #{task['id']}:\n", align='center'),
+            urwid.Divider(),
+            urwid.AttrMap(self.edit, None, focus_map='focus'),
+            urwid.Divider(),
+            button_row,
+        ]
+
+        listbox = urwid.ListBox(urwid.SimpleFocusListWalker(content))
+        box = urwid.LineBox(listbox, title="Comentário")
+        dialog = urwid.AttrMap(box, 'dialog_bg')
+
+        super().__init__(dialog)
+
+    def on_ok(self, button):
+        """Salvar comentário"""
+        comment_text = self.edit.get_edit_text().strip()
+        if not comment_text:
+            # Mostrar erro
+            error_dialog = MessageDialog(
+                "Erro de Validação",
+                "O comentário não pode estar vazio.",
+                on_ok=lambda: self.app.close_overlay(),
+                dialog_type='error'
+            )
+            # Fechar este dialog primeiro, depois mostrar erro
+            self.on_close()
+            self.app.show_overlay(error_dialog, width=('relative', 50), height=('relative', 25))
+            return
+
+        self.app.state.add_comment(self.task['id'], comment_text)
+        self.app.state.save_tasks()
+        self.on_close()
+
+    def on_cancel(self, button):
+        """Fechar sem salvar"""
+        self.on_close()
+
+    def keypress(self, size, key):
+        """Esc para fechar"""
+        if key == 'esc':
+            self.on_cancel(None)
+            return None
+        return super().keypress(size, key)
+
+
+class ConfirmDialog(urwid.WidgetWrap):
+    """Dialog genérico de confirmação"""
+
+    def __init__(self, title, message, on_yes, on_no):
+        self.on_yes_callback = on_yes
+        self.on_no_callback = on_no
+
+        # Mensagem
+        text = urwid.Text(message, align='center')
+
+        # Botões
+        yes_btn = urwid.Button("Yes", on_press=self.on_yes)
+        no_btn = urwid.Button("No", on_press=self.on_no)
+
+        button_row = urwid.Columns([
+            urwid.AttrMap(yes_btn, 'button', focus_map='button_focus'),
+            urwid.AttrMap(no_btn, 'button', focus_map='button_focus'),
+        ], dividechars=2)
+
+        # Montar dialog
+        content = [
+            text,
+            urwid.Divider(),
+            button_row,
+        ]
+
+        listbox = urwid.ListBox(urwid.SimpleFocusListWalker(content))
+        box = urwid.LineBox(listbox, title=title)
+        dialog = urwid.AttrMap(box, 'dialog_bg')
+
+        super().__init__(dialog)
+
+    def on_yes(self, button):
+        """Confirmar"""
+        self.on_yes_callback()
+
+    def on_no(self, button):
+        """Cancelar"""
+        self.on_no_callback()
+
+    def keypress(self, size, key):
+        """Esc para cancelar"""
+        if key == 'esc':
+            self.on_no(None)
+            return None
+        return super().keypress(size, key)
+
+
+class MessageDialog(urwid.WidgetWrap):
+    """Dialog genérico para mensagens (erro, sucesso, info)"""
+
+    def __init__(self, title, message, on_ok, dialog_type='info'):
+        """
+        dialog_type: 'error', 'success', 'info', 'warning'
+        """
+        self.on_ok_callback = on_ok
+
+        # Ícone baseado no tipo
+        icons = {
+            'error': '❌',
+            'success': '✅',
+            'info': 'ℹ️ ',
+            'warning': '⚠️ '
+        }
+        icon = icons.get(dialog_type, 'ℹ️ ')
+
+        # Mensagem com ícone
+        text = urwid.Text(f"{icon} {message}", align='center')
+
+        # Botão OK
+        ok_btn = urwid.Button("OK", on_press=self.on_ok)
+
+        button_row = urwid.Columns([
+            urwid.AttrMap(ok_btn, 'button', focus_map='button_focus'),
+        ], dividechars=2)
+
+        # Montar dialog
+        content = [
+            text,
+            urwid.Divider(),
+            button_row,
+        ]
+
+        listbox = urwid.ListBox(urwid.SimpleFocusListWalker(content))
+        box = urwid.LineBox(listbox, title=title)
+        dialog = urwid.AttrMap(box, 'dialog_bg')
+
+        super().__init__(dialog)
+
+    def on_ok(self, button):
+        """Fechar dialog"""
+        self.on_ok_callback()
+
+    def keypress(self, size, key):
+        """Esc ou Enter para fechar"""
+        if key in ('esc', 'enter'):
+            self.on_ok(None)
+            return None
+        return super().keypress(size, key)
+
+
+# ============================================================================
+# AddTodoDialog - Dialog para adicionar TODO
+# ============================================================================
+
+class AddTodoDialog(urwid.WidgetWrap):
+    """Dialog para adicionar novo TODO"""
+
+    def __init__(self, app, task, on_close):
+        self.app = app
+        self.task = task
+        self.on_close_callback = on_close
+
+        # Campo de texto
+        self.edit = urwid.Edit(caption="TODO: ", multiline=False)
+
+        # Botões
+        ok_btn = urwid.Button("Adicionar", on_press=self.on_ok)
+        cancel_btn = urwid.Button("Cancelar", on_press=self.on_cancel)
+
+        button_row = urwid.Columns([
+            urwid.AttrMap(ok_btn, 'button', focus_map='button_focus'),
+            urwid.AttrMap(cancel_btn, 'button', focus_map='button_focus'),
+        ], dividechars=2)
+
+        # Montar dialog
+        content = [
+            urwid.Text(f"Adicionar TODO à task #{task['id']}:\n", align='center'),
+            urwid.Divider(),
+            urwid.AttrMap(self.edit, None, focus_map='focus'),
+            urwid.Divider(),
+            button_row,
+        ]
+
+        listbox = urwid.ListBox(urwid.SimpleFocusListWalker(content))
+        box = urwid.LineBox(listbox, title="Novo TODO")
+        dialog = urwid.AttrMap(box, 'dialog_bg')
+
+        super().__init__(dialog)
+
+    def on_ok(self, button):
+        """Salvar TODO"""
+        text = self.edit.get_edit_text().strip()
+        if not text:
+            # Validação: texto vazio
+            error_dialog = MessageDialog(
+                "Erro de Validação",
+                "O TODO não pode estar vazio.",
+                on_ok=lambda: self.app.close_overlay(),
+                dialog_type='error'
+            )
+            self.on_close_callback()
+            self.app.show_overlay(error_dialog, width=('relative', 50), height=('relative', 25))
+            return
+
+        self.app.state.add_todo(self.task['id'], text)
+        self.app.state.save_tasks()
+        self.on_close_callback()
+
+    def on_cancel(self, button):
+        """Fechar sem salvar"""
+        self.on_close_callback()
+
+    def keypress(self, size, key):
+        """Esc para fechar"""
+        if key == 'esc':
+            self.on_cancel(None)
+            return None
+        return super().keypress(size, key)
+
+
+# ============================================================================
+# EditTodoDialog - Dialog para editar TODO
+# ============================================================================
+
+class EditTodoDialog(urwid.WidgetWrap):
+    """Dialog para editar TODO existente"""
+
+    def __init__(self, app, task, todo_index, on_close):
+        self.app = app
+        self.task = task
+        self.todo_index = todo_index
+        self.on_close_callback = on_close
+
+        # Pegar texto atual
+        current_text = task['todos'][todo_index]['text']
+
+        # Campo de texto pre-preenchido
+        self.edit = urwid.Edit(caption="TODO: ", edit_text=current_text, multiline=False)
+
+        # Botões
+        ok_btn = urwid.Button("Salvar", on_press=self.on_ok)
+        cancel_btn = urwid.Button("Cancelar", on_press=self.on_cancel)
+
+        button_row = urwid.Columns([
+            urwid.AttrMap(ok_btn, 'button', focus_map='button_focus'),
+            urwid.AttrMap(cancel_btn, 'button', focus_map='button_focus'),
+        ], dividechars=2)
+
+        # Montar dialog
+        content = [
+            urwid.Text(f"Editar TODO:\n", align='center'),
+            urwid.Divider(),
+            urwid.AttrMap(self.edit, None, focus_map='focus'),
+            urwid.Divider(),
+            button_row,
+        ]
+
+        listbox = urwid.ListBox(urwid.SimpleFocusListWalker(content))
+        box = urwid.LineBox(listbox, title="Editar TODO")
+        dialog = urwid.AttrMap(box, 'dialog_bg')
+
+        super().__init__(dialog)
+
+    def on_ok(self, button):
+        """Salvar alteração"""
+        text = self.edit.get_edit_text().strip()
+        if not text:
+            # Validação
+            error_dialog = MessageDialog(
+                "Erro de Validação",
+                "O TODO não pode estar vazio.",
+                on_ok=lambda: self.app.close_overlay(),
+                dialog_type='error'
+            )
+            self.on_close_callback()
+            self.app.show_overlay(error_dialog, width=('relative', 50), height=('relative', 25))
+            return
+
+        self.app.state.update_todo(self.task['id'], self.todo_index, text)
+        self.app.state.save_tasks()
+        self.on_close_callback()
+
+    def on_cancel(self, button):
+        """Fechar sem salvar"""
+        self.on_close_callback()
+
+    def keypress(self, size, key):
+        """Esc para fechar"""
+        if key == 'esc':
+            self.on_cancel(None)
+            return None
+        return super().keypress(size, key)
+
+
+# ============================================================================
+# TodoManageDialog - Dialog principal para gerenciar TODOs
+# ============================================================================
+
+class TodoManageDialog(urwid.WidgetWrap):
+    """Dialog para gerenciar TODOs de uma task"""
+
+    def __init__(self, app, task, on_close):
+        self.app = app
+        self.task = task
+        self.on_close_callback = on_close
+
+        # Lista de TODOs (mutável para rebuild)
+        self.todos = task.get('todos', [])
+
+        # Build content
+        self.build_content()
+
+        super().__init__(self.dialog)
+
+    def build_content(self):
+        """Constrói o conteúdo do dialog"""
+        content = []
+
+        # Header
+        total = len(self.todos)
+        done_count = sum(1 for t in self.todos if t['done'])
+        content.append(urwid.Text(
+            f"📋 TODOs da task #{self.task['id']} ({done_count}/{total} completos)\n",
+            align='center'
+        ))
+        content.append(urwid.Divider())
+
+        # Lista de TODOs (com checkbox)
+        if self.todos:
+            for idx, todo in enumerate(self.todos):
+                checkbox = urwid.CheckBox(
+                    todo['text'],
+                    state=todo['done'],
+                    on_state_change=lambda cb, new_state, i=idx: self.on_toggle(i, new_state)
+                )
+
+                # Botões de ação para cada TODO
+                edit_btn = urwid.Button("✏️", on_press=lambda btn, i=idx: self.on_edit_todo(i))
+                del_btn = urwid.Button("🗑️", on_press=lambda btn, i=idx: self.on_delete_todo(i))
+
+                row = urwid.Columns([
+                    ('weight', 3, urwid.AttrMap(checkbox, None, focus_map='focus')),
+                    ('pack', urwid.AttrMap(edit_btn, 'button', focus_map='button_focus')),
+                    ('pack', urwid.AttrMap(del_btn, 'button', focus_map='button_focus')),
+                ], dividechars=1)
+
+                content.append(row)
+                content.append(urwid.Divider())
+        else:
+            content.append(urwid.Text("(Nenhum TODO ainda)", align='center'))
+            content.append(urwid.Divider())
+
+        # Botões principais
+        add_btn = urwid.Button("➕ Adicionar TODO", on_press=self.on_add_todo)
+        close_btn = urwid.Button("✅ Fechar", on_press=self.on_close)
+
+        button_row = urwid.Columns([
+            urwid.AttrMap(add_btn, 'button', focus_map='button_focus'),
+            urwid.AttrMap(close_btn, 'button', focus_map='button_focus'),
+        ], dividechars=2)
+
+        content.append(button_row)
+
+        # ListBox com todo o conteúdo
+        listbox = urwid.ListBox(urwid.SimpleFocusListWalker(content))
+        box = urwid.LineBox(listbox, title="Gerenciar TODOs")
+        self.dialog = urwid.AttrMap(box, 'dialog_bg')
+
+    def on_toggle(self, idx, new_state):
+        """Toggle TODO done/not done"""
+        self.app.state.toggle_todo(self.task['id'], idx)
+        self.app.state.save_tasks()
+        # Reload task
+        self.task = self.app.state.get_task(self.task['id'])
+        self.todos = self.task.get('todos', [])
+        # Rebuild
+        self.build_content()
+        self._w = self.dialog
+
+    def on_add_todo(self, button):
+        """Abrir dialog para adicionar novo TODO"""
+        def on_add_close():
+            self.app.close_overlay()
+            # Reload e rebuild
+            self.task = self.app.state.get_task(self.task['id'])
+            self.todos = self.task.get('todos', [])
+            self.build_content()
+            self._w = self.dialog
+            # Re-show este dialog
+            self.app.show_overlay(self)
+
+        add_dialog = AddTodoDialog(self.app, self.task, on_add_close)
+        self.app.show_overlay(add_dialog, width=('relative', 60), height=('relative', 30))
+
+    def on_edit_todo(self, idx):
+        """Editar texto de um TODO"""
+        def on_edit_close():
+            self.app.close_overlay()
+            # Reload e rebuild
+            self.task = self.app.state.get_task(self.task['id'])
+            self.todos = self.task.get('todos', [])
+            self.build_content()
+            self._w = self.dialog
+            # Re-show este dialog
+            self.app.show_overlay(self)
+
+        edit_dialog = EditTodoDialog(self.app, self.task, idx, on_edit_close)
+        self.app.show_overlay(edit_dialog, width=('relative', 60), height=('relative', 30))
+
+    def on_delete_todo(self, idx):
+        """Deletar TODO com confirmação"""
+        todo_text = self.todos[idx]['text']
+
+        def on_yes():
+            self.app.state.delete_todo(self.task['id'], idx)
+            self.app.state.save_tasks()
+            self.app.close_overlay()
+            # Reload e rebuild
+            self.task = self.app.state.get_task(self.task['id'])
+            self.todos = self.task.get('todos', [])
+            self.build_content()
+            self._w = self.dialog
+            # Re-show este dialog
+            self.app.show_overlay(self)
+
+        def on_no():
+            self.app.close_overlay()
+            # Re-show este dialog
+            self.app.show_overlay(self)
+
+        confirm = ConfirmDialog(
+            "Deletar TODO",
+            f"Deletar TODO: '{todo_text}'?",
+            on_yes=on_yes,
+            on_no=on_no
+        )
+        self.app.show_overlay(confirm, width=('relative', 50), height=('relative', 25))
+
+    def on_close(self, button=None):
+        """Fechar dialog"""
+        self.on_close_callback()
+
+    def keypress(self, size, key):
+        """Esc para fechar"""
+        if key == 'esc':
+            self.on_close()
+            return None
+        return super().keypress(size, key)
+
+
+# ============================================================================
+# TaskEditScreen - Formulário de edição de task
+# ============================================================================
+
+class TaskEditScreen(urwid.WidgetWrap):
+    """Tela para editar ou criar uma task"""
+
+    def __init__(self, app, task=None):
+        self.app = app
+        self.task = task  # None = nova task
+        self.is_new = (task is None)
+
+        # Campos do formulário
+        self.description_edit = urwid.Edit(
+            "Descrição:\n",
+            edit_text=task['description'] if task else "",
+            multiline=True
+        )
+
+        self.who_edit = urwid.Edit(
+            "Quem pediu: ",
+            edit_text=task.get('who', '') if task else ""
+        )
+
+        self.company_edit = urwid.Edit(
+            "Empresa: ",
+            edit_text=task.get('company', '') if task else ""
+        )
+
+        # RadioButtons para status (só na criação de nova task)
+        self.status_group = []
+        self.status_buttons = {}
+        status_widgets = []
+
+        if self.is_new:
+            status_widgets.append(urwid.Text("Status:"))
+            for status_key, status_info in STATUS.items():
+                # Não mostrar 'finished' na criação
+                if status_key == 'finished':
+                    continue
+                selected = (status_key == 'todo')  # Default: todo
+                rb = urwid.RadioButton(
+                    self.status_group,
+                    f"{status_info['emoji']} {status_info['label']}",
+                    state=selected
+                )
+                self.status_buttons[status_key] = rb
+                status_widgets.append(urwid.AttrMap(rb, None, focus_map='focus'))
+            status_widgets.append(urwid.Divider())
+
+        # RadioButtons para categoria
+        self.category_group = []
+        self.category_buttons = {}
+        category_widgets = [urwid.Text("Categoria:")]
+
+        for cat_key, cat_info in CATEGORIES.items():
+            selected = (task and task.get('category') == cat_key) or (not task and cat_key == 'other')
+            rb = urwid.RadioButton(
+                self.category_group,
+                f"{cat_info['emoji']} {cat_info['label']}",
+                state=selected
+            )
+            self.category_buttons[cat_key] = rb
+            category_widgets.append(urwid.AttrMap(rb, None, focus_map='focus'))
+
+        # RadioButtons para prioridade
+        self.priority_group = []
+        self.priority_buttons = {}
+        priority_widgets = [urwid.Divider(), urwid.Text("Prioridade:")]
+
+        for pri_key, pri_info in PRIORITY.items():
+            selected = (task and task.get('priority') == pri_key) or (not task and pri_key == 'low')
+            rb = urwid.RadioButton(
+                self.priority_group,
+                f"{pri_info['emoji']} {pri_key.upper()}",
+                state=selected
+            )
+            self.priority_buttons[pri_key] = rb
+            priority_widgets.append(urwid.AttrMap(rb, None, focus_map='focus'))
+
+        # Botões
+        save_btn = urwid.Button("Save", on_press=self.on_save)
+        cancel_btn = urwid.Button("Cancel", on_press=self.on_cancel)
+
+        buttons = urwid.Columns([
+            urwid.AttrMap(save_btn, 'button', focus_map='button_focus'),
+            urwid.AttrMap(cancel_btn, 'button', focus_map='button_focus'),
+        ], dividechars=2)
+
+        # Montar formulário
+        form_widgets = [
+            urwid.AttrMap(self.description_edit, None, focus_map='focus'),
+            urwid.Divider(),
+            urwid.AttrMap(self.who_edit, None, focus_map='focus'),
+            urwid.AttrMap(self.company_edit, None, focus_map='focus'),
+            urwid.Divider(),
+            *status_widgets,
+            *category_widgets,
+            *priority_widgets,
+            urwid.Divider(),
+            buttons,
+        ]
+
+        listbox = urwid.ListBox(urwid.SimpleFocusListWalker(form_widgets))
+
+        # Header
+        title = "━━━ ✨ NOVA TASK ━━━" if self.is_new else f"━━━ ✏️  EDITAR TASK #{task['id']} ━━━"
+        header = urwid.AttrMap(urwid.Text(title, align='center'), 'header')
+
+        # Footer
+        footer_text = "━ [ESC]Cancel [Tab]Next [Shift+Tab]Previous [Enter]Save ━"
+        footer = urwid.AttrMap(urwid.Text(footer_text, align='center'), 'footer')
+
+        # Frame
+        frame = urwid.Frame(
+            header=header,
+            body=listbox,
+            footer=footer
+        )
+
+        super().__init__(frame)
+
+    def get_selected_category(self):
+        """Retorna a categoria selecionada"""
+        for cat_key, rb in self.category_buttons.items():
+            if rb.get_state():
+                return cat_key
+        return 'other'
+
+    def get_selected_priority(self):
+        """Retorna a prioridade selecionada"""
+        for pri_key, rb in self.priority_buttons.items():
+            if rb.get_state():
+                return pri_key
+        return 'low'
+
+    def get_selected_status(self):
+        """Retorna o status selecionado (para nova task)"""
+        for status_key, rb in self.status_buttons.items():
+            if rb.get_state():
+                return status_key
+        return 'todo'
+
+    def on_save(self, button):
+        """Salvar task"""
+        description = self.description_edit.get_edit_text().strip()
+
+        # Validação
+        if not description:
+            # Mostrar erro
+            dialog = MessageDialog(
+                "Erro de Validação",
+                "A descrição da task não pode estar vazia.",
+                on_ok=lambda: self.app.close_overlay(),
+                dialog_type='error'
+            )
+            self.app.show_overlay(dialog, width=('relative', 50), height=('relative', 25))
+            return
+
+        who = self.who_edit.get_edit_text().strip()
+        company = self.company_edit.get_edit_text().strip()
+        category = self.get_selected_category()
+        priority = self.get_selected_priority()
+
+        if self.is_new:
+            # Criar nova task
+            status = self.get_selected_status()
+            self.app.state.add_task(
+                description=description,
+                priority=priority,
+                who=who,
+                category=category,
+                company=company,
+                status=status
+            )
+        else:
+            # Atualizar task existente
+            self.app.state.update_task(
+                self.task['id'],
+                description=description,
+                who=who,
+                company=company,
+                category=category,
+                priority=priority
+            )
+
+        self.app.state.save_tasks()
+        self.app.pop_screen()
+
+    def on_cancel(self, button):
+        """Cancelar e voltar"""
+        self.app.pop_screen()
+
+    def keypress(self, size, key):
+        """Handler de teclas"""
+        if key == 'esc':
+            self.on_cancel(None)
+            return None
+
+        return super().keypress(size, key)
+
+
+# ============================================================================
+# TaskDetailScreen - Tela de detalhes de uma task
+# ============================================================================
+
+class TaskDetailScreen(urwid.WidgetWrap):
+    """Tela mostrando todos os detalhes de uma task"""
+
+    def __init__(self, app, task):
+        self.app = app
+        self.task = task
+
+        # Criar conteúdo da tela
+        content = self.build_content()
+
+        # Header
+        header_text = urwid.Text(f"━━━ 🔍 TASK #{task['id']} ━━━", align='center')
+        header = urwid.AttrMap(header_text, 'header')
+
+        # Footer com ações
+        footer_text = urwid.Text(
+            "━ [ESC]Back [e]Edit [c]Comment [s]Status [p]Priority [t]TODOs [d]Delete [↑↓jk]Scroll ━",
+            align='center'
+        )
+        footer = urwid.AttrMap(footer_text, 'footer')
+
+        # Frame
+        frame = urwid.Frame(
+            header=header,
+            body=content,
+            footer=footer
+        )
+
+        super().__init__(frame)
+
+    def build_content(self):
+        """Constrói o conteúdo da tela de detalhes"""
+        task = self.task
+
+        # Info básica
+        status_info = STATUS[task['status']]
+        priority_info = PRIORITY[task['priority']]
+        category_info = CATEGORIES[task.get('category', 'other')]
+
+        # Formatar timestamps
+        created = datetime.fromisoformat(task['created']).strftime('%d/%m/%Y às %H:%M')
+        updated = datetime.fromisoformat(task['updated']).strftime('%d/%m/%Y às %H:%M')
+
+        # Visual clean - branco/cinza com bold para destaque e divisas
+        lines = [
+            urwid.Text([('label', "\nID: "), ('text_bold', f"{task['id']}")]),
+            urwid.Divider('─'),
+            urwid.Text([
+                ('label', "Status: "),
+                (f"status_{task['status']}", f"{status_info['emoji']} {status_info['label']}")
+            ]),
+            urwid.Text([
+                ('label', "Prioridade: "),
+                (f"priority_{task['priority']}", f"{priority_info['emoji']} {task['priority'].upper()}")
+            ]),
+            urwid.Text([
+                ('label', "Categoria: "),
+                ('text', f"{category_info['emoji']} {category_info['label']}")
+            ]),
+            urwid.Text([('label', "Descrição:")]),
+            urwid.Text([('text', task['description'])]),
+            urwid.Text([('label', "Quem pediu: "), ('text', task.get('who', 'Não informado'))]),
+            urwid.Text([('label', "Empresa: "), ('text', task.get('company', 'Não informado'))]),
+            urwid.Text([('secondary', f"Criada: {created}")]),
+            urwid.Text([('secondary', f"Atualizada: {updated}")]),
+        ]
+
+        # Adicionar finished_at se existir
+        if task.get('finished_at'):
+            finished = datetime.fromisoformat(task['finished_at']).strftime('%d/%m/%Y às %H:%M')
+            lines.append(urwid.Text(('success', f"Finalizada: {finished}")))
+
+        # ClickUp info se existir
+        if task.get('clickup_id'):
+            lines.append(urwid.Divider('─'))
+            lines.append(urwid.Text(('subtitle', "\n🔗 ClickUp")))
+            lines.append(urwid.Text([('label', "ID: "), ('text', task['clickup_id'])]))
+            if task.get('clickup_url'):
+                lines.append(urwid.Text([('label', "URL: "), ('text', task['clickup_url'])]))
+
+        # TODOs (antes dos comentários)
+        todos = task.get('todos', [])
+        if todos:
+            total = len(todos)
+            done_count = sum(1 for t in todos if t['done'])
+
+            lines.append(urwid.Divider('─'))
+            lines.append(urwid.Text(('subtitle', f"\n📋 TODOs ({done_count}/{total} completos)")))
+
+            for idx, todo in enumerate(todos):
+                checkbox = "[X]" if todo['done'] else "[ ]"
+                style = 'dimmed' if todo['done'] else 'text'
+                text = todo['text']
+                lines.append(urwid.Text((style, f"  {checkbox} {text}")))
+
+        # Comentários (depois dos TODOs) - ordem: mais recente primeiro
+        if task.get('comments'):
+            lines.append(urwid.Divider('─'))
+            lines.append(urwid.Text(('subtitle', f"\n💬 Comentários ({len(task['comments'])})")))
+
+            comments = task['comments']
+            for i, comment in enumerate(reversed(comments), 1):
+                timestamp = datetime.fromisoformat(comment['timestamp']).strftime('%d/%m/%Y %H:%M')
+                lines.append(urwid.Text(('secondary', f"\n[{i}] {timestamp}")))
+                lines.append(urwid.Text(('text', f"  {comment['text']}")))
+
+        # Criar Pile com todas as linhas
+        pile = urwid.Pile(lines)
+
+        # Wrap em ListBox para permitir scroll
+        listbox = urwid.ListBox(urwid.SimpleFocusListWalker([pile]))
+
+        return listbox
+
+    def keypress(self, size, key):
+        """Handler de teclas"""
+        # Vim-style navigation
+        if key == 'j':
+            key = 'down'
+        elif key == 'k':
+            key = 'up'
+
+        if key == 'esc':
+            # Voltar para MainScreen
+            self.app.pop_screen()
+            return None
+        elif key == 'e':
+            # Editar task
+            edit_screen = TaskEditScreen(self.app, self.task)
+            self.app.push_screen(edit_screen)
+            return None
+        elif key == 'c':
+            # Adicionar comentário
+            def on_close():
+                self.app.close_overlay()
+                # Refresh da tela (rebuild)
+                self.task = self.app.state.get_task(self.task['id'])
+                content = self.build_content()
+                self._w.body = content
+
+            dialog = CommentDialog(self.app, self.task, on_close)
+            self.app.show_overlay(dialog)
+            return None
+        elif key == 's':
+            # Mudar status
+            def on_close():
+                self.app.close_overlay()
+                # Refresh da tela (rebuild)
+                self.task = self.app.state.get_task(self.task['id'])
+                content = self.build_content()
+                self._w.body = content
+
+            dialog = StatusDialog(self.app, self.task, on_close)
+            self.app.show_overlay(dialog)
+            return None
+        elif key == 'p':
+            # Mudar prioridade
+            def on_close():
+                self.app.close_overlay()
+                # Refresh da tela (rebuild)
+                self.task = self.app.state.get_task(self.task['id'])
+                content = self.build_content()
+                self._w.body = content
+
+            dialog = PriorityDialog(self.app, self.task, on_close)
+            self.app.show_overlay(dialog)
+            return None
+        elif key == 'd':
+            # Deletar task com confirmação
+            def on_yes():
+                self.app.state.delete_task(self.task['id'])
+                self.app.state.save_tasks()
+                self.app.close_overlay()
+                self.app.pop_screen()  # Volta ao MainScreen
+
+            def on_no():
+                self.app.close_overlay()
+
+            dialog = ConfirmDialog(
+                "Confirmar Exclusão",
+                f"Deletar task #{self.task['id']}?\n\n{self.task['description'][:50]}...",
+                on_yes=on_yes,
+                on_no=on_no
+            )
+            self.app.show_overlay(dialog, width=('relative', 60), height=('relative', 30))
+            return None
+        elif key == 't':
+            # Gerenciar TODOs
+            def on_close():
+                self.app.close_overlay()
+                # Reload task
+                self.task = self.app.state.get_task(self.task['id'])
+                # Rebuild content
+                content = self.build_content()
+                self._w.body = content
+
+            dialog = TodoManageDialog(self.app, self.task, on_close)
+            self.app.show_overlay(dialog, width=('relative', 70), height=('relative', 60))
+            return None
+
+        return super().keypress(size, key)
+
+
+# ============================================================================
+# MetricsScreen - Tela de métricas e estatísticas
+# ============================================================================
+
+class MetricsScreen(urwid.WidgetWrap):
+    """Tela de métricas com gráficos ASCII e estatísticas"""
+
+    def __init__(self, app, days=30):
+        self.app = app
+        self.days = days
+
+        # Header
+        header_text = urwid.Text(
+            ('header', f"━━━ 📊 MÉTRICAS (últimos {days} dias) ━━━ [7]7d [3]30d [9]90d [ESC]Voltar [↑↓jk]Scroll ━━━"),
+            align='center'
+        )
+        header = urwid.AttrMap(header_text, 'header')
+
+        # Body com todas as métricas
+        body_content = self._build_metrics()
+        body = urwid.ListBox(urwid.SimpleFocusListWalker(body_content))
+
+        # Frame
+        frame = urwid.Frame(header=header, body=body)
+        super().__init__(frame)
+
+    def _build_metrics(self):
+        """Constrói todas as seções de métricas"""
+        from collections import defaultdict
+
+        tasks = self.app.state.tasks
+
+        if not tasks:
+            return [urwid.Text(('body', "\n\n   📭 Nenhuma tarefa cadastrada"), align='center')]
+
+        now = datetime.now()
+        cutoff = now - timedelta(days=self.days)
+
+        # Filtra tarefas do período
+        recent_tasks = [
+            t for t in tasks
+            if datetime.fromisoformat(t['created']) >= cutoff
+        ]
+
+        if not recent_tasks:
+            return [urwid.Text(('body', f"\n\n   📭 Nenhuma tarefa nos últimos {self.days} dias"), align='center')]
+
+        # Métricas gerais
+        total = len(recent_tasks)
+        completed = len([t for t in recent_tasks if t['status'] == 'done'])
+        finished = len([t for t in recent_tasks if t['status'] == 'finished'])
+        in_progress = len([t for t in recent_tasks if t['status'] == 'doing'])
+        paused = len([t for t in recent_tasks if t['status'] == 'paused'])
+        blocked = len([t for t in recent_tasks if t['status'] == 'blocked'])
+        completion_rate = ((completed + finished) / total * 100) if total > 0 else 0
+
+        # Por quem pediu
+        by_requester = defaultdict(int)
+        for task in recent_tasks:
+            who = task.get('who', '').strip()
+            if who:
+                by_requester[who] += 1
+
+        # Por prioridade
+        by_priority = defaultdict(int)
+        for task in recent_tasks:
+            by_priority[task['priority']] += 1
+
+        # Por categoria
+        by_category = defaultdict(int)
+        for task in recent_tasks:
+            by_category[task.get('category', 'other')] += 1
+
+        # Por empresa
+        by_company = defaultdict(int)
+        for task in recent_tasks:
+            company = task.get('company', '').strip()
+            if company:
+                by_company[company] += 1
+
+        # Tarefas por dia (últimas 2 semanas)
+        tasks_by_day = defaultdict(int)
+        completed_by_day = defaultdict(int)
+
+        for task in recent_tasks:
+            created_date = datetime.fromisoformat(task['created']).date()
+            tasks_by_day[created_date] += 1
+
+            if task['status'] in ['done', 'finished']:
+                completed_date = datetime.fromisoformat(task['updated']).date()
+                completed_by_day[completed_date] += 1
+
+        # Tempo médio de conclusão
+        completion_times = []
+        for task in recent_tasks:
+            if task['status'] in ['done', 'finished']:
+                created = datetime.fromisoformat(task['created'])
+                updated = datetime.fromisoformat(task['updated'])
+                hours = (updated - created).total_seconds() / 3600
+                completion_times.append(hours)
+
+        avg_completion_time = sum(completion_times) / len(completion_times) if completion_times else 0
+
+        # === CONSTRUIR WIDGETS ===
+        widgets = []
+
+        # Visão Geral
+        widgets.append(urwid.Divider())
+        widgets.append(urwid.Text(('status_doing', "📊 Visão Geral"), align='center'))
+        widgets.append(urwid.Divider())
+
+        overview_lines = [
+            f"Total de tarefas: {total}",
+            f"Concluídas: {completed} (aguardando confirmação)",
+            f"Finalizadas: {finished} (confirmadas)",
+            f"Taxa de conclusão: {completion_rate:.1f}%",
+            f"Em progresso: {in_progress}",
+            f"Pausadas: {paused}",
+            f"Bloqueadas: {blocked}",
+            f"Tempo médio de conclusão: {avg_completion_time:.1f}h"
+        ]
+        for line in overview_lines:
+            widgets.append(urwid.Text(('body', f"  {line}")))
+
+        # Timeline de Tarefas Criadas
+        widgets.append(urwid.Divider())
+        widgets.append(urwid.Text(('status_doing', "📅 Tarefas Criadas (últimos 14 dias)"), align='center'))
+        widgets.append(urwid.Divider())
+        timeline = draw_timeline_chart(tasks_by_day, days=14)
+        widgets.append(urwid.Text(('body', timeline)))
+
+        # Timeline de Tarefas Concluídas
+        if completed_by_day:
+            widgets.append(urwid.Divider())
+            widgets.append(urwid.Text(('status_done', "✅ Tarefas Concluídas (últimos 14 dias)"), align='center'))
+            widgets.append(urwid.Divider())
+            completion_timeline = draw_timeline_chart(completed_by_day, days=14)
+            widgets.append(urwid.Text(('body', completion_timeline)))
+
+        # Por Solicitante
+        if by_requester:
+            widgets.append(urwid.Divider())
+            widgets.append(urwid.Text(('status_doing', "👥 Tarefas por Solicitante"), align='center'))
+            widgets.append(urwid.Divider())
+            requester_data = dict(sorted(by_requester.items(), key=lambda x: x[1], reverse=True)[:10])
+            requester_chart = draw_bar_chart(requester_data, max_width=40)
+            widgets.append(urwid.Text(('body', requester_chart)))
+
+        # Por Categoria
+        if by_category:
+            widgets.append(urwid.Divider())
+            widgets.append(urwid.Text(('status_doing', "📂 Distribuição por Categoria"), align='center'))
+            widgets.append(urwid.Divider())
+            category_data = {}
+            for cat, count in sorted(by_category.items(), key=lambda x: x[1], reverse=True):
+                cat_info = CATEGORIES[cat]
+                category_data[f"{cat_info['emoji']} {cat_info['label']}"] = count
+            category_chart = draw_bar_chart(category_data, max_width=40)
+            widgets.append(urwid.Text(('body', category_chart)))
+
+        # Por Empresa
+        if by_company:
+            widgets.append(urwid.Divider())
+            widgets.append(urwid.Text(('status_doing', "🏢 Tarefas por Empresa"), align='center'))
+            widgets.append(urwid.Divider())
+            company_data = dict(sorted(by_company.items(), key=lambda x: x[1], reverse=True)[:10])
+            company_chart = draw_bar_chart(company_data, max_width=40)
+            widgets.append(urwid.Text(('body', company_chart)))
+
+        # Por Prioridade
+        widgets.append(urwid.Divider())
+        widgets.append(urwid.Text(('status_doing', "🎯 Distribuição por Prioridade"), align='center'))
+        widgets.append(urwid.Divider())
+        priority_data = {
+            f"{PRIORITY['high']['emoji']} High": by_priority.get('high', 0),
+            f"{PRIORITY['medium']['emoji']} Medium": by_priority.get('medium', 0),
+            f"{PRIORITY['low']['emoji']} Low": by_priority.get('low', 0)
+        }
+        priority_chart = draw_bar_chart(priority_data, max_width=40)
+        widgets.append(urwid.Text(('body', priority_chart)))
+
+        # Insights
+        insights = []
+
+        if completion_rate < 50:
+            insights.append("⚠️  Taxa de conclusão baixa. Considere revisar prioridades.")
+        elif completion_rate > 80:
+            insights.append("🎉 Excelente taxa de conclusão!")
+
+        if blocked > 0:
+            insights.append(f"🚫 Você tem {blocked} tarefa(s) bloqueada(s). Revise-as!")
+
+        if paused > 0:
+            insights.append(f"⏸️  {paused} tarefa(s) pausada(s). Considere retomá-las.")
+
+        if avg_completion_time > 48:
+            insights.append("⏰ Tarefas levam em média mais de 2 dias. Considere quebrar em tarefas menores.")
+
+        if by_requester:
+            top_requester = max(by_requester.items(), key=lambda x: x[1])
+            insights.append(f"👤 Maior solicitante: {top_requester[0]} com {top_requester[1]} tarefas")
+
+        if by_company:
+            top_company = max(by_company.items(), key=lambda x: x[1])
+            insights.append(f"🏢 Empresa com mais tarefas: {top_company[0]} ({top_company[1]} tarefas)")
+
+        if by_category:
+            top_category = max(by_category.items(), key=lambda x: x[1])
+            cat_info = CATEGORIES[top_category[0]]
+            insights.append(f"{cat_info['emoji']} Categoria dominante: {cat_info['label']} ({top_category[1]} tarefas)")
+
+        if insights:
+            widgets.append(urwid.Divider())
+            widgets.append(urwid.Text(('status_doing', "💡 Insights"), align='center'))
+            widgets.append(urwid.Divider())
+            for insight in insights:
+                widgets.append(urwid.Text(('body', f"  {insight}")))
+
+        widgets.append(urwid.Divider())
+        widgets.append(urwid.Divider())
+
+        return widgets
+
+    def keypress(self, size, key):
+        """Handler de teclas - scroll e mudança de período"""
+        # Vim-style navigation
+        if key == 'j':
+            key = 'down'
+        elif key == 'k':
+            key = 'up'
+
+        if key == 'esc':
+            self.app.pop_screen()
+            return None
+        elif key == '7':
+            # Recarregar com 7 dias
+            new_screen = MetricsScreen(self.app, days=7)
+            self.app.screen_stack.pop()
+            self.app.screen_stack.append(new_screen)
+            self.app.main_widget.original_widget = new_screen
+            return None
+        elif key == '3':
+            # Recarregar com 30 dias
+            new_screen = MetricsScreen(self.app, days=30)
+            self.app.screen_stack.pop()
+            self.app.screen_stack.append(new_screen)
+            self.app.main_widget.original_widget = new_screen
+            return None
+        elif key == '9':
+            # Recarregar com 90 dias
+            new_screen = MetricsScreen(self.app, days=90)
+            self.app.screen_stack.pop()
+            self.app.screen_stack.append(new_screen)
+            self.app.main_widget.original_widget = new_screen
+            return None
+
+        return super().keypress(size, key)
+
+
+# ============================================================================
+# Agenda Screens
+# ============================================================================
+
+class EventDetailScreen(urwid.WidgetWrap):
+    """Tela de detalhes de um evento - layout rico similar a TaskDetailScreen"""
+
+    def __init__(self, app, event):
+        self.app = app
+        self.event = event
+
+        # Extrair dados
+        summary = event.get('summary', 'Sem título')
+        description = event.get('description', '')
+        location = event.get('location', '')
+        link = event.get('htmlLink', '')
+        creator = event.get('creator', {}).get('email', '')
+        organizer = event.get('organizer', {}).get('email', '')
+        attendees = event.get('attendees', [])
+        status = event.get('status', 'confirmed')
+        visibility = event.get('visibility', 'default')
+        recurring = 'recurringEventId' in event
+        hangout_link = event.get('hangoutLink', '')
+        conference = event.get('conferenceData', {})
+        created = event.get('created', '')
+        updated = event.get('updated', '')
+
+        start = event['start'].get('dateTime', event['start'].get('date'))
+        end = event['end'].get('dateTime', event['end'].get('date'))
+
+        # Formatar datas
+        is_all_day = 'date' in event['start'] and 'dateTime' not in event['start']
+        try:
+            dt_start = datetime.fromisoformat(start.replace('Z', '+00:00'))
+            dt_end = datetime.fromisoformat(end.replace('Z', '+00:00'))
+
+            if is_all_day:
+                date_str = dt_start.strftime('%A, %d de %B de %Y')
+                time_str = "Dia inteiro"
+            else:
+                date_str = dt_start.strftime('%A, %d de %B de %Y')
+                time_str = f"{dt_start.strftime('%H:%M')} - {dt_end.strftime('%H:%M')}"
+
+                # Calcular duração
+                duration = dt_end - dt_start
+                hours, remainder = divmod(duration.seconds, 3600)
+                minutes = remainder // 60
+                if hours > 0:
+                    duration_str = f"{hours}h{minutes:02d}min"
+                else:
+                    duration_str = f"{minutes}min"
+        except:
+            date_str = start
+            time_str = f"{start} - {end}"
+            duration_str = ""
+
+        # Verificar se é hoje/amanhã
+        today = datetime.now().date()
+        tomorrow = today + timedelta(days=1)
+        try:
+            event_date = dt_start.date()
+            if event_date == today:
+                day_badge = ('warning', " HOJE ")
+            elif event_date == tomorrow:
+                day_badge = ('success', " AMANHÃ ")
+            elif event_date < today:
+                day_badge = ('error', " PASSADO ")
+            else:
+                days_until = (event_date - today).days
+                day_badge = ('dimmed', f" em {days_until} dias ")
+        except:
+            day_badge = None
+
+        # Header
+        header_text = urwid.Text(f"━━━ 📅 DETALHES DO EVENTO ━━━", align='center')
+        header = urwid.AttrMap(header_text, 'header')
+
+        # ══════════════════════════════════════════════════════════════
+        # PAINEL ESQUERDO: Informações principais
+        # ══════════════════════════════════════════════════════════════
+
+        info_content = [
+            urwid.Text(('title', f" {summary}")),
+            urwid.Divider(),
+        ]
+
+        if day_badge:
+            info_content.append(urwid.Text(day_badge))
+            info_content.append(urwid.Divider())
+
+        # Data e hora
+        info_content.append(urwid.Text(('subtitle', " 🗓️  Data e Hora")))
+        info_content.append(urwid.Divider('─'))
+        info_content.append(urwid.Text(f"   {date_str}"))
+        info_content.append(urwid.Text(f"   ⏰ {time_str}"))
+        if duration_str:
+            info_content.append(urwid.Text(('dimmed', f"   ⏱️  Duração: {duration_str}")))
+        if recurring:
+            info_content.append(urwid.Text(('dimmed', "   🔄 Evento recorrente")))
+
+        # Indicador de notificações
+        if event_has_notifications(event):
+            info_content.append(urwid.Text(('success', "   🔔 Notificações ativas")))
+
+        info_content.append(urwid.Divider())
+
+        # Local
+        if location:
+            info_content.append(urwid.Text(('subtitle', " 📍 Local")))
+            info_content.append(urwid.Divider('─'))
+            info_content.append(urwid.Text(f"   {location}"))
+            info_content.append(urwid.Divider())
+
+        # Link de videoconferência
+        if hangout_link:
+            info_content.append(urwid.Text(('subtitle', " 🎥 Videoconferência")))
+            info_content.append(urwid.Divider('─'))
+            info_content.append(urwid.Text(('success', f"   Google Meet")))
+            info_content.append(urwid.Text(('dimmed', f"   {hangout_link}")))
+            info_content.append(urwid.Divider())
+        elif conference:
+            conf_type = conference.get('conferenceSolution', {}).get('name', 'Reunião')
+            info_content.append(urwid.Text(('subtitle', " 🎥 Videoconferência")))
+            info_content.append(urwid.Divider('─'))
+            info_content.append(urwid.Text(('success', f"   {conf_type}")))
+            info_content.append(urwid.Divider())
+
+        info_pile = urwid.Pile(info_content)
+        info_filler = urwid.Filler(info_pile, valign='top')
+        info_box = urwid.LineBox(info_filler, title="Informações")
+
+        # ══════════════════════════════════════════════════════════════
+        # PAINEL DIREITO: Detalhes adicionais
+        # ══════════════════════════════════════════════════════════════
+
+        details_content = []
+
+        # Organizador/Criador
+        if organizer or creator:
+            details_content.append(urwid.Text(('subtitle', " 👤 Organizador")))
+            details_content.append(urwid.Divider('─'))
+            details_content.append(urwid.Text(f"   {organizer or creator}"))
+            details_content.append(urwid.Divider())
+
+        # Status
+        details_content.append(urwid.Text(('subtitle', " ℹ️  Status")))
+        details_content.append(urwid.Divider('─'))
+        status_map = {
+            'confirmed': ('success', '✅ Confirmado'),
+            'tentative': ('warning', '❓ Tentativo'),
+            'cancelled': ('error', '❌ Cancelado'),
+        }
+        st_style, st_text = status_map.get(status, ('text', status))
+        details_content.append(urwid.Text((st_style, f"   {st_text}")))
+        details_content.append(urwid.Divider())
+
+        # Criado/Atualizado
+        if created or updated:
+            details_content.append(urwid.Text(('subtitle', " 📆 Histórico")))
+            details_content.append(urwid.Divider('─'))
+            if created:
+                try:
+                    dt_created = datetime.fromisoformat(created.replace('Z', '+00:00'))
+                    created_str = dt_created.strftime('%d/%m/%Y %H:%M')
+                except:
+                    created_str = created
+                details_content.append(urwid.Text(('dimmed', f"   Criado: {created_str}")))
+            if updated:
+                try:
+                    dt_updated = datetime.fromisoformat(updated.replace('Z', '+00:00'))
+                    updated_str = dt_updated.strftime('%d/%m/%Y %H:%M')
+                except:
+                    updated_str = updated
+                details_content.append(urwid.Text(('dimmed', f"   Atualizado: {updated_str}")))
+            details_content.append(urwid.Divider())
+
+        # Participantes (no final, usa espaço restante)
+        if attendees:
+            details_content.append(urwid.Text(('subtitle', f" 👥 Participantes ({len(attendees)})")))
+            details_content.append(urwid.Divider('─'))
+
+            # Organizar em 2 colunas para usar melhor o espaço
+            att_list = []
+            for att in attendees:
+                email = att.get('email', '')
+                name = att.get('displayName', email.split('@')[0])
+                response = att.get('responseStatus', 'needsAction')
+
+                if response == 'accepted':
+                    icon = "✅"
+                elif response == 'declined':
+                    icon = "❌"
+                elif response == 'tentative':
+                    icon = "❓"
+                else:
+                    icon = "⏳"
+
+                is_org = att.get('organizer', False)
+                org_mark = " ◆" if is_org else ""
+                name_truncated = name[:16] if is_org else name[:18]
+                att_list.append(f"{icon} {name_truncated}{org_mark}")
+
+            # Criar 2 colunas
+            for i in range(0, len(att_list), 2):
+                col1 = att_list[i] if i < len(att_list) else ""
+                col2 = att_list[i+1] if i+1 < len(att_list) else ""
+                details_content.append(urwid.Text(f" {col1:<22} {col2}"))
+
+            details_content.append(urwid.Divider())
+
+        if not details_content:
+            details_content.append(urwid.Text(('dimmed', " Sem detalhes adicionais")))
+
+        details_pile = urwid.Pile(details_content)
+        details_filler = urwid.Filler(details_pile, valign='top')
+        details_box = urwid.LineBox(details_filler, title="Detalhes")
+
+        # ══════════════════════════════════════════════════════════════
+        # DESCRIÇÃO (Parte inferior, se existir)
+        # ══════════════════════════════════════════════════════════════
+
+        if description:
+            desc_content = [
+                urwid.Text(description),
+            ]
+            desc_pile = urwid.Pile(desc_content)
+            desc_filler = urwid.Filler(desc_pile, valign='top')
+            desc_box = urwid.LineBox(desc_filler, title="📝 Descrição")
+        else:
+            desc_box = None
+
+        # ══════════════════════════════════════════════════════════════
+        # LAYOUT FINAL
+        # ══════════════════════════════════════════════════════════════
+
+        # Colunas: Info (60%) | Detalhes (40%)
+        top_columns = urwid.Columns([
+            ('weight', 60, info_box),
+            ('weight', 40, details_box),
+        ], dividechars=0)
+
+        if desc_box:
+            body = urwid.Pile([
+                ('weight', 70, top_columns),
+                ('weight', 30, desc_box),
+            ])
+        else:
+            body = top_columns
+
+        # Footer com opção de notificação
+        self.has_notif = event_has_notifications(event)
+        self.update_footer()
+
+        self.frame = urwid.Frame(header=header, body=body, footer=self.footer)
+        super().__init__(self.frame)
+
+    def update_footer(self):
+        """Atualiza footer com status de notificação"""
+        if self.has_notif:
+            notif_text = "[N]🔔 Remover notif."
+        else:
+            notif_text = "[n]🔕 Criar notif."
+
+        footer_text = urwid.Text(
+            f"━ [ESC/q]Voltar [j/k]Scroll {notif_text} ━",
+            align='center'
+        )
+        self.footer = urwid.AttrMap(footer_text, 'footer')
+
+        if hasattr(self, 'frame'):
+            self.frame.footer = self.footer
+
+    def show_message(self, msg, style='text'):
+        """Mostra mensagem temporária no footer"""
+        footer_text = urwid.Text(('warning', f"  {msg}  "), align='center')
+        self.frame.footer = urwid.AttrMap(footer_text, 'footer')
+        # Restaurar footer original após 2 segundos
+        def restore(loop, data):
+            self.update_footer()
+        self.app.loop.set_alarm_in(2, restore)
+
+    def keypress(self, size, key):
+        if key in ('esc', 'q'):
+            self.app.pop_screen()
+            return None
+
+        if key == 'j':
+            key = 'down'
+        elif key == 'k':
+            key = 'up'
+
+        # n - Criar notificações
+        if key == 'n' and not self.has_notif:
+            success, msg = create_event_notifications(self.event)
+            if success:
+                self.has_notif = True
+                self.show_message(f"✅ {msg}")
+            else:
+                self.show_message(f"❌ {msg}")
+            self.update_footer()
+            return None
+
+        # N (shift+n) - Remover notificações
+        if key == 'N' and self.has_notif:
+            success, msg = remove_event_notifications(self.event)
+            if success:
+                self.has_notif = False
+                self.show_message(f"✅ {msg}")
+            else:
+                self.show_message(f"❌ {msg}")
+            self.update_footer()
+            return None
+
+        return super().keypress(size, key)
+
+
+class AgendaEventRow(urwid.WidgetWrap):
+    """Linha da lista de agenda - formato igual ao TaskRow (texto simples)"""
+
+    def __init__(self, event):
+        self.event = event
+
+        start = event['start'].get('dateTime', event['start'].get('date'))
+        end = event['end'].get('dateTime', event['end'].get('date'))
+        is_all_day = 'date' in event['start'] and 'dateTime' not in event['start']
+
+        time_str = "Dia todo"
+        duration_str = "     "
+
+        try:
+            dt_start = datetime.fromisoformat(start.replace('Z', '+00:00'))
+            dt_end = datetime.fromisoformat(end.replace('Z', '+00:00'))
+
+            if not is_all_day:
+                time_str = dt_start.strftime("%H:%M")
+
+                # Duração
+                duration = dt_end - dt_start
+                hours, remainder = divmod(duration.seconds, 3600)
+                minutes = remainder // 60
+                if hours > 0:
+                    duration_str = f"{hours}h{minutes:02d}m"
+                else:
+                    duration_str = f" {minutes:2d}m "
+        except:
+            pass
+
+        summary = event.get('summary', 'Sem título')
+        location = event.get('location', '')
+        hangout = event.get('hangoutLink', '')
+        attendees = event.get('attendees', [])
+        status = event.get('status', 'confirmed')
+
+        # Truncar título
+        max_len = 40
+        if len(summary) > max_len:
+            summary = summary[:max_len-3] + '...'
+
+        # Truncar local
+        if location:
+            loc_short = location[:20] + "..." if len(location) > 20 else location
+        else:
+            loc_short = "-"
+
+        # Ícones fixos
+        icon_meet = "🎥" if (hangout or event.get('conferenceData')) else "  "
+        icon_loc = "📍" if location else "  "
+        icon_recur = "🔄" if 'recurringEventId' in event else "  "
+        attendees_str = f"👥{len(attendees):2d}" if attendees else "    "
+
+        # Status
+        if status == 'cancelled':
+            status_icon = "❌"
+        elif status == 'tentative':
+            status_icon = "❓"
+        else:
+            status_icon = "📅"
+
+        # Linha única formatada (igual TaskRow)
+        line_text = f" {status_icon} {time_str:<8} {duration_str:<5} │ {summary:<40} │ {icon_loc}{loc_short:<23} │ {icon_meet} {attendees_str} {icon_recur}"
+
+        # Widget de texto simples
+        text_widget = urwid.Text(line_text)
+
+        # AttrMap para focus funcionar (igual TaskRow)
+        attr_map = urwid.AttrMap(text_widget, 'task_row', focus_map='task_row_focus')
+
+        super().__init__(attr_map)
+
+    def selectable(self):
+        return True
+
+    def keypress(self, size, key):
+        return key
+
+
+class AgendaListScreen(urwid.WidgetWrap):
+    """Tela de lista completa da Agenda - estilo similar ao MainScreen"""
+
+    def __init__(self, app):
+        self.app = app
+        self.events = []
+        self.show_recurring = True  # Eventos recorrentes ativados por padrão
+
+        # Walker para lista de eventos
+        self.event_walker = urwid.SimpleFocusListWalker([])
+        self.event_list = urwid.ListBox(self.event_walker)
+        self.event_box = urwid.LineBox(self.event_list, title="Eventos")
+
+        # Painel de stats (esquerda)
+        self.stats_box = self.build_stats_panel()
+
+        # Layout em colunas: Stats (25%) | Eventos (75%)
+        self.columns = urwid.Columns([
+            ('weight', 25, self.stats_box),
+            ('weight', 75, self.event_box),
+        ], dividechars=0)
+
+        # Carregar eventos
+        self.load_events()
+
+        # Header
+        self.update_header()
+
+        # Footer
+        self.update_footer()
+
+    def update_footer(self):
+        """Atualiza footer com status do filtro de recorrentes"""
+        recur_status = "ON" if self.show_recurring else "OFF"
+        footer_text = urwid.Text(
+            f"━ [r]Atualizar [R]Recorrentes:{recur_status} [Enter]Detalhes [j/k]Navegar [ESC]Voltar ━",
+            align='center'
+        )
+        self.footer = urwid.AttrMap(footer_text, 'footer')
+
+        if hasattr(self, '_w') and isinstance(self._w, urwid.Frame):
+            self._w.footer = self.footer
+
+        # Frame
+        frame = urwid.Frame(
+            header=self.header,
+            body=self.columns,
+            footer=self.footer
+        )
+
+        super().__init__(frame)
+
+    def build_stats_panel(self):
+        """Constrói painel de estatísticas"""
+        today = datetime.now().date()
+
+        # Contar eventos por período
+        today_count = 0
+        tomorrow_count = 0
+        week_count = 0
+
+        for event in self.events:
+            start = event['start'].get('dateTime', event['start'].get('date'))
+            try:
+                dt = datetime.fromisoformat(start.replace('Z', '+00:00')).date()
+                if dt == today:
+                    today_count += 1
+                elif dt == today + timedelta(days=1):
+                    tomorrow_count += 1
+                if dt <= today + timedelta(days=7):
+                    week_count += 1
+            except:
+                pass
+
+        # Status do filtro de recorrentes
+        recur_style = 'success' if self.show_recurring else 'dimmed'
+        recur_text = "🔄 Mostrar" if self.show_recurring else "🔄 Ocultar"
+
+        content = [
+            urwid.Text(('subtitle', " 📊 Resumo")),
+            urwid.Divider('─'),
+            urwid.Text(f" Hoje: {today_count}"),
+            urwid.Text(f" Amanhã: {tomorrow_count}"),
+            urwid.Text(f" 7 dias: {week_count}"),
+            urwid.Text(f" Total: {len(self.events)}"),
+            urwid.Divider('─'),
+            urwid.Text(('dimmed', f" {today.strftime('%d/%m/%Y')}")),
+            urwid.Divider(),
+            urwid.Text(('subtitle', " ⚙️ Filtros")),
+            urwid.Divider('─'),
+            urwid.Text((recur_style, f" {recur_text}")),
+            urwid.Text(('dimmed', "   recorrentes")),
+            urwid.Divider(),
+            urwid.Text(('subtitle', " 📅 Legenda")),
+            urwid.Divider('─'),
+            urwid.Text(('warning', " ● Hoje")),
+            urwid.Text(('success', " ● Amanhã")),
+            urwid.Text(('text', " ● Próximos")),
+        ]
+
+        pile = urwid.Pile(content)
+        filler = urwid.Filler(pile, valign='top')
+        return urwid.LineBox(filler, title="Stats")
+
+    def update_header(self):
+        """Atualiza header com contagem de eventos"""
+        total = len(self.events)
+        today = datetime.now().strftime('%d/%m/%Y')
+
+        header_text = urwid.Text(
+            f"━━━ 📅 GOOGLE AGENDA ━━━ {total} eventos ━━━ {today} ━━━",
+            align='center'
+        )
+        self.header = urwid.AttrMap(header_text, 'header')
+
+        if hasattr(self, '_w') and isinstance(self._w, urwid.Frame):
+            self._w.header = self.header
+
+    def load_events(self):
+        """Carrega eventos do Google Calendar"""
+        self.event_walker.clear()
+
+        # Buscar eventos
+        all_events = self.app.state.calendar_api.get_upcoming_events(max_results=50) or []
+
+        # Filtrar eventos recorrentes se show_recurring = False
+        if self.show_recurring:
+            self.events = all_events
+        else:
+            self.events = [e for e in all_events if 'recurringEventId' not in e]
+
+        if not self.events:
+            empty = urwid.Text(('dimmed', "\n  📭 Nenhum evento encontrado\n\n  Verifique sua conexão com o Google Calendar."), align='left')
+            self.event_walker.append(empty)
+            return
+
+        # Agrupar por dia
+        current_day = None
+        today = datetime.now().date()
+        tomorrow = today + timedelta(days=1)
+
+        for event in self.events:
+            start = event['start'].get('dateTime', event['start'].get('date'))
+            try:
+                dt = datetime.fromisoformat(start.replace('Z', '+00:00'))
+                event_day = dt.date()
+            except:
+                event_day = None
+
+            # Separador de dia
+            if event_day and event_day != current_day:
+                current_day = event_day
+
+                if event_day == today:
+                    day_label = "📍 HOJE"
+                    day_style = 'warning'
+                elif event_day == tomorrow:
+                    day_label = "📆 AMANHÃ"
+                    day_style = 'success'
+                else:
+                    day_label = f"📅 {event_day.strftime('%A, %d/%m').upper()}"
+                    day_style = 'subtitle'
+
+                # Adicionar separador
+                self.event_walker.append(urwid.Divider())
+                separator = urwid.AttrMap(
+                    urwid.Text(f" {day_label} ", align='left'),
+                    day_style
+                )
+                self.event_walker.append(separator)
+                self.event_walker.append(urwid.Divider('─'))
+
+            # Adicionar evento
+            self.event_walker.append(AgendaEventRow(event))
+
+        # Atualizar stats
+        self.stats_box = self.build_stats_panel()
+        self.columns.contents[0] = (self.stats_box, ('weight', 25, False))
+
+        # Atualizar header
+        self.update_header()
+
+    def refresh(self):
+        """Recarrega os eventos"""
+        self.app.state.load_events()
+        self.load_events()
+
+    def keypress(self, size, key):
+        # ESC - Voltar
+        if key in ('esc', 'q'):
+            self.app.pop_screen()
+            return None
+
+        # Enter - Detalhes do evento
+        if key in ('enter', ' '):
+            focus_widget = self.event_list.focus
+            if focus_widget and isinstance(focus_widget, AgendaEventRow):
+                detail = EventDetailScreen(self.app, focus_widget.event)
+                self.app.push_screen(detail)
+            return None
+
+        # r - Refresh
+        if key == 'r':
+            self.refresh()
+            return None
+
+        # R - Toggle eventos recorrentes
+        if key == 'R':
+            self.show_recurring = not self.show_recurring
+            self.load_events()
+            self.update_footer()
+            return None
+
+        # Vim-style navigation
+        if key == 'j':
+            key = 'down'
+        elif key == 'k':
+            key = 'up'
+
+        # g - Ir para início
+        if key == 'g':
+            if self.event_walker:
+                self.event_list.focus_position = 0
+            return None
+
+        # G - Ir para fim
+        if key == 'G':
+            if self.event_walker:
+                self.event_list.focus_position = len(self.event_walker) - 1
+            return None
+
+        return super().keypress(size, key)
+
+# ============================================================================
+# StatsPanel - Painel esquerdo com estatísticas e eventos
+# ============================================================================
+
+class AgendaPanel(urwid.WidgetWrap):
+    """Painel esquerdo: Apenas Agenda (Eventos)"""
+
+    def __init__(self, app):
+        self.app = app
+        self.build_content()
+
+    def build_content(self):
+        """Constrói o conteúdo do painel"""
+        content_widgets = []
+
+        # Filtrar eventos recorrentes (mostrar apenas não-recorrentes)
+        non_recurring = [e for e in self.app.state.events if 'recurringEventId' not in e]
+
+        if non_recurring:
+            today = datetime.now().date()
+            for event in non_recurring[:4]: # Max 4 eventos para caber na horizontal
+                start = event['start'].get('dateTime', event['start'].get('date'))
+                try:
+                    dt = datetime.fromisoformat(start.replace('Z', '+00:00'))
+                    if dt.date() == today:
+                         time_str = f"Hoje {dt.strftime('%H:%M')}"
+                         style = 'warning'
+                    else:
+                         time_str = dt.strftime("%d/%m %H:%M")
+                         style = 'secondary'
+                except:
+                    time_str = start
+                    style = 'secondary'
+                
+                summary = event.get('summary', 'Sem título')
+
+                # Criar widget de texto que adapta ao espaço disponível
+                # wrap='space' quebra em palavras, adaptando ao espaço
+                event_text = urwid.Text([
+                    (style, f"{time_str}\n"),
+                    ('text', summary)
+                ], align='center', wrap='space')
+
+                # Wrap em um LineBox para dar "corpo" ao evento
+                event_box = urwid.LineBox(event_text)
+                content_widgets.append(('weight', 1, event_box))
+            
+            # Se não houver eventos suficientes para preencher, urwid expande os existentes.
+            # Columns divide o espaço.
+            self.inner_widget = urwid.Columns(content_widgets, dividechars=1)
+        else:
+             self.inner_widget = urwid.Text(('dimmed', "Sem eventos próximos"), align='center')
+
+        # Wrap em LineBox principal da Agenda
+        # Filler garante que o conteúdo não estique verticalmente mais que o necessário, 
+        # mas aqui queremos que o painel ocupe o espaço do Pile. 
+        # No Pile do MainScreen, este painel tem weight 1.
+        
+        # IMPORTANTE: Remover 'dialog_bg' para transparência (usar None)
+        box = urwid.LineBox(self.inner_widget, title="📅 Agenda")
+        self._w = urwid.AttrMap(box, None)
+
+
+# ============================================================================
+# ClickUpTodayPanel - Tasks de hoje do ClickUp
+# ============================================================================
+
+class ClickUpTodayPanel(urwid.WidgetWrap):
+    """Painel lateral com tasks do ClickUp agrupadas por data e lista"""
+
+    MAX_WIDTH = 35  # Largura máxima
+    MIN_WIDTH = 20  # Largura mínima
+
+    def __init__(self, app):
+        self.app = app
+        self.width = self.MIN_WIDTH
+        self.build_content()
+
+    def build_content(self):
+        """Constrói o conteúdo do painel usando dados da API do ClickUp"""
+        content = []
+        line_widths = []  # Para calcular largura necessária
+        today = datetime.now().date()
+        tomorrow = today + timedelta(days=1)
+
+        # Usar tasks do ClickUp carregadas na inicialização
+        clickup_tasks = getattr(self.app, 'clickup_tasks', []) or []
+
+        # Agrupar tasks por data (apenas hoje e futuro)
+        tasks_by_date = {}
+
+        for ct in clickup_tasks:
+            # Status do ClickUp
+            status_obj = ct.get('status', {})
+            status_name = status_obj.get('status', '').lower() if isinstance(status_obj, dict) else ''
+            if status_name in ('complete', 'done', 'closed', 'finished'):
+                continue
+
+            # Due date (timestamp em ms)
+            due = ct.get('due_date')
+            if due:
+                try:
+                    task_date = datetime.fromtimestamp(int(due) / 1000).date()
+                    if task_date >= today:
+                        if task_date not in tasks_by_date:
+                            tasks_by_date[task_date] = []
+                        tasks_by_date[task_date].append(ct)
+                except:
+                    pass
+
+        # Ordenar datas
+        sorted_dates = sorted(tasks_by_date.keys())
+
+        # Função para ordenar tasks: por lista
+        def sort_task(t):
+            list_name = t.get('list', {}).get('name', '') or ''
+            return list_name
+
+        total_tasks = sum(len(tasks) for tasks in tasks_by_date.values())
+
+        if total_tasks > 0:
+            header = f" 📋 {total_tasks} tasks pendentes"
+            content.append(urwid.Text(('warning', header)))
+            line_widths.append(len(header) + 2)
+            content.append(urwid.Divider('─'))
+
+            for date in sorted_dates:
+                tasks = tasks_by_date[date]
+                tasks.sort(key=sort_task)
+
+                # Header da data
+                if date == today:
+                    date_label = "📍 HOJE"
+                    attr = 'warning'
+                elif date == tomorrow:
+                    date_label = "📆 AMANHÃ"
+                    attr = 'info'
+                else:
+                    days_diff = (date - today).days
+                    if days_diff <= 7:
+                        weekdays = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
+                        date_label = f"📅 {weekdays[date.weekday()]} ({date.strftime('%d/%m')})"
+                    else:
+                        date_label = f"📅 {date.strftime('%d/%m')}"
+                    attr = 'dimmed'
+
+                date_line = f" {date_label} ({len(tasks)})"
+                content.append(urwid.Text((attr, date_line)))
+                line_widths.append(len(date_line) + 2)
+
+                # Agrupar por lista dentro da data
+                tasks_by_list = {}
+                for ct in tasks:
+                    list_name = ct.get('list', {}).get('name', 'Sem Lista') or 'Sem Lista'
+                    if list_name not in tasks_by_list:
+                        tasks_by_list[list_name] = []
+                    tasks_by_list[list_name].append(ct)
+
+                for list_name, list_tasks in tasks_by_list.items():
+                    # Sub-header da lista com contagem (só se > 1)
+                    count_str = f" ({len(list_tasks)})" if len(list_tasks) > 1 else ""
+                    list_line = f"   └ {list_name}{count_str}"
+                    line_widths.append(len(list_line) + 2)
+                    # Truncar se necessário para o display
+                    short_list = list_name[:18] + "..." if len(list_name) > 18 else list_name
+                    display_line = f"   └ {short_list}{count_str}"
+                    content.append(urwid.Text(('dimmed', display_line)))
+
+                content.append(urwid.Text(""))
+
+            # Calcular largura necessária (+2 para margem direita)
+            max_line = max(line_widths) if line_widths else self.MIN_WIDTH
+            self.width = min(max(max_line + 2, self.MIN_WIDTH), self.MAX_WIDTH)
+
+        else:
+            content.append(urwid.Text(('success', "\n ✅ Nenhuma task\n    pendente!"), align='center'))
+            self.width = self.MIN_WIDTH
+
+        # Usar ListBox para scroll
+        listbox = urwid.ListBox(urwid.SimpleFocusListWalker(content))
+        box = urwid.LineBox(listbox, title="📋 Empresas")
+        self._w = urwid.AttrMap(box, None)
+
+
+class MainScreen(urwid.WidgetWrap):
+    """Tela principal: lista de tasks com filtros"""
+
+    def __init__(self, app):
+        self.app = app
+
+        # --- Painéis ---
+        self.agenda_panel = AgendaPanel(app)
+        self.tasks_panel = ClickUpTodayPanel(app)
+
+        # Painel de Tasks (Lista principal)
+        self.task_list_walker = urwid.SimpleFocusListWalker([])
+        self.task_list = urwid.ListBox(self.task_list_walker)
+        self.task_box = urwid.LineBox(self.task_list, title="Tarefas")
+
+        # Layout esquerdo: Tasks + Agenda empilhados
+        self.left_pile = urwid.Pile([
+            ('weight', 3, self.task_box),     # Lista de tasks - 75%
+            ('weight', 1, self.agenda_panel), # Agenda - 25%
+        ])
+
+        # Layout principal: Esquerda (75%) | Painel Tasks (25%)
+        self.body = urwid.Columns([
+            ('weight', 1, self.left_pile),
+            (self.tasks_panel.width, self.tasks_panel),
+        ], dividechars=0)
+
+        # Para navegação
+        self.pile = self.left_pile
+
+        # Populartasks inicialmente
+        self.refresh_task_list()
+        
+        # Header inicial
+        self.update_header()
+
+        # Footer com hints
+        footer_text = urwid.Text(
+            "━ [q]Quit [t]Tasks [n]New [e]Edit [s]Status [m]Metrics [i]ClickUp [Tab]Agenda ━",
+            align='center'
+        )
+        self.footer = urwid.AttrMap(footer_text, 'footer')
+
+        # Frame: header + body + footer
+        frame = urwid.Frame(
+            header=self.header,
+            body=self.body,
+            footer=self.footer
+        )
+        # Foco inicial na lista de tasks (índice 0 no Pile)
+        self.pile.focus_position = 0
+
+        super().__init__(frame)
+
+    def update_header(self):
+        """Atualiza o header com contadores e filtros (RESTAURADO)"""
+        total = len(self.app.state.tasks)
+        filtered = len(self.app.state.get_filtered_tasks())
+
+        # Mostrar filtros ativos
+        active_filters = []
+        if self.app.state.current_filter.get('status'):
+            status = self.app.state.current_filter['status']
+            active_filters.append(f"Status:{STATUS[status]['label']}")
+        if self.app.state.current_filter.get('category'):
+            cat = self.app.state.current_filter['category']
+            active_filters.append(f"Cat:{CATEGORIES[cat]['label']}")
+        if self.app.state.current_filter.get('company'):
+            active_filters.append(f"Co:{self.app.state.current_filter['company']}")
+
+        filter_str = " • ".join(active_filters) if active_filters else "TODAS"
+
+        # Streak
+        streak = self.app.state.get_streak()
+        streak_icon = "🔥" if streak >= 7 else "⚡" if streak >= 3 else ""
+        streak_str = f" {streak_icon}{streak}d " if streak > 0 else ""
+
+        header_text = urwid.Text(
+            f"{streak_str}━━━ 📋 QUICK TASKS ━━━ {filtered}/{total} tasks ━━━ Filtros: {filter_str} ━━━{streak_str}",
+            align='center'
+        )
+        self.header = urwid.AttrMap(header_text, 'header')
+        # Se frame já existe, atualizar
+        if hasattr(self, '_w') and isinstance(self._w, urwid.Frame):
+            self._w.header = self.header
+
+    def refresh_task_list(self):
+        """Recarrega a lista de tasks"""
+        # Atualizar agenda
+        self.agenda_panel.build_content()
+        # Atualizar header
+        self.update_header()
+        
+        # Limpar lista atual
+        self.task_list_walker.clear()
+
+        # Pegar tasks filtradas
+        tasks = self.app.state.get_filtered_tasks()
+
+        if not tasks:
+            # Nenhuma task encontrada
+            empty_msg = urwid.Text("📭 Nenhuma task encontrada", align='center')
+            self.task_list_walker.append(empty_msg)
+            self.task_list_walker.append(urwid.Divider())
+            return
+
+        # Mapeamento de prioridade para ordenação (high=0, medium=1, low=2)
+        priority_order = {'high': 0, 'medium': 1, 'low': 2}
+
+        # Agrupar por status e ordenar por prioridade (high primeiro) e depois por ID
+        grouped = {}
+        for task in sorted(tasks, key=lambda x: (x['status'], priority_order.get(x.get('priority', 'low'), 2), -x['id'])):
+            status = task['status']
+            if status not in grouped:
+                grouped[status] = []
+            grouped[status].append(task)
+
+        # Ordem de exibição dos status
+        status_order = ['blocked', 'doing', 'paused', 'todo', 'done', 'finished']
+
+        # Adicionar tasks agrupadas
+        for status_key in status_order:
+            if status_key not in grouped:
+                continue
+
+            status_tasks = grouped[status_key]
+            status_info = STATUS[status_key]
+
+            # Divider do grupo - visual clean com azul
+            divider_text = urwid.Text(
+                ('subtitle', f"\n─── {status_info['emoji']} {status_info['label'].upper()} ({len(status_tasks)}) ───"),
+                align='left'
+            )
+            self.task_list_walker.append(divider_text)
+
+            # Tasks do grupo (versão compacta na tela principal)
+            for task in status_tasks:
+                task_row = CompactTaskRow(task)
+                self.task_list_walker.append(task_row)
+
+        # Adicionar espaçamento no final
+        self.task_list_walker.append(urwid.Divider())
+
+    def keypress(self, size, key):
+        """Handler de teclas da tela principal"""
+        # Vim-style navigation
+        if key == 'j':
+            key = 'down'
+        elif key == 'k':
+            key = 'up'
+
+    def keypress(self, size, key):
+        """Handler de teclas da tela principal"""
+        # Navegação entre paineis
+        if key == 'tab':
+             # Abrir tela de agenda completa
+             agenda_screen = AgendaListScreen(self.app)
+             self.app.push_screen(agenda_screen)
+             return None
+        
+        # Manter compatibilidade com Shift Tab ou remover se nao necessario
+        elif key == 'shift tab': 
+             agenda_screen = AgendaListScreen(self.app)
+             self.app.push_screen(agenda_screen)
+             return None
+            
+        # Vim-style navigation na lista atual
+        if key == 'j':
+            key = 'down'
+        elif key == 'k':
+            key = 'up'
+
+        # Deixa Body processar navegação interna
+        key = super().keypress(size, key)
+        if not key:
+            return None
+
+        # Ações globais
+        status_keys = {
+            '1': 'todo', '2': 'doing', '3': 'paused',
+            '4': 'done', '5': 'blocked', '6': 'finished',
+        }
+
+        if key in status_keys:
+            self.app.state.current_filter['status'] = status_keys[key]
+            if status_keys[key] == 'finished':
+                self.app.state.current_filter['show_finished'] = True
+            self.refresh_task_list()
+            return None
+        elif key == '0':
+            self.app.state.current_filter = {}
+            self.refresh_task_list()
+            return None
+
+        is_task_list_focused = (self.pile.focus_position == 0)
+        
+        if key == 'enter':
+            if is_task_list_focused:
+                focus_widget = self.task_list.focus
+                if focus_widget and isinstance(focus_widget, (TaskRow, CompactTaskRow)):
+                    detail_screen = TaskDetailScreen(self.app, focus_widget.task)
+                    self.app.push_screen(detail_screen)
+                return None
+            return key
+            
+        elif key == 'n':
+            edit_screen = TaskEditScreen(self.app, task=None)
+            self.app.push_screen(edit_screen)
+            return None
+            
+        elif key == 'e' and is_task_list_focused:
+            focus_widget = self.task_list.focus
+            if focus_widget and isinstance(focus_widget, (TaskRow, CompactTaskRow)):
+                edit_screen = TaskEditScreen(self.app, focus_widget.task)
+                self.app.push_screen(edit_screen)
+            return None
+            
+        elif key == 's' and is_task_list_focused:
+            focus_widget = self.task_list.focus
+            if focus_widget and isinstance(focus_widget, (TaskRow, CompactTaskRow)):
+                task = focus_widget.task
+                def on_close():
+                    self.app.close_overlay()
+                    self.refresh_task_list()
+                dialog = StatusDialog(self.app, task, on_close)
+                self.app.show_overlay(dialog)
+            return None
+
+        elif key == 'p' and is_task_list_focused:
+            focus_widget = self.task_list.focus
+            if focus_widget and isinstance(focus_widget, (TaskRow, CompactTaskRow)):
+                task = focus_widget.task
+                def on_close():
+                    self.app.close_overlay()
+                    self.refresh_task_list()
+                dialog = PriorityDialog(self.app, task, on_close)
+                self.app.show_overlay(dialog)
+            return None
+            
+        elif key == 'd' and is_task_list_focused:
+            focus_widget = self.task_list.focus
+            if focus_widget and isinstance(focus_widget, (TaskRow, CompactTaskRow)):
+                task = focus_widget.task
+                def on_yes():
+                    self.app.state.delete_task(task['id'])
+                    self.app.state.save_tasks()
+                    self.app.close_overlay()
+                    self.refresh_task_list()
+                def on_no():
+                    self.app.close_overlay()
+                dialog = ConfirmDialog(
+                    "Confirmar Exclusão",
+                    f"Deletar task #{task['id']}?\n\n{task['description'][:50]}...",
+                    on_yes=on_yes,
+                    on_no=on_no
+                )
+                self.app.show_overlay(dialog, width=('relative', 60), height=('relative', 30))
+            return None
+            
+        elif key == 'f':
+            done_count = len([t for t in self.app.state.tasks if t['status'] == 'done'])
+            if done_count == 0:
+                return None
+            def on_yes():
+                self.app.state.bulk_finish_done_tasks()
+                self.app.state.save_tasks()
+                self.app.close_overlay()
+                self.refresh_task_list()
+            def on_no():
+                self.app.close_overlay()
+            dialog = ConfirmDialog(
+                "Finalizar Tasks",
+                f"Arquivar {done_count} tasks Concluídas?",
+                on_yes=on_yes,
+                on_no=on_no
+            )
+            self.app.show_overlay(dialog, width=('relative', 50), height=('relative', 25))
+            return None
+
+        elif key == 'i':
+            # Importar do ClickUp
+            import_screen = ClickUpImportScreen(self.app)
+            self.app.push_screen(import_screen)
+            return None
+
+        elif key == 'm':
+            # Métricas
+            metrics_screen = MetricsScreen(self.app)
+            self.app.push_screen(metrics_screen)
+            return None
+
+        elif key == 'r':
+            # Refresh
+            self.refresh_task_list()
+            return None
+
+        elif key == 't':
+            # Tela cheia de tasks
+            full_tasks_screen = FullTasksScreen(self.app)
+            self.app.push_screen(full_tasks_screen)
+            return None
+
+        return key
+
+
+
+# ============================================================================
+# HelpScreen - Tela de ajuda com atalhos
+# ============================================================================
+
+class HelpScreen(urwid.WidgetWrap):
+    """Tela de ajuda mostrando todos os atalhos do teclado"""
+
+    def __init__(self, app):
+        self.app = app
+
+        # Header
+        header_text = urwid.Text(
+            ('header', "━━━ ❓ AJUDA - ATALHOS DO TECLADO ━━━ [ESC]Voltar [↑↓jk]Scroll ━━━"),
+            align='center'
+        )
+        header = urwid.AttrMap(header_text, 'header')
+
+        # Conteúdo de ajuda
+        help_content = self._build_help_content()
+        body = urwid.ListBox(urwid.SimpleFocusListWalker(help_content))
+
+        # Frame
+        frame = urwid.Frame(header=header, body=body)
+        super().__init__(frame)
+
+    def _build_help_content(self):
+        """Constrói o conteúdo da ajuda"""
+        widgets = []
+
+        widgets.append(urwid.Divider())
+        widgets.append(urwid.Text(('subtitle', "🌐 ATALHOS GLOBAIS"), align='center'))
+        widgets.append(urwid.Divider())
+        global_shortcuts = [
+            ("q", "Sair da aplicação"),
+            ("ESC", "Voltar / Fechar dialog"),
+            ("?", "Abrir esta tela de ajuda"),
+            ("↑ / ↓", "Navegar em listas"),
+            ("j / k", "Navegar em listas (vim-style)"),
+            ("Tab", "Próximo campo (em forms)"),
+            ("Shift+Tab", "Campo anterior (em forms)"),
+        ]
+        for key, desc in global_shortcuts:
+            widgets.append(urwid.Text(('text', f"  [{key:12}]  {desc}")))
+
+        widgets.append(urwid.Divider())
+        widgets.append(urwid.Text(('subtitle', "📋 TELA PRINCIPAL (Lista de Tasks)"), align='center'))
+        widgets.append(urwid.Divider())
+        main_shortcuts = [
+            ("Enter", "Ver detalhes da task selecionada"),
+            ("n", "Criar nova task"),
+            ("e", "Editar task selecionada"),
+            ("s", "Mudar status da task selecionada"),
+            ("p", "Mudar prioridade da task selecionada"),
+            ("d", "Deletar task selecionada (com confirmação)"),
+            ("m", "Abrir tela de métricas"),
+            ("f", "Bulk finish: mover todas tasks 'done' → 'finished'"),
+            ("r", "Atualizar/refresh lista"),
+            ("0", "Limpar todos os filtros (mostrar todas)"),
+            ("1", "Filtrar por status: A Fazer (todo)"),
+            ("2", "Filtrar por status: Fazendo (doing)"),
+            ("3", "Filtrar por status: Pausado (paused)"),
+            ("4", "Filtrar por status: Concluído (done)"),
+            ("5", "Filtrar por status: Bloqueado (blocked)"),
+            ("6", "Filtrar por status: Finalizado (finished)"),
+        ]
+        for key, desc in main_shortcuts:
+            widgets.append(urwid.Text(('text', f"  [{key:12}]  {desc}")))
+
+        widgets.append(urwid.Divider())
+        widgets.append(urwid.Text(('subtitle', "🔍 TELA DE DETALHES (Task Detail)"), align='center'))
+        widgets.append(urwid.Divider())
+        detail_shortcuts = [
+            ("e", "Editar task"),
+            ("c", "Adicionar comentário"),
+            ("s", "Mudar status"),
+            ("p", "Mudar prioridade"),
+            ("t", "Gerenciar TODOs (adicionar, editar, marcar como completo)"),
+            ("d", "Deletar task (com confirmação)"),
+            ("ESC", "Voltar para lista principal"),
+        ]
+        for key, desc in detail_shortcuts:
+            widgets.append(urwid.Text(('text', f"  [{key:12}]  {desc}")))
+
+        widgets.append(urwid.Divider())
+        widgets.append(urwid.Text(('subtitle', "✏️  TELA DE EDIÇÃO (Task Edit/Add)"), align='center'))
+        widgets.append(urwid.Divider())
+        edit_shortcuts = [
+            ("Tab", "Navegar para próximo campo"),
+            ("Shift+Tab", "Navegar para campo anterior"),
+            ("Enter", "Salvar (quando no botão Save)"),
+            ("ESC", "Cancelar (se não houver mudanças)"),
+        ]
+        for key, desc in edit_shortcuts:
+            widgets.append(urwid.Text(('text', f"  [{key:12}]  {desc}")))
+
+        widgets.append(urwid.Divider())
+        widgets.append(urwid.Text(('subtitle', "📊 TELA DE MÉTRICAS"), align='center'))
+        widgets.append(urwid.Divider())
+        metrics_shortcuts = [
+            ("7", "Mostrar métricas dos últimos 7 dias"),
+            ("3", "Mostrar métricas dos últimos 30 dias"),
+            ("9", "Mostrar métricas dos últimos 90 dias"),
+            ("↑ / ↓", "Scroll pelos gráficos"),
+            ("ESC", "Voltar para tela principal"),
+        ]
+        for key, desc in metrics_shortcuts:
+            widgets.append(urwid.Text(('text', f"  [{key:12}]  {desc}")))
+
+        widgets.append(urwid.Divider())
+        widgets.append(urwid.Text(('subtitle', "ℹ️  INFORMAÇÕES ADICIONAIS"), align='center'))
+        widgets.append(urwid.Divider())
+        info_lines = [
+            "",
+            "ESTADOS DE TASK:",
+            "  ⏳ A Fazer (todo)     - Task aguardando início",
+            "  🔄 Fazendo (doing)    - Task em progresso",
+            "  ⏸️  Pausado (paused)   - Pausada voluntariamente (baixa prioridade)",
+            "  ✅ Concluído (done)   - Completa, aguardando confirmação",
+            "  🎉 Finalizado (finished) - Confirmada e arquivada",
+            "  🚫 Bloqueado (blocked) - Impedida por fator externo",
+            "",
+            "PRIORIDADES:",
+            "  🔴 High (alta)        - Urgente, fazer primeiro",
+            "  🟡 Medium (média)     - Prioridade normal",
+            "  🟢 Low (baixa)        - Pode esperar",
+            "",
+            "CATEGORIAS:",
+            "  💻 Desenvolvimento, 🐛 Bug, ✨ Feature, 📝 Docs",
+            "  🤝 Reunião, 👀 Review, 🔧 Infra, 🆘 Suporte, 📦 Outros",
+            "",
+            "ARQUIVO DE DADOS:",
+            "  ~/.local/share/quicktasks/tasks.json",
+            "",
+        ]
+        for line in info_lines:
+            widgets.append(urwid.Text(('text', f"  {line}")))
+
+        widgets.append(urwid.Divider())
+
+        return widgets
+
+    def keypress(self, size, key):
+        """Handler de teclas"""
+        # Vim-style navigation
+        if key == 'j':
+            key = 'down'
+        elif key == 'k':
+            key = 'up'
+
+        if key == 'esc':
+            self.app.pop_screen()
+            return None
+
+        return super().keypress(size, key)
+
+
+# ============================================================================
+# ClickUpImportScreen - Tela de importação do ClickUp
+# ============================================================================
+
+class ClickUpTaskRow(urwid.WidgetWrap):
+    """Widget para exibir uma task do ClickUp na lista de importação"""
+
+    def __init__(self, clickup_task, is_imported=False):
+        self.clickup_task = clickup_task
+        self.is_imported = is_imported
+        self.selected = False
+
+        # Extrair info
+        task_id = clickup_task.get("id", "")
+        name = clickup_task.get("name", "Sem nome")[:45]
+        status = clickup_task.get("status", {}).get("status", "?")[:10]
+        priority = clickup_task.get("priority", {})
+        priority_str = (priority.get("priority", "-") if priority else "-")[:1].upper()
+        list_name = clickup_task.get("list", {}).get("name", "")[:15]
+
+        # Indicador de importado
+        imported_mark = "✓" if is_imported else " "
+
+        # Montar linha
+        line = f" [{imported_mark}] {name:<45} │ {status:<10} │ {priority_str} │ {list_name}"
+
+        text_widget = urwid.Text(line)
+        attr = 'dimmed' if is_imported else 'task_row'
+        attr_map = urwid.AttrMap(text_widget, attr, focus_map='task_row_focus')
+
+        super().__init__(attr_map)
+
+    def selectable(self):
+        return True
+
+    def keypress(self, size, key):
+        return key
+
+
+class ClickUpImportScreen(urwid.WidgetWrap):
+    """Tela para importar tasks do ClickUp"""
+
+    def __init__(self, app):
+        self.app = app
+        self.clickup_tasks = []
+        self.task_widgets = []
+        self.api = None
+        self.loading = False
+        self.error_message = None
+
+        # Carregar config
+        config = ClickUpAPI.load_config()
+        self.api_token = config.get("clickup_api_token", "")
+
+        # Header
+        header_text = urwid.Text(
+            "━━━ 📥 IMPORTAR DO CLICKUP ━━━ [ESC]Voltar [Enter]Importar [r]Refresh [t]Token [c]Closed ━━━",
+            align='center'
+        )
+        self.header = urwid.AttrMap(header_text, 'header')
+
+        # Body - Lista de tasks
+        self.list_walker = urwid.SimpleFocusListWalker([])
+        self.listbox = urwid.ListBox(self.list_walker)
+        self.list_box = urwid.LineBox(self.listbox, title="Tasks")
+
+        # Footer
+        self.footer_text = urwid.Text("", align='center')
+        self.footer = urwid.AttrMap(self.footer_text, 'footer')
+
+        # Frame
+        self.frame = urwid.Frame(
+            header=self.header,
+            body=self.list_box,
+            footer=self.footer
+        )
+
+        super().__init__(self.frame)
+
+        # Carregar tasks se tiver token
+        if self.api_token:
+            self._show_loading()
+            # Agendar carregamento para depois do loop iniciar
+            self._load_tasks()
+        else:
+            self._show_token_prompt()
+
+    def _show_loading(self):
+        """Mostra mensagem de carregamento"""
+        self.list_walker.clear()
+        self.list_walker.append(urwid.Text(('text', "\n\n   ⏳ Carregando tasks do ClickUp..."), align='center'))
+        self.footer_text.set_text("Aguarde...")
+
+    def _show_token_prompt(self):
+        """Mostra prompt para inserir token"""
+        self.list_walker.clear()
+        self.list_walker.append(urwid.Text(('title', "\n\n   🔑 API Token não configurado"), align='center'))
+        self.list_walker.append(urwid.Text(('text', "\n   Pressione [t] para configurar seu token do ClickUp"), align='center'))
+        self.list_walker.append(urwid.Text(('secondary', "\n   Para obter: ClickUp > Settings > Apps > API Token"), align='center'))
+        self.footer_text.set_text("[t] Configurar Token │ [ESC] Voltar")
+
+    def _show_error(self, message):
+        """Mostra mensagem de erro"""
+        self.list_walker.clear()
+        self.list_walker.append(urwid.Text(('error', f"\n\n   ❌ Erro: {message}"), align='center'))
+        self.list_walker.append(urwid.Text(('text', "\n   [r] Tentar novamente │ [t] Reconfigurar token"), align='center'))
+        self.footer_text.set_text("[r] Retry │ [t] Token │ [ESC] Voltar")
+
+    def _load_tasks(self, include_closed=False):
+        """Carrega tasks do ClickUp"""
+        self.loading = True
+        self._show_loading()
+
+        try:
+            self.api = ClickUpAPI(self.api_token)
+
+            # Verificar autenticação
+            user_result = self.api.get_user()
+            if "error" in user_result:
+                self._show_error(user_result["error"])
+                self.loading = False
+                return
+
+            # Buscar tasks
+            self.clickup_tasks = self.api.get_all_my_tasks(include_closed=include_closed)
+
+            if not self.clickup_tasks:
+                self.list_walker.clear()
+                self.list_walker.append(urwid.Text(('text', "\n\n   📭 Nenhuma task encontrada atribuída a você"), align='center'))
+                self.footer_text.set_text(f"0 tasks │ [c] Incluir fechadas │ [r] Refresh │ [ESC] Voltar")
+                self.loading = False
+                return
+
+            # Pegar IDs já importados
+            imported_ids = set()
+            for task in self.app.state.tasks:
+                if task.get("clickup_id"):
+                    imported_ids.add(task["clickup_id"])
+
+            # Montar lista
+            self.list_walker.clear()
+            self.task_widgets = []
+
+            # Agrupar tasks por data
+            today = datetime.now().date()
+            tomorrow = today + timedelta(days=1)
+
+            def get_due_date(task):
+                due = task.get("due_date")
+                if due:
+                    try:
+                        return datetime.fromtimestamp(int(due) / 1000).date()
+                    except:
+                        pass
+                return None
+
+            # Separar tasks com e sem data
+            tasks_with_date = []
+            tasks_without_date = []
+
+            for ct in self.clickup_tasks:
+                due = get_due_date(ct)
+                if due:
+                    tasks_with_date.append((due, ct))
+                else:
+                    tasks_without_date.append(ct)
+
+            # Ordenar por data
+            tasks_with_date.sort(key=lambda x: x[0])
+
+            # Renderizar tasks agrupadas por dia
+            current_day = None
+
+            for due_date, ct in tasks_with_date:
+                # Separador de dia
+                if due_date != current_day:
+                    current_day = due_date
+
+                    if due_date < today:
+                        day_label = f"⚠️  ATRASADO - {due_date.strftime('%d/%m %A').upper()}"
+                        day_style = 'error'
+                    elif due_date == today:
+                        day_label = "📍 HOJE"
+                        day_style = 'warning'
+                    elif due_date == tomorrow:
+                        day_label = "📆 AMANHÃ"
+                        day_style = 'success'
+                    else:
+                        day_label = f"📅 {due_date.strftime('%d/%m %A').upper()}"
+                        day_style = 'subtitle'
+
+                    self.list_walker.append(urwid.Divider())
+                    separator = urwid.AttrMap(
+                        urwid.Text(f" {day_label} ", align='left'),
+                        day_style
+                    )
+                    self.list_walker.append(separator)
+                    self.list_walker.append(urwid.Divider('─'))
+
+                is_imported = ct.get("id") in imported_ids
+                row = ClickUpTaskRow(ct, is_imported)
+                self.task_widgets.append(row)
+                self.list_walker.append(row)
+
+            # Tasks sem data
+            if tasks_without_date:
+                self.list_walker.append(urwid.Divider())
+                separator = urwid.AttrMap(
+                    urwid.Text(" 📋 SEM DATA ", align='left'),
+                    'dimmed'
+                )
+                self.list_walker.append(separator)
+                self.list_walker.append(urwid.Divider('─'))
+
+                for ct in tasks_without_date:
+                    is_imported = ct.get("id") in imported_ids
+                    row = ClickUpTaskRow(ct, is_imported)
+                    self.task_widgets.append(row)
+                    self.list_walker.append(row)
+
+            imported_count = len(imported_ids & {t.get("id") for t in self.clickup_tasks})
+            total = len(self.clickup_tasks)
+            self.footer_text.set_text(
+                f"{total} tasks ({imported_count} importadas) │ [Enter] Importar │ [c] Closed │ [r] Refresh │ [ESC] Voltar"
+            )
+
+        except Exception as e:
+            self._show_error(str(e))
+
+        self.loading = False
+
+    def _import_selected_task(self):
+        """Importa a task selecionada"""
+        focus_widget = self.listbox.focus
+        if not isinstance(focus_widget, ClickUpTaskRow):
+            return
+
+        if focus_widget.is_imported:
+            # Já importada, mostrar mensagem
+            self.footer_text.set_text("⚠️  Task já foi importada anteriormente!")
+            return
+
+        ct = focus_widget.clickup_task
+
+        # Mapear campos
+        description = ct.get("name", "Sem nome")
+        priority = ClickUpAPI.map_priority(ct.get("priority"))
+        status = ClickUpAPI.map_status(ct.get("status"))
+        company = ClickUpAPI.extract_company(ct)
+        clickup_id = ct.get("id")
+        clickup_url = ct.get("url", "")
+
+        # Due date (timestamp em ms do ClickUp)
+        due_date = ct.get("due_date")
+        due_date_iso = None
+        if due_date:
+            try:
+                due_date_iso = datetime.fromtimestamp(int(due_date) / 1000).isoformat()
+            except:
+                pass
+
+        # Nome da lista do ClickUp
+        clickup_list = ct.get("list", {}).get("name", "")
+
+        # Criar task
+        task = {
+            'id': self.app.state.get_next_id(),
+            'description': description,
+            'status': status,
+            'priority': priority,
+            'who': '',
+            'category': 'other',
+            'company': company,
+            'comments': [],
+            'clickup_id': clickup_id,
+            'clickup_url': clickup_url,
+            'clickup_list': clickup_list,
+            'due_date': due_date_iso,
+            'created': datetime.now().isoformat(),
+            'updated': datetime.now().isoformat()
+        }
+
+        self.app.state.tasks.append(task)
+        self.app.state.save_tasks()
+
+        # Atualizar visual
+        focus_widget.is_imported = True
+        focus_widget._w.set_attr_map({None: 'dimmed'})
+
+        # Atualizar texto do widget
+        name = ct.get("name", "Sem nome")[:50]
+        status_str = ct.get("status", {}).get("status", "?")
+        priority_obj = ct.get("priority", {})
+        priority_str = priority_obj.get("priority", "none") if priority_obj else "none"
+        list_name = ct.get("list", {}).get("name", "")
+        folder_name = ct.get("folder", {}).get("name", "")
+        line = f"[✓] {name:<50} │ {status_str:<12} │ {priority_str:<6} │ {list_name or folder_name}"
+        focus_widget._w.base_widget.set_text(line)
+
+        self.footer_text.set_text(f"✅ Task importada! │ [Enter] Importar │ [ESC] Voltar")
+
+    def _prompt_token(self):
+        """Abre dialog para inserir token"""
+        edit = urwid.Edit("API Token: ", edit_text=self.api_token)
+
+        def on_ok(button):
+            new_token = edit.get_edit_text().strip()
+            if new_token:
+                self.api_token = new_token
+                config = ClickUpAPI.load_config()
+                config["clickup_api_token"] = new_token
+                ClickUpAPI.save_config(config)
+                self.app.close_overlay()
+                self._load_tasks()
+            else:
+                self.app.close_overlay()
+
+        def on_cancel(button):
+            self.app.close_overlay()
+
+        ok_btn = urwid.Button("OK", on_press=on_ok)
+        cancel_btn = urwid.Button("Cancel", on_press=on_cancel)
+
+        button_row = urwid.Columns([
+            urwid.AttrMap(ok_btn, 'button', focus_map='button_focus'),
+            urwid.AttrMap(cancel_btn, 'button', focus_map='button_focus'),
+        ], dividechars=2)
+
+        content = [
+            urwid.Text("🔑 Configurar API Token do ClickUp\n", align='center'),
+            urwid.Text("Obtenha em: ClickUp > Settings > Apps > API Token\n", align='center'),
+            urwid.Divider(),
+            urwid.AttrMap(edit, None, focus_map='focus'),
+            urwid.Divider(),
+            button_row,
+        ]
+
+        listbox = urwid.ListBox(urwid.SimpleFocusListWalker(content))
+        box = urwid.LineBox(listbox, title="API Token")
+        dialog = urwid.AttrMap(box, 'dialog_bg')
+
+        self.app.show_overlay(dialog, width=('relative', 70), height=('relative', 40))
+
+    def keypress(self, size, key):
+        """Handler de teclas"""
+        if key == 'j':
+            key = 'down'
+        elif key == 'k':
+            key = 'up'
+
+        if key == 'esc':
+            self.app.pop_screen()
+            return None
+        elif key == 't':
+            self._prompt_token()
+            return None
+        elif key == 'r':
+            if self.api_token:
+                self._load_tasks()
+            return None
+        elif key == 'c':
+            if self.api_token:
+                self._load_tasks(include_closed=True)
+            return None
+        elif key == 'enter':
+            self._import_selected_task()
+            return None
+
+        return super().keypress(size, key)
+
+
+# ============================================================================
+# QuickTasksApp - Aplicação principal com MainLoop
+# ============================================================================
+
+class LoadingScreen(urwid.WidgetWrap):
+    """Tela de carregamento"""
+
+    def __init__(self, status="Carregando..."):
+        self.status_text = urwid.Text(('title', status), align='center')
+
+        content = urwid.Pile([
+            urwid.Text(""),
+            urwid.Text(('header', "  ⚡ QuickTasks  "), align='center'),
+            urwid.Text(""),
+            self.status_text,
+            urwid.Text(""),
+        ])
+
+        filler = urwid.Filler(content, valign='middle')
+        super().__init__(filler)
+
+    def set_status(self, status):
+        self.status_text.set_text(('dimmed', status))
+
+
+class QuickTasksApp:
+    """Aplicação TUI principal"""
+
+    def __init__(self):
+        self.state = None
+        self.main_screen = None
+        self.screen_stack = []
+        self.loop = None
+
+        # Criar palette
+        self.palette = create_palette()
+
+        # Tela de loading inicial
+        self.loading_screen = LoadingScreen("Iniciando...")
+        self.main_widget = urwid.WidgetPlaceholder(self.loading_screen)
+
+    def _load_data(self, loop, data):
+        """Carrega dados em background"""
+        # Carregar tasks
+        self.loading_screen.set_status("Carregando tarefas...")
+        loop.draw_screen()
+
+        self.state = AppState()
+        self.state.load_tasks()
+
+        # Carregar tasks do ClickUp (uma vez, para sync e painel)
+        self.loading_screen.set_status("Sincronizando ClickUp...")
+        loop.draw_screen()
+
+        self.clickup_tasks = load_clickup_tasks()
+        sync_clickup_due_dates(self.state, self.clickup_tasks)
+
+        # Carregar eventos do Google Calendar
+        self.loading_screen.set_status("Carregando agenda...")
+        loop.draw_screen()
+
+        self.state.load_events()
+
+        # Limpar notificações expiradas
+        self.loading_screen.set_status("Limpando notificações...")
+        loop.draw_screen()
+
+        cleanup_expired_notifications()
+
+        # Criar tela principal
+        self.loading_screen.set_status("Pronto!")
+        loop.draw_screen()
+
+        self.main_screen = MainScreen(self)
+        self.main_widget.original_widget = self.main_screen
+        self.screen_stack = [self.main_screen]
+
+    def run(self):
+        """Inicia o MainLoop"""
+        # Criar o loop principal
+        self.loop = urwid.MainLoop(
+            self.main_widget,
+            palette=self.palette,
+            unhandled_input=self.unhandled_input,
+            handle_mouse=False
+        )
+
+        # Agendar carregamento de dados após o loop iniciar
+        self.loop.set_alarm_in(0.01, self._load_data)
+
+        # Executar
+        try:
+            self.loop.run()
+        except KeyboardInterrupt:
+            # Ctrl+C: sair gracefully
+            self.quit()
+
+    def unhandled_input(self, key):
+        """Handler para teclas não tratadas (atalhos globais)"""
+        if key in ('q', 'Q'):
+            # Tecla 'q' para quit
+            self.quit()
+        elif key in ('f1', '?'):
+            # F1 ou '?' para help
+            help_screen = HelpScreen(self)
+            self.push_screen(help_screen)
+
+    def push_screen(self, screen):
+        """Empilha uma nova tela (navega para ela)"""
+        self.screen_stack.append(screen)
+        self.main_widget.original_widget = screen
+
+    def pop_screen(self):
+        """Volta para a tela anterior"""
+        if len(self.screen_stack) > 1:
+            self.screen_stack.pop()
+            self.main_widget.original_widget = self.screen_stack[-1]
+
+            # Refresh da tela principal se voltando para ela
+            if isinstance(self.screen_stack[-1], MainScreen):
+                self.screen_stack[-1].update_header()
+                self.screen_stack[-1].refresh_task_list()
+
+    def show_overlay(self, dialog_widget, width=('relative', 50), height=('relative', 50)):
+        """Mostra um dialog como overlay sobre a tela atual"""
+        current_screen = self.screen_stack[-1]
+
+        overlay = urwid.Overlay(
+            dialog_widget,
+            current_screen,
+            align='center', width=width,
+            valign='middle', height=height
+        )
+
+        self.main_widget.original_widget = overlay
+
+    def close_overlay(self):
+        """Fecha o overlay e volta para a tela atual"""
+        self.main_widget.original_widget = self.screen_stack[-1]
+
+    def quit(self):
+        """Sai da aplicação"""
+        # Salvar se houver mudanças
+        if self.state.dirty:
+            self.state.save_tasks()
+
+        raise urwid.ExitMainLoop()
+
+
+# ============================================================================
+# Entry point
+# ============================================================================
+
+if __name__ == '__main__':
+    app = QuickTasksApp()
+    app.run()
